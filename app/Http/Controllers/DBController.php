@@ -34,7 +34,7 @@ class DBController extends Controller
         $dbController = new DBController();
         $dbController->createDatabase($databaseName);
 
-        $migrationsPath = 'database/migrations/user_database';
+        $migrationsPath = 'database/migrations/users_database';
 
         return $dbController->runMigrations($databaseName, $migrationsPath);
     }
