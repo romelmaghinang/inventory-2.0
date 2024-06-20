@@ -13,3 +13,5 @@ Route::middleware(['auth:sanctum', 'abilities:create-users,create-permission,cre
     Route::post('/assign-permission', [UserController::class, 'assignPermission']);
     Route::post('/create-permission', [UserController::class, 'createPermission']);
 });
+
+
