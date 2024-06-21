@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 
@@ -23,22 +22,7 @@ class UserController extends Controller
             return response()->json(['message' => $e->errors()], 422);
         }
 
-        $dbController = new DBController();
-
-        do {
-            $databaseName = Str::random(10);
-            $databaseExists = $dbController->databaseExists($databaseName);
-        } while ($databaseExists);
-
-        $dbController->createUserDatabase($databaseName);
-
-        $newUser = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'database_name' => $databaseName,
-        ]);
-
+        $newUser = (new \App\Models\User)->createUser($request);
         $newUser->assignRole('user');
 
         return response()->json(['message' => 'User created successfully'], 201);

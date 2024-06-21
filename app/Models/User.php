@@ -1,9 +1,11 @@
 <?php
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Http\Controllers\DBController;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
@@ -50,5 +52,25 @@ class User extends Authenticatable
         ]);
 
         return new \Laravel\Sanctum\NewAccessToken($token, $plainTextToken);
+    }
+
+    public function createUser($request)
+    {
+        $dbController = new DBController();
+
+        do {
+            $databaseName = Str::random(10);
+            $databaseExists = $dbController->databaseExists($databaseName);
+        } while ($databaseExists);
+
+        $dbController->createUserDatabase($databaseName);
+
+        return User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'database_name' => $databaseName,
+        ]);
+
     }
 }
