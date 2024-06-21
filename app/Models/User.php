@@ -51,10 +51,4 @@ class User extends Authenticatable
 
         return new \Laravel\Sanctum\NewAccessToken($token, $plainTextToken);
     }
-
-    public function getAllPermissionsAsArray()
-    {
-        return $this->getAllPermissions()->pluck('name')->toArray();
-    }
-
 }
