@@ -6,7 +6,7 @@ use App\Models\SalesOrder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
-use Illuminate\Support\Str;
+use App\Models\Customer;
 
 class SalesOrderController extends Controller
 {
@@ -50,7 +50,11 @@ class SalesOrderController extends Controller
             'username', 'vendorPO'
         ]);
 
-        // Find the highest SONum and increment it
+        // Find or create customer using Customer model
+        $customer = Customer::findOrCreateByName($request->CustomerName);
+        $data['CustomerName'] = $customer->so;
+
+        // Find the highest SONum (num) and increment it
         $prefix = 10;
         $lastOrder = SalesOrder::orderBy('id', 'desc')->first();
         $lastNumber = $lastOrder ? intval(substr($lastOrder->num, strlen($prefix))) : 0;
@@ -60,11 +64,7 @@ class SalesOrderController extends Controller
         // Use today's date for dateCreate
         $data['dateCreate'] = Carbon::now()->toDateString();
 
-        // Find or create customer
-        $customerController = new CustomerController();
-        $customer = $customerController->findOrCreateCustomer($request->CustomerName, 'so');
-        $data['CustomerName'] = $customer->so;
-
+        // Create the sales order with Num
         $salesOrder = SalesOrder::create($data);
 
         return response()->json([

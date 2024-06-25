@@ -9,7 +9,7 @@ class Customer extends Model
 {
     use HasFactory;
 
-    protected $table = 'user_tables';
+    protected $table = 'so';
 
     // Define fillable fields if needed
     protected $fillable = [
@@ -21,17 +21,21 @@ class Customer extends Model
      */
     public static function findOrCreateByName($name)
     {
-        $customer = DB::table('user_tables')->whereRaw('LOWER(so) = ?', [strtolower($name)])->first();
+        // Perform a case-insensitive search for a customer with the given name
+        $customer = DB::table('so')->whereRaw('LOWER(customerId) = ?', [strtolower($name)])->first();
 
+        // If a customer is found, return it
         if ($customer) {
             return $customer;
         }
 
-        $newCustomerId = DB::table('user_tables')->insertGetId([
-            'CustomerName' => $name,
+        // If no customer is found, create a new one
+        $newCustomerId = DB::table('so')->insertGetId([
+            'customerId' => $name,
         ]);
 
-        return DB::table('user_tables')->where('customerId', $newCustomerId)->first();
+        // Return the newly created customer
+        return DB::table('so')->where('customerId', $newCustomerId)->first();
     }
 
     /**
@@ -39,17 +43,17 @@ class Customer extends Model
      */
     public static function findOrCreateById($id)
     {
-        $customer = DB::table('user_tables')->find($id);
+        $customer = DB::table('so')->find($id);
 
         if ($customer) {
             return $customer;
         }
 
-        $newCustomerId = DB::table('user_tables')->insertGetId([
+        $newCustomerId = DB::table('so')->insertGetId([
             'customerId' => $id,
         ]);
 
-        return DB::table('user_tables')->where('customerId', $newCustomerId)->first();
+        return DB::table('so')->where('customerId', $newCustomerId)->first();
     }
 }
 

@@ -29,4 +29,5 @@ class SalesOrder extends Model
 
     // Disable timestamps
     public $timestamps = false;
+
 }
