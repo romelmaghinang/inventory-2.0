@@ -18,7 +18,7 @@ class SalesOrder extends Model
         'carrierId', 'carrierServiceId', 'Cost', 'currencyId', 'currencyRate', 'customerId',
         'customerPO', 'dateCompleted', 'dateCreate', 'dateExpired', 'dateFirstShip',
         'dateIssued', 'dateLastModified', 'dateRevision', 'email', 'estimatedTax',
-        'fobPointId', 'locationGroupId', 'mcTotalTax', 'note', 'Num', 'paymentTermsId',
+        'fobPointId', 'locationGroupId', 'mcTotalTax', 'note', 'num', 'paymentTermsId',
         'phone', 'priorityId', 'qbClassId', 'registerId', 'residentialFlag', 'revisionNum',
         'salesman', 'salesmanId', 'salesmanInitials', 'shipTermsId', 'shipToAddress',
         'shipToCity', 'shipToCountryId', 'shipToName', 'shipToStateId', 'shipToZip',
@@ -26,4 +26,7 @@ class SalesOrder extends Model
         'totalIncludesTax', 'totalTax', 'subTotal', 'totalPrice', 'typeId', 'url',
         'username', 'vendorPO'
     ];
+
+    // Disable timestamps
+    public $timestamps = false;
 }

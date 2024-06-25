@@ -41,7 +41,7 @@ class SalesOrderController extends Controller
             'carrierId', 'carrierServiceId', 'Cost', 'currencyId', 'currencyRate', 'customerId',
             'customerPO', 'dateCompleted', 'dateExpired', 'dateFirstShip',
             'dateIssued', 'dateLastModified', 'dateRevision', 'email', 'estimatedTax',
-            'fobPointId', 'locationGroupId', 'mcTotalTax', 'note', 'Num', 'paymentTermsId',
+            'fobPointId', 'locationGroupId', 'mcTotalTax', 'note', 'num', 'paymentTermsId',
             'phone', 'priorityId', 'qbClassId', 'registerId', 'residentialFlag', 'revisionNum',
             'salesman', 'salesmanId', 'salesmanInitials', 'shipTermsId', 'shipToAddress',
             'shipToCity', 'shipToCountryId', 'shipToName', 'shipToStateId', 'shipToZip',
@@ -52,10 +52,10 @@ class SalesOrderController extends Controller
 
         // Find the highest SONum and increment it
         $prefix = 10;
-        $lastOrder = SalesOrder::orderBy('SONum', 'desc')->first();
-        $lastNumber = $lastOrder ? intval(substr($lastOrder->SONum, strlen($prefix))) : 0;
+        $lastOrder = SalesOrder::orderBy('id', 'desc')->first();
+        $lastNumber = $lastOrder ? intval(substr($lastOrder->num, strlen($prefix))) : 0;
         $newNumber = $lastNumber + 1;
-        $data['SONum'] = $prefix . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
+        $data['num'] = $prefix . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
 
         // Use today's date for dateCreate
         $data['dateCreate'] = Carbon::now()->toDateString();
@@ -68,9 +68,6 @@ class SalesOrderController extends Controller
         $salesOrder = SalesOrder::create($data);
 
         return response()->json([
-            'message' => 'Sales Order created successfully',
-            'sales_order' => $salesOrder,
-            'all_fields' => $data
-        ], 201);
+            'message' => 'Sales Order created successfully', 'sales_order' => $salesOrder, 'all_fields' => $data]);
     }
 }
