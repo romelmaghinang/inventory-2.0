@@ -6,9 +6,17 @@ use App\Models\SalesOrder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 class SalesOrderController extends Controller
 {
+    protected $customerController;
+
+    public function __construct(CustomerController $customerController)
+    {
+        $this->customerController = $customerController;
+    }
+
     public function create(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -35,7 +43,7 @@ class SalesOrderController extends Controller
         }
 
         $data = $request->only([
-            'SONum', 'status', 'CustomerName', 'CustomerContact', 'billToAddress',
+            'SONum', 'status', 'CustomerContact', 'billToAddress',
             'billToCity', 'billToCountryId', 'billToName', 'billToStateId', 'billToZip',
             'carrierId', 'carrierServiceId', 'Cost', 'currencyId', 'currencyRate', 'customerId',
             'customerPO', 'dateCompleted', 'dateExpired', 'dateFirstShip',
@@ -57,14 +65,18 @@ class SalesOrderController extends Controller
         // Use today's date for dateCreate
         $data['dateCreate'] = Carbon::now()->toDateString();
 
+        // Find or create customer
+        $customer = $this->customerController->findOrCreateCustomer($request->CustomerName);
+        $data['CustomerName'] = $customer->so;
+
         $salesOrder = SalesOrder::create($data);
 
-        return response()->json(['message' => 'Sales Order created successfully', 'sales_order' => $salesOrder]);
+        return response()->json(['message' => 'Sales Order created successfully', 'sales_order' => $salesOrder], 201);
     }
 
     private function generateSONum()
     {
         // Generate a unique Sales Order Number (SONum)
-        return 'SO-' . strtoupper(\Illuminate\Support\Str::random(8));
+        return 'SO-' . strtoupper(Str::random(8));
     }
 }
