@@ -50,27 +50,27 @@ class SalesOrderController extends Controller
             'username', 'vendorPO'
         ]);
 
-        // Auto-generate SONum if not provided
-        if (empty($data['SONum'])) {
-            $data['SONum'] = $this->generateSONum();
-        }
+        // Find the highest SONum and increment it
+        $prefix = 10;
+        $lastOrder = SalesOrder::orderBy('SONum', 'desc')->first();
+        $lastNumber = $lastOrder ? intval(substr($lastOrder->SONum, strlen($prefix))) : 0;
+        $newNumber = $lastNumber + 1;
+        $data['SONum'] = $prefix . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
 
         // Use today's date for dateCreate
         $data['dateCreate'] = Carbon::now()->toDateString();
 
         // Find or create customer
         $customerController = new CustomerController();
-        $customer = $this->customerController->findOrCreateCustomer($request->CustomerName);
+        $customer = $customerController->findOrCreateCustomer($request->CustomerName, 'so');
         $data['CustomerName'] = $customer->so;
 
         $salesOrder = SalesOrder::create($data);
 
-        return response()->json(['message' => 'Sales Order created successfully', 'sales_order' => $salesOrder, 'all_fields' => $data]);
-    }
-
-    private function generateSONum()
-    {
-        // Generate a unique Sales Order Number (SONum)
-        return '1000' . strtoupper(Str::random(8));
+        return response()->json([
+            'message' => 'Sales Order created successfully',
+            'sales_order' => $salesOrder,
+            'all_fields' => $data
+        ], 201);
     }
 }

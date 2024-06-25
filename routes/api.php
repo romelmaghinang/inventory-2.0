@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\SalesOrderController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 
