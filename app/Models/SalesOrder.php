@@ -9,7 +9,7 @@ class SalesOrder extends Model
 {
     use HasFactory;
 
-    protected $table = 'sales_orders';
+    protected $table = 'so';
 
     // Specify the fillable fields
     protected $fillable = [

@@ -19,20 +19,20 @@ class CustomerController extends Controller
         $column = $this->getColumnFromType($type);
 
         // Search for the customer
-        $customer = DB::table('user_tables')->whereRaw("LOWER($column) = ?", [strtolower($data)])->first();
+        $customer = DB::table('so')->whereRaw("LOWER($column) = ?", [strtolower($data)])->first();
 
         if ($customer) {
             return $customer;
         }
 
         // If customer not found, create a new one
-        $newCustomerId = DB::table('user_tables')->insertGetId([
+        $newCustomerId = DB::table('so')->insertGetId([
             $column => $data,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
-        return DB::table('user_tables')->where('id', $newCustomerId)->first();
+        return DB::table('so')->where('customerId', $newCustomerId)->first();
     }
 
     /**
@@ -44,9 +44,9 @@ class CustomerController extends Controller
     private function getColumnFromType($type)
     {
         $columns = [
-            'so' => 'so'
+            'customerId' => 'customerId'
         ];
 
-        return $columns[$type] ?? 'so';
+        return $columns[$type] ?? 'customerId';
     }
 }

@@ -71,6 +71,6 @@ class SalesOrderController extends Controller
     private function generateSONum()
     {
         // Generate a unique Sales Order Number (SONum)
-        return 'SO-' . strtoupper(Str::random(8));
+        return '1000' . strtoupper(Str::random(8));
     }
 }
