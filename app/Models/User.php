@@ -47,8 +47,7 @@ class User extends Authenticatable
         $token = $this->tokens()->create([
             'name' => $name,
             'token' => hash('sha256', $plainTextToken = \Illuminate\Support\Str::random(40)),
-            'abilities' => $abilities,
-            'expires_at' => now()->addMinutes(30), // Set expiration time to 30 minutes
+            'abilities' => $abilities
         ]);
 
         return new \Laravel\Sanctum\NewAccessToken($token, $plainTextToken);
