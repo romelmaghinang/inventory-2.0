@@ -10,13 +10,6 @@ use Illuminate\Support\Str;
 
 class SalesOrderController extends Controller
 {
-    protected $customerController;
-
-    public function __construct(CustomerController $customerController)
-    {
-        $this->customerController = $customerController;
-    }
-
     public function create(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -66,12 +59,13 @@ class SalesOrderController extends Controller
         $data['dateCreate'] = Carbon::now()->toDateString();
 
         // Find or create customer
+        $customerController = new CustomerController();
         $customer = $this->customerController->findOrCreateCustomer($request->CustomerName);
         $data['CustomerName'] = $customer->so;
 
         $salesOrder = SalesOrder::create($data);
 
-        return response()->json(['message' => 'Sales Order created successfully', 'sales_order' => $salesOrder], 201);
+        return response()->json(['message' => 'Sales Order created successfully', 'sales_order' => $salesOrder, 'all_fields' => $data]);
     }
 
     private function generateSONum()
