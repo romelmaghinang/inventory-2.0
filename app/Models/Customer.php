@@ -5,6 +5,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
+
 class Customer extends Model
 {
     use HasFactory;
@@ -13,7 +14,7 @@ class Customer extends Model
 
     // Define fillable fields if needed
     protected $fillable = [
-        'CustomerName',
+        'customerName',
     ];
 
     /**

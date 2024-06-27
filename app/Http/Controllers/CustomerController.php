@@ -9,7 +9,7 @@ class CustomerController extends Controller
 {
     public function findOrCreateCustomer($data, $type)
     {
-        if ($type === 'CustomerName') {
+        if ($type === 'customerName') {
             return Customer::findOrCreateByName($data);
         } elseif ($type === 'customerId') {
             return Customer::findOrCreateById($data);

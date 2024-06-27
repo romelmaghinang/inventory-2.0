@@ -13,7 +13,7 @@ class SalesOrder extends Model
 
     // Specify the fillable fields
     protected $fillable = [
-        'SONum', 'status', 'CustomerName', 'CustomerContact', 'billToAddress',
+        'status', 'customerName', 'customerContact', 'billToAddress',
         'billToCity', 'billToCountryId', 'billToName', 'billToStateId', 'billToZip',
         'carrierId', 'carrierServiceId', 'Cost', 'currencyId', 'currencyRate', 'customerId',
         'customerPO', 'dateCompleted', 'dateCreate', 'dateExpired', 'dateFirstShip',

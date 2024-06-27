@@ -5,8 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\SalesOrder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Carbon\Carbon;
-use App\Models\Customer;
 
 class SalesOrderController extends Controller
 {
@@ -14,7 +12,7 @@ class SalesOrderController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'status' => 'required|in:10,20,95',
-            'CustomerName' => 'required|string',
+            'customerName' => 'required|string',
             'billToAddress' => 'required|string',
             'billToCity' => 'required|string',
             'billToCountryId' => 'required|string',
@@ -36,8 +34,8 @@ class SalesOrderController extends Controller
         }
 
         $data = $request->only([
-            'SONum', 'status', 'CustomerContact', 'billToAddress',
-            'billToCity', 'billToCountryId', 'billToName', 'billToStateId', 'billToZip',
+            'status', 'customerContact', 'billToAddress',
+            'billToCity', 'billToCountryId,', 'billToName', 'billToStateId', 'billToZip',
             'carrierId', 'carrierServiceId', 'Cost', 'currencyId', 'currencyRate', 'customerId',
             'customerPO', 'dateCompleted', 'dateExpired', 'dateFirstShip',
             'dateIssued', 'dateLastModified', 'dateRevision', 'email', 'estimatedTax',
@@ -50,8 +48,9 @@ class SalesOrderController extends Controller
             'username', 'vendorPO'
         ]);
 
-        // Find or create customer using Customer model
-        $customer = Customer::findOrCreateByName($request->CustomerName);
+        // Find or create customer using Customer Controller
+        $customerController = new CustomerController();
+        $customer = $customerController->findOrCreateCustomer($request->CustomerName, 'name');
         $data['CustomerName'] = $customer->so;
 
         // Find the highest SONum (num) and increment it
@@ -62,7 +61,7 @@ class SalesOrderController extends Controller
         $data['num'] = $prefix . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
 
         // Use today's date for dateCreate
-        $data['dateCreate'] = Carbon::now()->toDateString();
+        $data['dateCreate'] = date('Y-m-d');
 
         // Create the sales order with Num
         $salesOrder = SalesOrder::create($data);
