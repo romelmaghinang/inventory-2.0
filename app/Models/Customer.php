@@ -10,51 +10,40 @@ class Customer extends Model
 {
     use HasFactory;
 
-    protected $table = 'so';
+    protected $table = 'customer';
 
-    // Define fillable fields if needed
+    /*
     protected $fillable = [
-        'customerName',
+        'name', 'address_name', 'customer_name', 'street',
+        'city', 'state', 'zip', 'is_residential', 'customer_group'
     ];
 
-    /**
      * Find or create a customer by name.
      */
-    public static function findOrCreateByName($name)
+    public function findOrCreateByName(array $attributes)
     {
-        // Perform a case-insensitive search for a customer with the given name
-        $customer = DB::table('so')->whereRaw('LOWER(customerId) = ?', [strtolower($name)])->first();
+        $customer = self::whereRaw('LOWER(name) = ?', [strtolower($attributes['name'])])->first();
 
-        // If a customer is found, return it
         if ($customer) {
             return $customer;
         }
 
-        // If no customer is found, create a new one
-        $newCustomerId = DB::table('so')->insertGetId([
-            'customerId' => $name,
-        ]);
-
-        // Return the newly created customer
-        return DB::table('so')->where('customerId', $newCustomerId)->first();
+        return self::create($attributes);
     }
 
     /**
      * Find or create a customer by ID.
      */
-    public static function findOrCreateById($id)
+    public function findOrCreateById(int $id, array $attributes)
     {
-        $customer = DB::table('so')->find($id);
+        $customer = self::find($id);
 
         if ($customer) {
             return $customer;
         }
 
-        $newCustomerId = DB::table('so')->insertGetId([
-            'customerId' => $id,
-        ]);
-
-        return DB::table('so')->where('customerId', $newCustomerId)->first();
+        $attributes['id'] = $id;
+        return self::create($attributes);
     }
 }
 
