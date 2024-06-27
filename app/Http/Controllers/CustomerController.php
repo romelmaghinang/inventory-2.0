@@ -13,22 +13,22 @@ class CustomerController extends Controller
     public function findOrCreateCustomer(Request $request)
     {
         $type = $request->input('type');
-        $name = $request->input('name');
-        $addressName = $request->input('addressName');
-        $customerName = $request->input('customerName');
-        $city = $request->input('city');
-        $state = $request->input('state');
-        $zip = $request->input('zip');
-        $isResidential = $request->input('residentialFlag');
-        $customerGroup = $request->input('locationGroup');
+        $attributes = $request->except('addressName', 'name', 'city', 'zip', 'residentialFlag', 'locationGroup', 'customerId');
+
+        $customer = new Customer();
 
         if ($type === 'name') {
-            return Customer::findOrCreateByName($name, $addressName, $customerName, $city, $state, $zip, $isResidential, $customerGroup);
+            $customer = $customer->findOrCreateByName($attributes);
         } elseif ($type === 'id') {
             $id = $request->input('id');
-            return Customer::findOrCreateById($id, $name, $addressName, $customerName, $city, $state, $zip, $isResidential, $customerGroup);
+            $customer = $customer->findOrCreateById($id, $attributes);
+        } else {
+            return response()->json(['message' => 'Invalid type provided.'], 400);
         }
 
-        return response()->json(['message' => 'Invalid type provided.'], 400);
+        $addressController = new AddressController();
+        $addressController->findOrCreateAddress($request, $customer->id);
+
+        return $customer;
     }
 }

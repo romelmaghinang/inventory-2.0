@@ -14,8 +14,7 @@ class Customer extends Model
 
     /*
     protected $fillable = [
-        'name', 'address_name', 'customer_name', 'street',
-        'city', 'state', 'zip', 'is_residential', 'customer_group'
+        'addressName', 'name', 'city', 'zip', 'residentialFlag', 'locationGroup', 'customerId'
     ];
 
      * Find or create a customer by name.
