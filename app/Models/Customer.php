@@ -11,17 +11,16 @@ class Customer extends Model
     use HasFactory;
 
     protected $table = 'customer';
-
-    /*
     protected $fillable = [
-        'addressName', 'name', 'city', 'zip', 'residentialFlag', 'locationGroup', 'customerId'
+        'id','accountId','addressName', 'name', 'city', 'zip', 'residentialFlag', 'locationGroup', 'customerId'
     ];
 
+    /*
      * Find or create a customer by name.
      */
     public function findOrCreateByName(array $attributes)
     {
-        $customer = self::whereRaw('LOWER(name) = ?', [strtolower($attributes['name'])])->first();
+        $customer = self::whereRaw('LOWER(name) = ?', [strtolower($attributes['customerName'])])->first();
 
         if ($customer) {
             return $customer;
@@ -44,5 +43,8 @@ class Customer extends Model
         $attributes['id'] = $id;
         return self::create($attributes);
     }
+
+    public $timestamps = false;
+
 }
 

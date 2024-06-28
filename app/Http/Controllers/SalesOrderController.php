@@ -55,54 +55,50 @@ class SalesOrderController extends Controller
         $orderNum = $prefix . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
 
         // Find or create customer using Customer Controller
-        $customerController = new CustomerController();
+       /* $customerController = new CustomerController();
         $customer = $customerController->findOrCreateCustomer($request);
-        if ($customer instanceof \Illuminate\Http\JsonResponse) {
-            return $customer;
-        }
-        $data['customerId'] = $customer->id;
+        $data['customerId'] = $customer->id; */
 
-        /* still to be modified */
         $carrierController = new CarrierController();
-        $data['carrierId'] = $carrierController->getCarrierId($request->carrierName);
-        $data['carrierServiceId'] = $carrierController->getCarrierServiceId($request->carrierServiceName);
+        $data['carrierId'] = $carrierController->getCarrierId($request);
+        $data['carrierServiceId'] = $carrierController->getCarrierServiceId($request);
 
         $currencyController = new CurrencyController();
-        $data['currencyId'] = $currencyController->getCurrencyId($request->currencyName);
-        $data['currencyRate'] = $currencyController->getCurrencyRate($request->currencyName);
+        $data['currencyId'] = $currencyController->getCurrencyId($request);
+        $data['currencyRate'] = $currencyController->getCurrencyRate($request);
 
         $fobPointController = new FobPointController();
-        $data['fobPointId'] = $fobPointController->getFobPointId($request->fobPointName);
+        $data['fobPointId'] = $fobPointController->getFobPointId($request);
 
         $locationController = new LocationController();
-        $data['locationGroupId'] = $locationController->getLocationGroupId($request->locationGroupName);
+        $data['locationGroupId'] = $locationController->getLocationGroupId($request);
 
         $paymentController = new PaymentController();
-        $data['paymentTermsId'] = $paymentController->getPaymentTermsId($request->paymentTermsName);
+        $data['paymentTermsId'] = $paymentController->getPaymentTermsId($request);
 
         $priorityController = new PriorityController();
-        $data['priorityId'] = $priorityController->getPriorityId($request->priorityName);
+        $data['priorityId'] = $priorityController->getPriorityId($request);
 
-        $qbClassController = new QbClassController();
-        $data['qbClassId'] = $qbClassController->getQbClassId($request->qbClassName);
+        $qbClassController = new qbClassController();
+        $data['qbClassId'] = $qbClassController->getQbClassId($request);
 
         $registerController = new RegisterController();
-        $data['registerId'] = $registerController->getRegisterId($request->registerName);
+        $data['registerId'] = $registerController->getRegisterId($request);
 
         $salesmanController = new SalesmanController();
-        $salesmanData = $salesmanController->getSalesmanData($request->salesmanName);
-        $data['salesmanId'] = $salesmanData['id'];
-        $data['salesman'] = $salesmanData['name'];
-        $data['salesmanInitials'] = $salesmanData['initials'];
+        $salesmanData = $salesmanController->getSalesmanData($request);
+        $data['salesmanId'] = $salesmanData['salesmanId'];
+        $data['salesman'] = $salesmanData['salesman'];
+        $data['salesmanInitials'] = $salesmanData['salesmanInitials'];
 
         $shippingController = new ShippingController();
-        $shippingData = $shippingController->getShippingData($request->shippingTermName);
+        $shippingData = $shippingController->getShippingData($request);
         $data['shipTermsId'] = $shippingData['shipTermsId'];
         $data['shipToCountryId'] = $shippingData['shipToCountryId'];
         $data['shipToStateId'] = $shippingData['shipToStateId'];
 
         $taxController = new TaxController();
-        $taxData = $taxController->getTaxRateData($request->taxRateName);
+        $taxData = $taxController->getTaxRateData($request);
         $data['taxRateId'] = $taxData['taxRateId'];
         $data['taxRateName'] = $taxData['taxRateName'];
 
@@ -120,7 +116,7 @@ class SalesOrderController extends Controller
             'currencyId' => $data['currencyId'],
             'currencyRate' => $data['currencyRate'],
             'customerContact' => $request->input('customerContact'),
-            'customerId' => $request->input('customerId'),
+            'customerId' => $data['customerId'],
             'customerPO' => $request->input('customerPO'),
             'dateCompleted' => $request->input('dateCompleted'),
             'dateCreated' => $request->input('dateCreated'),

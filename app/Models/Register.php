@@ -8,4 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class Register extends Model
 {
     use HasFactory;
+
+    protected $table = 'register';
+    protected $fillable = ['name'];
+    public function getRegisterIdByName($name)
+    {
+        return $this->where('name', $name)->value('id');
+    }
 }

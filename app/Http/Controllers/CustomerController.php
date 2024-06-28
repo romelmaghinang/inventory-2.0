@@ -13,7 +13,7 @@ class CustomerController extends Controller
     public function findOrCreateCustomer(Request $request)
     {
         $type = $request->input('type');
-        $attributes = $request->except('addressName', 'name', 'city', 'zip', 'residentialFlag', 'locationGroup', 'customerId');
+        $attributes = $request->except('type', 'accountId','addressName', 'name', 'city', 'zip', 'residentialFlag', 'locationGroup', 'customerId');
 
         $customer = new Customer();
 
@@ -26,6 +26,7 @@ class CustomerController extends Controller
             return response()->json(['message' => 'Invalid type provided.'], 400);
         }
 
+        // Ensuring that the address is also created or updated
         $addressController = new AddressController();
         $addressController->findOrCreateAddress($request, $customer->id);
 
