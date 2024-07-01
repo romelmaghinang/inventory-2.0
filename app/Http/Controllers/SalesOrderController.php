@@ -54,10 +54,11 @@ class SalesOrderController extends Controller
         $newNumber = $lastNumber + 1;
         $orderNum = $prefix . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
 
-        /* Find or create customer using Customer Controller
+        /* Find or create customer using Customer Controller */
         $customerController = new CustomerController();
-        $customer = $customerController->findOrCreateCustomer($request);
-        $data['customerId'] = $customer->id; */
+        $customer = $customerController->getOrCreateCustomer($request);
+        $customerId = $customer->getData()->id;
+        $toBeEmailed = $customer->getData()->toBeEmailed;
 
         // Retrieve or create the carrier ID using CarrierController
         $carrierController = new CarrierController();
@@ -133,8 +134,8 @@ class SalesOrderController extends Controller
             'currencyId' => $currencyId,
             'currencyRate' => $currencyRate,
             'customerContact' => $request->input('customerContact'),
-            /*'customerId' => $customerId,
-            'customerPO' => $customerPO,
+            'customerId' => $customerId,
+            /*'customerPO' => $customerPO,
             'dateCompleted' =>'$dateCompleted,
             'dateCreated' => $dateCreated,
             'dateExpired' => $dateExpired,
@@ -170,9 +171,9 @@ class SalesOrderController extends Controller
             'taxRate' => $request->input('taxRate'),
             'taxRateId' => $taxRateId,
             'taxRateName' => $taxRateName,
-            'toBeEmailedy' => $request->input('toBeEmailedy'),
-            'toBePrintedy' => $request->input('toBePrintedy'),
-            'totalIncludesTaxy' => $request->input('totalIncludesTaxy'),
+            'toBeEmailed' => $toBeEmailed,
+            'toBePrinted' => $request->input('toBePrinted'),
+            'totalIncludesTax' => $request->input('totalIncludesTax'),
             'totalTax' => $request->input('totalTax'),
             'subTotal' => $request->input('subTotal'),
             'totalPrice' => $request->input('totalPrice'),

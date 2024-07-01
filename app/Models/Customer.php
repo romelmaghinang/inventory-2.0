@@ -12,36 +12,47 @@ class Customer extends Model
 
     protected $table = 'customer';
     protected $fillable = [
-        'id','accountId','addressName', 'name', 'city', 'zip', 'residentialFlag', 'locationGroup', 'customerId'
+        'activeFlag',
+        'defaultPaymentTermsId',
+        'name',
+        'number',
+        'statusId',
+        'taxExempt',
+        'toBeEmailed',
+        'toBePrinted',
+        'url'
     ];
 
-    /*
-     * Find or create a customer by name.
-     */
-    public function findOrCreateByName(array $attributes)
+    public function getOrCreateCustomer($name, $defaultPaymentTermsId, $statusId, $number, $taxExempt, $toBeEmailed, $toBePrinted, $url)
     {
-        $customer = self::whereRaw('LOWER(name) = ?', [strtolower($attributes['customerName'])])->first();
+        // Attempt to find the customer by name
+        $customer = $this->where('name', $name)->first();
 
+        // If the customer exists, return its details
         if ($customer) {
-            return $customer;
+            return [
+                'id' => $customer->id,
+                'name' => $customer->name
+            ];
         }
 
-        return self::create($attributes);
-    }
+        // If the customer does not exist, create a new one and return its details
+        $newCustomer = $this->create([
+            'activeFlag' => 1,
+            'defaultPaymentTermsId' => $defaultPaymentTermsId,
+            'name' => $name,
+            'number' => $number,
+            'statusId' => $statusId,
+            'taxExempt' => $taxExempt,
+            'toBeEmailed' => $toBeEmailed,
+            'toBePrinted' => $toBePrinted,
+            'url' => $url
+        ]);
 
-    /**
-     * Find or create a customer by ID.
-     */
-    public function findOrCreateById(int $id, array $attributes)
-    {
-        $customer = self::find($id);
-
-        if ($customer) {
-            return $customer;
-        }
-
-        $attributes['id'] = $id;
-        return self::create($attributes);
+        return [
+            'id' => $newCustomer->id,
+            'name' => $newCustomer->name
+        ];
     }
 
     public $timestamps = false;

@@ -62,9 +62,9 @@ return new class extends Migration
             $table->double('taxRate')->nullable();
             $table->integer('taxRateId')->nullable();
             $table->string('taxRateName', 31)->nullable();
-            $table->boolean('toBeEmailedy');
-            $table->boolean('toBePrintedy');
-            $table->boolean('totalIncludesTaxy');
+            $table->boolean('toBeEmailed');
+            $table->boolean('toBePrinted');
+            $table->boolean('totalIncludesTax');
             $table->decimal('totalTax', 28, 9)->nullable();
             $table->decimal('subTotal', 28, 9)->nullable();
             $table->decimal('totalPrice', 28, 9)->nullable();
