@@ -10,15 +10,32 @@ class Carrier extends Model
     use HasFactory;
 
     protected $table = 'carrier';
-    protected $fillable = ['carrierId', 'carrierServiceId'];
+    protected $fillable = ['name', 'description'];
 
-    public function getCarrierIdByName($carrierId)
+    public function getCarrierId($name, $description = null)
     {
-        return $this->where('name', $carrierId)->value('id');
+        // Attempt to find the carrier by name (and optionally description)
+        $query = $this->where('name', $name);
+
+        if ($description) {
+            $query->where('description', $description);
+        }
+
+        $carrier = $query->first();
+
+        // If the carrier exists, return its id
+        if ($carrier) {
+            return $carrier->id;
+        }
+
+        // If the carrier does not exist, create a new one and return its id
+        $newCarrier = $this->create([
+            'name' => $name,
+            'description' => $description
+        ]);
+
+        return $newCarrier->id;
     }
 
-    public function getCarrierServiceIdByName($carrierServiceId)
-    {
-        return $this->where('name', $carrierServiceId)->value('id');
-    }
+    public $timestamps = false;
 }

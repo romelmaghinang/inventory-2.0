@@ -9,8 +9,15 @@ class qbClassController extends Controller
 {
     public function getQbClassId(Request $request)
     {
-        $qbClassId = $request->input('qbClassId');
-        $qbClass = new qbClass();
-        return $qbClass->getQbClassIdByName($qbClassId);
+        $name = $request->input('name');
+
+        $qbClass = new QbClass();
+        $qbClassId = $qbClass->getQbClassIdByName($name);
+
+        if ($qbClassId) {
+            return response()->json(['id' => $qbClassId], 200);
+        } else {
+            return response()->json(['message' => 'QB Class not found'], 404);
+        }
     }
 }

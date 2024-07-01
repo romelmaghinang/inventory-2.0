@@ -13,18 +13,36 @@ class Shipping extends Model
 
     protected $fillable = ['shipTermsId', 'shipToCountryId', 'shipToStateId'];
 
-    public function getShipTermsIdByName($term)
+    public function getShippingData($shipTermsId, $shipToCountryId, $shipToStateId): array
     {
-        return $this->where('shipTermsId', $term)->value('id');
-    }
+        // Attempt to find the shipping entry by shipTermsId, shipToCountryId, and shipToStateId
+        $shipping = $this->where('shipTermsId', $shipTermsId)
+            ->where('shipToCountryId', $shipToCountryId)
+            ->where('shipToStateId', $shipToStateId)
+            ->first();
 
-    public function getShipToCountryIdByName($countryName)
-    {
-        return $this->where('shipToCountryId', $countryName)->value('id');
-    }
+        // If the shipping entry exists, return its details
+        if ($shipping) {
+            return [
+                'shipTermsId' => $shipping->shipTermsId,
+                'shipToCountryId' => $shipping->shipToCountryId,
+                'shipToStateId' => $shipping->shipToStateId
+            ];
+        }
 
-    public function getShipToStateIdByName($stateName)
-    {
-        return $this->where('shipToStateId', $stateName)->value('id');
+        // If the shipping entry does not exist, create a new one and return its details
+        $newShipping = $this->create([
+            'shipTermsId' => $shipTermsId,
+            'shipToCountryId' => $shipToCountryId,
+            'shipToStateId' => $shipToStateId
+        ]);
+
+        return [
+            'shipTermsId' => $newShipping->shipTermsId,
+            'shipToCountryId' => $newShipping->shipToCountryId,
+            'shipToStateId' => $newShipping->shipToStateId
+        ];
     }
+    public $timestamps = false;
+
 }

@@ -4,19 +4,21 @@ namespace App\Http\Controllers;
 
 use App\Models\Salesman;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 
 class SalesmanController extends Controller
 {
-    public function getSalesmanId(Request $request)
+    public function getSalesmanData(Request $request): JsonResponse
     {
-        $salesmanId = $request->input('salesmanId');
+        $salesmanId = $request->input('SalesmanId');
+        $salesmanName = $request->input('salesman');
+        $salesmanInitials = $request->input('salesmanInitials');
+
         $salesman = new Salesman();
-        return $salesman->getSalesmanIdByName($salesmanId);
+        $salesmanDetails = $salesman->getSalesmanData($salesmanId, $salesmanName, $salesmanInitials);
+
+        return response()->json($salesmanDetails);
     }
-    public function getSalesmanData(Request $request)
-    {
-        $name = $request->input('salesmanName');
-        $salesman = new Salesman();
-        return $salesman->getSalesmanDataByName($name);
-    }
+
+
 }

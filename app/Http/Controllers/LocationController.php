@@ -4,13 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Models\Location;
 use Illuminate\Http\Request;
-
+use Illuminate\Http\JsonResponse;
 class LocationController extends Controller
 {
-    public function getLocationGroupId(Request $request)
+    public function getLocationGroup(Request $request): JsonResponse
     {
-        $locationGroupId = $request->input('locationGroupId');
+        $name = $request->input('name');
+        $description = $request->input('description', '');
+        $parentId = $request->input('parentId');
+        $pickable = $request->input('pickable', 1);
+        $receivable = $request->input('receivable', 1);
+
         $location = new Location();
-        return $location->getLocationGroupIdByName($locationGroupId);
+        $locationData = $location->getLocationGroup($name, $description, $parentId, $pickable, $receivable);
+
+        return response()->json($locationData);
     }
 }

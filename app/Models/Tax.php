@@ -11,10 +11,32 @@ class Tax extends Model
 
     protected $table = 'taxrate';
 
-    protected $fillable = ['name', 'rate'];
 
-    public function getTaxRateIdByName($name)
+    protected $fillable = ['taxRateId', 'taxRateName'];
+
+    public function getTaxRateData($taxRateName)
     {
-        return $this->where('name', $name)->value('id');
+        // Attempt to find the tax rate by name
+        $taxRate = $this->where('taxRateName', $taxRateName)->first();
+
+        // If the tax rate exists, return its details
+        if ($taxRate) {
+            return [
+                'taxRateId' => $taxRate->taxRateId,
+                'taxRateName' => $taxRate->taxRateName
+            ];
+        }
+
+        // If the tax rate does not exist, create a new one and return its details
+        $newTaxRate = $this->create([
+            'taxRateName' => $taxRateName
+        ]);
+
+        return [
+            'taxRateId' => $newTaxRate->taxRateId,
+            'taxRateName' => $newTaxRate->taxRateName
+        ];
     }
+
+    public $timestamps = false;
 }

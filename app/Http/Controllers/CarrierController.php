@@ -3,22 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Models\Carrier;
-use Illuminate\Support\Facades\Request;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 
 class CarrierController extends Controller
 {
-    public function getCarrierId(Request $request)
+    public function getCarrierId(Request $request): JsonResponse
     {
-        $carrierId = $request->input('carrierId');
-        $carrier = new Carrier();
-        return $carrier->getCarrierIdByName($carrierId);
-    }
+        $name = $request->input('name');
+        $description = $request->input('description');
 
-    public function getCarrierServiceId(Request $request)
-    {
-        $carrierServiceId = $request->input('carrierServiceId');
         $carrier = new Carrier();
-        return $carrier->getCarrierServiceIdByName($carrierServiceId);
+        $carrierId = $carrier->getCarrierId($name, $description);
+
+        return response()->json(['carrierId' => $carrierId]);
     }
 }
 

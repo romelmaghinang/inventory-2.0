@@ -4,13 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\Tax;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 
 class TaxController extends Controller
 {
-    public function getTaxRateData(Request $request)
+    public function getTaxRateData(Request $request): JsonResponse
     {
-        $name = $request->input('taxRateName');
+        $taxRateName = $request->input('taxRateName');
+
         $tax = new Tax();
-        return $tax->getTaxRateIdByName($name);
+        $taxRateDetails = $tax->getTaxRateData($taxRateName);
+
+        return response()->json($taxRateDetails);
     }
 }

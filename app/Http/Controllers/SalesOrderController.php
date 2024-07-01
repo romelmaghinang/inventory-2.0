@@ -54,105 +54,121 @@ class SalesOrderController extends Controller
         $newNumber = $lastNumber + 1;
         $orderNum = $prefix . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
 
-        // Find or create customer using Customer Controller
-       /* $customerController = new CustomerController();
+        /* Find or create customer using Customer Controller
+        $customerController = new CustomerController();
         $customer = $customerController->findOrCreateCustomer($request);
         $data['customerId'] = $customer->id; */
 
+        // Retrieve or create the carrier ID using CarrierController
         $carrierController = new CarrierController();
-        $data['carrierId'] = $carrierController->getCarrierId($request);
-        $data['carrierServiceId'] = $carrierController->getCarrierServiceId($request);
+        $carrierIdResponse = $carrierController->getCarrierId($request);
+        $carrierId = $carrierIdResponse->getData()->carrierId;
+
+        // Retrieve or create the carrier ID using CarrierController
+        $carrierServiceController = new CarrierServiceController();
+        $carrierServiceIdResponse = $carrierServiceController->getCarrierServiceId($request);
+        $carrierServiceId = $carrierServiceIdResponse->getData()->carrierServiceId;
 
         $currencyController = new CurrencyController();
-        $data['currencyId'] = $currencyController->getCurrencyId($request);
-        $data['currencyRate'] = $currencyController->getCurrencyRate($request);
+        $currencyIdResponse = $currencyController->getCurrency($request);
+        $currencyRateResponse = $currencyController->getCurrency($request);
+        $currencyId = $currencyIdResponse->getData()->currencyId;
+        $currencyRate = $currencyRateResponse->getData()->currencyRate;
 
+        /* this table does not exist in our database
         $fobPointController = new FobPointController();
         $data['fobPointId'] = $fobPointController->getFobPointId($request);
+        */
 
         $locationController = new LocationController();
-        $data['locationGroupId'] = $locationController->getLocationGroupId($request);
+        $locationGroupIdResponse = $locationController->getLocationGroup($request);
+        $locationGroupId = $locationGroupIdResponse->getData()->locationGroupId;
 
         $paymentController = new PaymentController();
-        $data['paymentTermsId'] = $paymentController->getPaymentTermsId($request);
+        $paymentTermsIdResponse = $paymentController->getPaymentTerm($request);
+        $paymentTermsId = $paymentTermsIdResponse->getData()->paymentTermId;
 
-        $priorityController = new PriorityController();
-        $data['priorityId'] = $priorityController->getPriorityId($request);
+        $priority = new PriorityController();
+        $priorityIdResponse = $priority->getPriorityId($request);
+        $priorityId = $priorityIdResponse->getData()->priorityId;
 
         $qbClassController = new qbClassController();
-        $data['qbClassId'] = $qbClassController->getQbClassId($request);
+        $qbClassIdResponse = $qbClassController->getQbClassId($request);
+        $qbClassId = $qbClassIdResponse->getData()->qbClassId;
 
+        /* this table does not exist in our database
         $registerController = new RegisterController();
         $data['registerId'] = $registerController->getRegisterId($request);
+        */
 
         $salesmanController = new SalesmanController();
         $salesmanData = $salesmanController->getSalesmanData($request);
-        $data['salesmanId'] = $salesmanData['salesmanId'];
-        $data['salesman'] = $salesmanData['salesman'];
-        $data['salesmanInitials'] = $salesmanData['salesmanInitials'];
+        $salesmanId = $salesmanData->getData()->salesmanId;
+        $salesmanName = $salesmanData->getData()->salesmanName;
+        $salesmanIntials = $salesmanData->getData()->salesmanInitials;
 
         $shippingController = new ShippingController();
         $shippingData = $shippingController->getShippingData($request);
-        $data['shipTermsId'] = $shippingData['shipTermsId'];
-        $data['shipToCountryId'] = $shippingData['shipToCountryId'];
-        $data['shipToStateId'] = $shippingData['shipToStateId'];
+        $shipTermsId = $shippingData->getData()->shippingTermsId;
+        $shipToCountryId = $shippingData->getData()->shipToCountryId;
+        $shipToStateId = $shippingData->getData()->shipToStateId;
 
         $taxController = new TaxController();
         $taxData = $taxController->getTaxRateData($request);
-        $data['taxRateId'] = $taxData['taxRateId'];
-        $data['taxRateName'] = $taxData['taxRateName'];
+        $taxRateId = $taxData->getData()->taxRateId;
+        $taxRateName = $taxData->getData()->taxRateName;
 
         // Create the sales order
         $salesOrder = SalesOrder::create([
             'billToAddress' => $request->input('billToAddress'),
             'billToCity' => $request->input('billToCity'),
-            'billToCountryId' => $request->input('billToCountryId'),
+            //'billToCountryId' => $billToCountryId,
             'billToName' => $request->input('billToName'),
-            'billToStateId' => $request->input('billToStateId'),
+            //'billToStateId' => $billToStateId,
             'billToZip' => $request->input('billToZip'),
-            'carrierId' => $data['carrierId'],
-            'carrierServiceId' => $data['carrierServiceId'],
+            'carrierId' => $carrierId,
+            'carrierServiceId' => $carrierServiceId,
             'cost' => $request->input('cost'),
-            'currencyId' => $data['currencyId'],
-            'currencyRate' => $data['currencyRate'],
+            'currencyId' => $currencyId,
+            'currencyRate' => $currencyRate,
             'customerContact' => $request->input('customerContact'),
-            'customerId' => $data['customerId'],
-            'customerPO' => $request->input('customerPO'),
-            'dateCompleted' => $request->input('dateCompleted'),
-            'dateCreated' => $request->input('dateCreated'),
-            'dateExpired' => $request->input('dateExpired'),
-            'dateFirstShip' => $request->input('dateFirstShip'),
-            'dateIssued' => $request->input('dateIssued'),
-            'dateLastModified' => $request->input('dateLastModified'),
-            'dateRevision' => $request->input('dateRevision'),
-            'email' => $request->input('email'),
-            'estimatedTax' => $request->input('estimatedTax'),
-            'fobPointId' => $data['fobPointId'],
-            'locationGroupId' => $data['locationGroupId'],
+            /*'customerId' => $customerId,
+            'customerPO' => $customerPO,
+            'dateCompleted' =>'$dateCompleted,
+            'dateCreated' => $dateCreated,
+            'dateExpired' => $dateExpired,
+            'dateFirstShip' => $dateFirstShip,
+            'dateIssued' => $dateIssued,
+            'dateLastModified' => $dateLastModified,
+            'dateRevision' => $dateRevision,
+            'email' => $email,
+            'estimatedTax' => $estimatedTax,
+            'fobPointId' => $fobPointId, */
+            'locationGroupId' => $locationGroupId,
             'mcTotalTax' => $request->input('mcTotalTax'),
             'note' => $request->input('note'),
             'num' => $orderNum,
-            'paymentTermsId' => $data['paymentTermsId'],
+            'paymentTermsId' => $paymentTermsId,
             'phone' => $request->input('phone'),
-            'priorityId' => $data['priorityId'],
-            'qbClassId' => $data['qbClassId'],
-            'registerId' =>  $data['registerId'],
+            'priorityId' => $priorityId,
+            'qbClassId' => $qbClassId,
+            //'registerId' =>  $data['registerId'],
             'residentialFlag' => $request->input('residentialFlag'),
             'revisionNum' => $request->input('revisionNum'),
-            'salesman' => $data['salesman'],
-            'salesmanId' => $data['salesmanId'],
-            'salesmanInitials' => $data['salesmanInitials'],
-            'shipTermsId' => $data['shipTermsId'],
+            'salesman' => $salesmanName,
+            'salesmanId' => $salesmanId,
+            'salesmanInitials' => $salesmanIntials,
+            'shipTermsId' => $shipTermsId,
             'shipToAddress' => $request->input('shipToAddress'),
             'shipToCity' => $request->input('shipToCity'),
-            'shipToCountryId' => $data['shipToCountryId'],
+            'shipToCountryId' => $shipToCountryId,
             'shipToName' => $request->input('shipToName'),
-            'shipToStateId' => $data['shipToStateId'],
+            'shipToStateId' => $shipToStateId,
             'shipToZip' => $request->input('shipToZip'),
             'statusId' => $request->input('statusId'),
             'taxRate' => $request->input('taxRate'),
-            'taxRateId' => $data['taxRateId'],
-            'taxRateName' => $data['taxRateName'],
+            'taxRateId' => $taxRateId,
+            'taxRateName' => $taxRateName,
             'toBeEmailedy' => $request->input('toBeEmailedy'),
             'toBePrintedy' => $request->input('toBePrintedy'),
             'totalIncludesTaxy' => $request->input('totalIncludesTaxy'),

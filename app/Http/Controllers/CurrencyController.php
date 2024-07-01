@@ -4,20 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Models\Currency;
 use Illuminate\Http\Request;
-
+use Illuminate\Http\JsonResponse;
 class CurrencyController extends Controller
 {
-    public function getCurrencyId(Request $request)
+    public function getCurrency(Request $request): JsonResponse
     {
-        $currencyId = $request->input('currencyId');
-        $currency = new Currency();
-        return $currency->getCurrencyIdByName($currencyId);
-    }
+        $name = $request->input('name');
+        $code = $request->input('code');
+        $symbol = $request->input('symbol');
+        $rate = $request->input('rate');
 
-    public function getCurrencyRate(Request $request)
-    {
-        $currencyRate = $request->input('currencyRate');
         $currency = new Currency();
-        return $currency->getCurrencyRateByName($currencyRate);
+        $currencyData = $currency->getCurrency($name, $code, $symbol, $rate);
+
+        return response()->json($currencyData);
     }
 }
