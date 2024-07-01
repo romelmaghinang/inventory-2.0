@@ -105,13 +105,14 @@ class SalesOrderController extends Controller
         $salesmanData = $salesmanController->getSalesmanData($request);
         $salesmanId = $salesmanData->getData()->salesmanId;
         $salesmanName = $salesmanData->getData()->salesmanName;
-        $salesmanIntials = $salesmanData->getData()->salesmanInitials;
+        $salesmanInitials = $salesmanData->getData()->salesmanInitials;
 
         $shippingController = new ShippingController();
         $shippingData = $shippingController->getShippingData($request);
         $shipTermsId = $shippingData->getData()->shippingTermsId;
         $shipToCountryId = $shippingData->getData()->shipToCountryId;
         $shipToStateId = $shippingData->getData()->shipToStateId;
+        $statusId = $shippingData->getData()->statusId;
 
         $taxController = new TaxController();
         $taxData = $taxController->getTaxRateData($request);
@@ -157,7 +158,7 @@ class SalesOrderController extends Controller
             'revisionNum' => $request->input('revisionNum'),
             'salesman' => $salesmanName,
             'salesmanId' => $salesmanId,
-            'salesmanInitials' => $salesmanIntials,
+            'salesmanInitials' => $salesmanInitials,
             'shipTermsId' => $shipTermsId,
             'shipToAddress' => $request->input('shipToAddress'),
             'shipToCity' => $request->input('shipToCity'),
@@ -165,7 +166,7 @@ class SalesOrderController extends Controller
             'shipToName' => $request->input('shipToName'),
             'shipToStateId' => $shipToStateId,
             'shipToZip' => $request->input('shipToZip'),
-            'statusId' => $request->input('statusId'),
+            'statusId' => $statusId,
             'taxRate' => $request->input('taxRate'),
             'taxRateId' => $taxRateId,
             'taxRateName' => $taxRateName,

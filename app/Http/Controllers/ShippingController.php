@@ -13,9 +13,10 @@ class ShippingController extends Controller
         $shipTermsId = $request->input('shipTermsId');
         $shipToCountryId = $request->input('shipToCountryId');
         $shipToStateId = $request->input('shipToStateId');
+        $statusId = $request->input('statusId');
 
         $shipping = new Shipping();
-        $shippingDetails = $shipping->getShippingData($shipTermsId, $shipToCountryId, $shipToStateId);
+        $shippingDetails = $shipping->getShippingData($shipTermsId, $shipToCountryId, $shipToStateId, $statusId);
 
         return response()->json($shippingDetails);
     }
