@@ -54,6 +54,12 @@ class SalesOrderController extends Controller
         $newNumber = $lastNumber + 1;
         $orderNum = $prefix . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
 
+        // Retrieve or create the billToCountryId and billToStateId
+        $AddressController = new AddressController();
+        $addressResponse = $AddressController->getOrCreateAddress($request);
+        $billToCountryId = $addressResponse->getData()->CountryId;
+        $billToStateId = $addressResponse->getData()->SteteId;
+
         /* Find or create customer using Customer Controller */
         $customerController = new CustomerController();
         $customer = $customerController->getOrCreateCustomer($request);
@@ -124,9 +130,9 @@ class SalesOrderController extends Controller
         $salesOrder = SalesOrder::create([
             'billToAddress' => $request->input('billToAddress'),
             'billToCity' => $request->input('billToCity'),
-            //'billToCountryId' => $billToCountryId,
             'billToName' => $request->input('billToName'),
-            //'billToStateId' => $billToStateId,
+            'billToCountryId' => $billToCountryId,
+            'billToStateId' => $billToStateId,
             'billToZip' => $request->input('billToZip'),
             'carrierId' => $carrierId,
             'carrierServiceId' => $carrierServiceId,
