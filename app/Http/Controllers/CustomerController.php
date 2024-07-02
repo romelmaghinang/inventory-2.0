@@ -5,7 +5,6 @@ use App\Models\Customer;
 use App\Models\CustomerStatus;
 use App\Models\PaymentTerms;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class CustomerController extends Controller
 {

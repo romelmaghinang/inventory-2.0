@@ -12,16 +12,18 @@ class Address extends Model
     protected $table = 'address';
     protected $fillable = ['accountId','countryId', 'stateId'];
 
-    public function getOrCreateAddress($countryName, $stateName): array
+    public function getOrCreateAddress($accountId, $countryName, $stateName): array
     {
         // Attempt to find the address by countryName and stateName
         $address = $this->where('countryId', $this->getCountryIdByName($countryName))
             ->where('stateId', $this->getStateIdByName($stateName))
+            ->where('accountId', $this->getAccountIdByName($accountId))
             ->first();
 
         // If the address exists, return its details
         if ($address) {
             return [
+                'addressId' => $address->accountId,
                 'countryId' => $address->countryId,
                 'stateId' => $address->stateId
             ];
@@ -29,6 +31,7 @@ class Address extends Model
 
         // If the address does not exist, create a new one and return its details
         $newAddress = $this->create([
+            'accountId' => $this->getAccountIdByName($accountId),
             'countryId' => $this->getCountryIdByName($countryName),
             'stateId' => $this->getStateIdByName($stateName)
         ]);
@@ -67,6 +70,21 @@ class Address extends Model
         $newState = State::create(['name' => $stateName]);
 
         return $newState->id;
+    }
+
+    public function getAccountIdByName($accountName)
+    {
+        // Logic to retrieve accountId by mame
+        $account = Accounttype::where('name', $accountName)->first();
+
+        if ($account) {
+            return $account->id;
+        }
+
+        // If the account does not exist, create a new one and return its id
+        $newAccount = Accounttype::create(['name' => $accountName]);
+
+        return $newAccount->id;
     }
 
     public $timestamps = false;

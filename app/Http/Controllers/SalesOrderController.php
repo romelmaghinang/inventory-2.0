@@ -10,7 +10,7 @@ class SalesOrderController extends Controller
 {
     public function create(Request $request)
     {
-        // Validate the request data
+        //Validate the request data
         $validator = Validator::make($request->all(), [
             'status' => 'required|in:10,20,95',
             'customerName' => 'required|string',
@@ -30,12 +30,10 @@ class SalesOrderController extends Controller
             'carrierServiceName' => 'nullable|string',
             'billToCountryName' => 'nullable|string',
             'currencyName' => 'nullable|string',
-            'fobPointName' => 'nullable|string',
             'locationGroupName' => 'nullable|string',
             'paymentTermsName' => 'nullable|string',
             'priorityName' => 'nullable|string',
             'qbClassName' => 'nullable|string',
-            'registerName' => 'nullable|string',
             'salesmanName' => 'nullable|string',
             'shippingTermName' => 'nullable|string',
         ]);
@@ -57,14 +55,13 @@ class SalesOrderController extends Controller
         // Retrieve or create the billToCountryId and billToStateId
         $AddressController = new AddressController();
         $addressResponse = $AddressController->getOrCreateAddress($request);
-        $billToCountryId = $addressResponse->getData()->CountryId;
-        $billToStateId = $addressResponse->getData()->SteteId;
+        $billToCountryId = $addressResponse->getData()->countryId;
+        $billToStateId = $addressResponse->getData()->stateId;
 
         /* Find or create customer using Customer Controller */
         $customerController = new CustomerController();
         $customer = $customerController->getOrCreateCustomer($request);
         $customerId = $customer->getData()->id;
-        $toBeEmailed = $customer->getData()->toBeEmailed;
 
         // Retrieve or create the carrier ID using CarrierController
         $carrierController = new CarrierController();
@@ -82,11 +79,6 @@ class SalesOrderController extends Controller
         $currencyId = $currencyIdResponse->getData()->currencyId;
         $currencyRate = $currencyRateResponse->getData()->currencyRate;
 
-        /* this table does not exist in our database
-        $fobPointController = new FobPointController();
-        $data['fobPointId'] = $fobPointController->getFobPointId($request);
-        */
-
         $locationController = new LocationController();
         $locationGroupIdResponse = $locationController->getLocationGroup($request);
         $locationGroupId = $locationGroupIdResponse->getData()->locationGroupId;
@@ -102,11 +94,6 @@ class SalesOrderController extends Controller
         $qbClassController = new qbClassController();
         $qbClassIdResponse = $qbClassController->getQbClassId($request);
         $qbClassId = $qbClassIdResponse->getData()->qbClassId;
-
-        /* this table does not exist in our database
-        $registerController = new RegisterController();
-        $data['registerId'] = $registerController->getRegisterId($request);
-        */
 
         $salesmanController = new SalesmanController();
         $salesmanData = $salesmanController->getSalesmanData($request);
@@ -126,68 +113,31 @@ class SalesOrderController extends Controller
         $taxRateId = $taxData->getData()->taxRateId;
         $taxRateName = $taxData->getData()->taxRateName;
 
-        // Create the sales order
-        $salesOrder = SalesOrder::create([
-            'billToAddress' => $request->input('billToAddress'),
-            'billToCity' => $request->input('billToCity'),
-            'billToName' => $request->input('billToName'),
-            'billToCountryId' => $billToCountryId,
-            'billToStateId' => $billToStateId,
-            'billToZip' => $request->input('billToZip'),
-            'carrierId' => $carrierId,
-            'carrierServiceId' => $carrierServiceId,
-            'cost' => $request->input('cost'),
-            'currencyId' => $currencyId,
-            'currencyRate' => $currencyRate,
-            'customerContact' => $request->input('customerContact'),
-            'customerId' => $customerId,
-            /*'customerPO' => $customerPO,
-            'dateCompleted' =>'$dateCompleted,
-            'dateCreated' => $dateCreated,
-            'dateExpired' => $dateExpired,
-            'dateFirstShip' => $dateFirstShip,
-            'dateIssued' => $dateIssued,
-            'dateLastModified' => $dateLastModified,
-            'dateRevision' => $dateRevision,
-            'email' => $email,
-            'estimatedTax' => $estimatedTax,
-            'fobPointId' => $fobPointId, */
-            'locationGroupId' => $locationGroupId,
-            'mcTotalTax' => $request->input('mcTotalTax'),
-            'note' => $request->input('note'),
-            'num' => $orderNum,
-            'paymentTermsId' => $paymentTermsId,
-            'phone' => $request->input('phone'),
-            'priorityId' => $priorityId,
-            'qbClassId' => $qbClassId,
-            //'registerId' =>  $data['registerId'],
-            'residentialFlag' => $request->input('residentialFlag'),
-            'revisionNum' => $request->input('revisionNum'),
-            'salesman' => $salesmanName,
-            'salesmanId' => $salesmanId,
-            'salesmanInitials' => $salesmanInitials,
-            'shipTermsId' => $shipTermsId,
-            'shipToAddress' => $request->input('shipToAddress'),
-            'shipToCity' => $request->input('shipToCity'),
-            'shipToCountryId' => $shipToCountryId,
-            'shipToName' => $request->input('shipToName'),
-            'shipToStateId' => $shipToStateId,
-            'shipToZip' => $request->input('shipToZip'),
-            'statusId' => $statusId,
-            'taxRate' => $request->input('taxRate'),
-            'taxRateId' => $taxRateId,
-            'taxRateName' => $taxRateName,
-            'toBeEmailed' => $toBeEmailed,
-            'toBePrinted' => $request->input('toBePrinted'),
-            'totalIncludesTax' => $request->input('totalIncludesTax'),
-            'totalTax' => $request->input('totalTax'),
-            'subTotal' => $request->input('subTotal'),
-            'totalPrice' => $request->input('totalPrice'),
-            'typeId' => $request->input('typeId'),
-            'url' => $request->input('url'),
-            'username' => $request->input('username'),
-            'vendorPO' => $request->input('vendorPO'),
-        ]);
+        //Create the sales order
+        $salesOrderData = $request->all();
+        $salesOrderData['billToCountryId'] = $billToCountryId;
+        $salesOrderData['billToStateId'] =  $billToStateId;
+        $salesOrderData['carrierId'] = $carrierId;
+        $salesOrderData['carrierServiceId'] = $carrierServiceId;
+        $salesOrderData['customerId'] = $customerId;
+        $salesOrderData['currencyId'] = $currencyId;
+        $salesOrderData['currencyRate'] = $currencyRate;
+        $salesOrderData['locationGroupId'] = $locationGroupId;
+        $salesOrderData['num'] = $orderNum;
+        $salesOrderData['paymentTermsId'] = $paymentTermsId;
+        $salesOrderData['priorityId'] = $priorityId;
+        $salesOrderData['qbClassId'] = $qbClassId;
+        $salesOrderData['salesmanName'] = $salesmanName;
+        $salesOrderData['salesmanId'] = $salesmanId;
+        $salesOrderData['salesmanInitials'] = $salesmanInitials;
+        $salesOrderData['shipTermsId'] = $shipTermsId;
+        $salesOrderData['shipToCountryId'] = $shipToCountryId;
+        $salesOrderData['shipToStateId'] = $shipToStateId;
+        $salesOrderData['statusId'] = $statusId;
+        $salesOrderData['taxRateId'] = $taxRateId;
+        $salesOrderData['taxRateName'] = $taxRateName;
+
+        $salesOrder = SalesOrder::create($salesOrderData);
 
         return response()->json([
             'message' => 'Sales Order created successfully',

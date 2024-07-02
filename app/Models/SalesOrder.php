@@ -14,13 +14,13 @@ class SalesOrder extends Model
         'billToAddress', 'billToCity', 'billToCountryId', 'billToName', 'billToStateId', 'billToZip', 'carrierId',
         'carrierServiceId', 'cost', 'currencyId', 'currencyRate', 'customerContact', 'customerId', 'customerPO', 'dateCompleted',
         'dateCreated', 'dateExpired', 'dateFirstShip', 'dateIssued', 'dateLastModified', 'dateRevision', 'email', 'estimatedTax',
-        'fobPointId', 'locationGroupId', 'mcTotalTax', 'note', 'num', 'paymentTermsId', 'phone', 'priorityId', 'qbClassId',
-        'registerId', 'residentialFlag', 'revisionNum', 'salesman', 'salesmanId', 'salesmanInitials', 'shipTermsId', 'shipToAddress',
-        'shipToCity', 'shipToCountryId', 'shipToName', 'shipToStateId', 'shipToZip', 'statusId', 'taxRate', 'taxRateId',
-        'taxRateName', 'toBeEmailedy', 'toBePrintedy', 'totalIncludesTaxy', 'totalTax', 'subTotal', 'totalPrice', 'typeId', 'url',
-        'username', 'vendorPO'
+        'locationGroupId', 'mcTotalTax', 'note', 'num', 'paymentTermsId', 'phone', 'priorityId', 'qbClassId', 'residentialFlag',
+        'revisionNum', 'salesman', 'salesmanId', 'salesmanInitials', 'shipTermsId', 'shipToAddress', 'shipToCity', 'shipToCountryId',
+        'shipToName', 'shipToStateId', 'shipToZip', 'statusId', 'taxRate', 'taxRateId', 'taxRateName', 'toBeEmailed', 'toBePrinted',
+        'totalIncludesTax', 'totalTax', 'subTotal', 'totalPrice', 'typeId', 'url', 'username', 'vendorPO'
     ];
 
     // Disable timestamps
     public $timestamps = false;
+
 }

@@ -12,7 +12,7 @@ class Carrier extends Model
     protected $table = 'carrier';
     protected $fillable = ['name', 'description'];
 
-    public function getCarrierId($name, $description = null)
+    public function getCarrierId($name, $activeFlag = 1, $description = null)
     {
         // Attempt to find the carrier by name (and optionally description)
         $query = $this->where('name', $name);
@@ -31,6 +31,7 @@ class Carrier extends Model
         // If the carrier does not exist, create a new one and return its id
         $newCarrier = $this->create([
             'name' => $name,
+            'active' => $activeFlag,
             'description' => $description
         ]);
 
