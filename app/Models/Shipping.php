@@ -13,7 +13,7 @@ class Shipping extends Model
 
     protected $fillable = ['shipTermsId', 'shipToCountryId', 'shipToStateId', 'statusId'];
 
-    public function getShippingData($shipTermsId, $shipToCountryId, $shipToStateId, $statusId): array
+    public function getShippingData($shipTermsId, $shipToCountryId, $shipToStateId, $statusId)
     {
         // Attempt to find the shipping entry by shipTermsId, shipToCountryId, and shipToStateId
         $shipping = $this->where('shipTermsId', $shipTermsId)

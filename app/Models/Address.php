@@ -12,7 +12,7 @@ class Address extends Model
     protected $table = 'address';
     protected $fillable = ['accountId','countryId', 'stateId'];
 
-    public function getOrCreateAddress($accountId, $countryName, $stateName): array
+    public function getOrCreateAddress($accountId, $countryName, $stateName)
     {
         // Attempt to find the address by countryName and stateName
         $address = $this->where('countryId', $this->getCountryIdByName($countryName))

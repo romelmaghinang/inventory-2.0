@@ -12,18 +12,17 @@ class Currency extends Model
     protected $table = 'currency';
     protected $fillable = ['activeFlag', 'code', 'dateCreated', 'lastChangedUserId', 'name', 'rate', 'symbol'];
 
-    public function getCurrency($name, $code, $symbol, $rate = 1.0)
+    public function getCurrency($code)
     {
         // Attempt to find the currency by code
         $currency = $this->where('code', $code)->first();
 
-        // If the currency exists, return its id and rate
-        if ($currency) {
-            return ['currencyId' => $currency->id, 'rate' => $currency->rate];
-        }
+        return ['currencyId' => $currency->id, 'rate' => $currency->rate];
 
-        // If the currency does not exist, create a new one and return its id and rate
-        $newCurrency = $this->create([
+    }
+    public function createCurrency($name, $code, $rate, $symbol)
+    {
+        $newCurrency = $this->createCurrency($name, $code, $symbol, $rate);([
             'activeFlag' => 1,
             'code' => $code,
             'dateCreated' => now(),
@@ -35,6 +34,5 @@ class Currency extends Model
 
         return ['currencyId' => $newCurrency->id, 'rate' => $newCurrency->rate];
     }
-
     public $timestamps = false;
 }

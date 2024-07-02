@@ -25,12 +25,12 @@ class CarrierService extends Model
 
         $carrierService = $query->first();
 
-        // If the carrier service exists, return its id
-        if ($carrierService) {
-            return $carrierService->id;
-        }
+        return $carrierService->id;
 
-        // If the carrier service does not exist, create a new one and return its id
+    }
+
+    public function createCarrierService($carrierId, $code, $name, $readOnly)
+    {
         $newCarrierService = $this->create([
             'activeFlag' => 1,
             'carrierId' => $carrierId,

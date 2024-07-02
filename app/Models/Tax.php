@@ -19,16 +19,16 @@ class Tax extends Model
         // Attempt to find the tax rate by name
         $taxRate = $this->where('taxRateName', $taxRateName)->first();
 
-        // If the tax rate exists, return its details
-        if ($taxRate) {
             return [
                 'taxRateId' => $taxRate->taxRateId,
                 'taxRateName' => $taxRate->taxRateName
             ];
-        }
+    }
 
+    public function createTaxRate($taxRateName)
+    {
         // If the tax rate does not exist, create a new one and return its details
-        $newTaxRate = $this->create([
+        $newTaxRate = $this->createTaxRate([
             'taxRateName' => $taxRateName
         ]);
 

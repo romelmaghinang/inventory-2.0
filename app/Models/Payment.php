@@ -12,27 +12,22 @@ class Payment extends Model
     protected $table = 'paymentterms';
     protected $fillable = ['activeFlag', 'defaultTerm', 'name', 'readOnly', 'typeId'];
 
-    public function getPaymentTerm($name, $defaultTerm = 1, $readOnly = 0, $typeName)
+    public function getPaymentTermsId($name, $typeName)
     {
         // Retrieve the typeId from the paymenttermstype table
-        $typeId = PaymentTermsType::where('name', $typeName)->value('id');
-
-        if (!$typeId) {
-            // Create a new type if it doesn't exist
-            $type = PaymentTermsType::create(['name' => $typeName]);
-            $typeId = $type->id;
-        }
+        $type = PaymentTermsType::where('name', $typeName)->value('id');
+        $typeId = $type->id;
 
         // Attempt to find the payment term by name
         $paymentTerm = $this->where('name', $name)->first();
 
-        // If the payment term exists, return its id
-        if ($paymentTerm) {
-            return ['id' => $paymentTerm->id];
-        }
+        return ['id' => $paymentTerm->id, 'typeId' => $typeId];
 
-        // If the payment term does not exist, create a new one and return its id
-        $newPaymentTerm = $this->create([
+    }
+
+    public function createPaymentTerm($name, $defaultTerm = 1, $readOnly = 0, $typeId)
+    {
+        $newPaymentTerm = $this->createPaymentTerm($name, $defaultTerm, $readOnly, $typeId);([
             'activeFlag' => 1,
             'defaultTerm' => $defaultTerm,
             'name' => $name,
@@ -42,6 +37,5 @@ class Payment extends Model
 
         return ['id' => $newPaymentTerm->id];
     }
-
     public $timestamps = false;
 }
