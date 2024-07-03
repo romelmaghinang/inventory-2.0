@@ -13,31 +13,22 @@ class Salesman extends Model
 
     public function getSalesmanData($salesmanId, $salesmanName, $salesmanInitials)
     {
-        // Attempt to find the salesman details by SalesmanId
         $salesman = $this->where('SalesmanId', $salesmanId)->first();
 
-        // If the salesman exists, return its details
-        if ($salesman) {
             return [
-                'SalesmanId' => $salesman->SalesmanId,
-                'salesman' => $salesman->salesman,
-                'salesmanInitials' => $salesman->salesmanInitials
+                'salesmanId' => $salesman,
+                'salesman' => $salesmanName,
+                'salesmanInitials' => $salesmanInitials
             ];
-        }
-
-        // If the salesman does not exist, create a new one and return its details
-        $newSalesman = $this->create([
-            'SalesmanId' => $salesmanId,
-            'salesman' => $salesmanName,
-            'salesmanInitials' => $salesmanInitials
-        ]);
-
-        return [
-            'SalesmanId' => $newSalesman->SalesmanId,
-            'salesman' => $newSalesman->salesman,
-            'salesmanInitials' => $newSalesman->salesmanInitials
-        ];
     }
 
-    public $timestamps = false;
+    public function createSalesman($salesman, $salesmanInitials)
+    {
+        return $this->create([
+            'salesman' => $salesman,
+            'salesmanInitials' => $salesmanInitials
+        ]);
+    }
+        public $timestamps = false;
+
 }

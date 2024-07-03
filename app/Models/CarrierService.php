@@ -14,19 +14,9 @@ class CarrierService extends Model
 
     public function getCarrierServiceId($carrierName, $code, $name)
     {
-        // Retrieve or create the carrier ID
-        $carrier = new Carrier();
-        $carrierId = $carrier->getCarrierId($carrierName);
+       $carrierService = $this->where('name', $carrierName)->where('code', $code)->first();
 
-        // Attempt to find the carrier service by carrierId, code, and name
-        $query = $this->where('carrierId', $carrierId)
-            ->where('code', $code)
-            ->where('name', $name);
-
-        $carrierService = $query->first();
-
-        return $carrierService->id;
-
+       return $carrierService->id;
     }
 
     public function createCarrierService($carrierId, $code, $name, $readOnly)

@@ -13,12 +13,11 @@ class qbClass extends Model
     protected $fillable = ['id', 'accountingHash', 'accountingId', 'activeFlag', 'dateCreated', 'name', 'parentId'];
     public function getQbClassIdByName($name)
     {
-        // Attempt to find the QB class by name
+
         $qbClass = $this->where('name', $name)->first();
 
-        // If the QB class exists, return its id
-        if ($qbClass) {
-            return $qbClass->id;
-        }
+        return $qbClass->id;
     }
+
+    public $timestamps = false;
 }

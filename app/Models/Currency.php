@@ -17,12 +17,11 @@ class Currency extends Model
         // Attempt to find the currency by code
         $currency = $this->where('code', $code)->first();
 
-        return ['currencyId' => $currency->id, 'rate' => $currency->rate];
-
+        return $currency->code;
     }
     public function createCurrency($name, $code, $rate, $symbol)
     {
-        $newCurrency = $this->createCurrency($name, $code, $symbol, $rate);([
+        $newCurrency = $this->create($name, $code, $symbol, $rate);([
             'activeFlag' => 1,
             'code' => $code,
             'dateCreated' => now(),

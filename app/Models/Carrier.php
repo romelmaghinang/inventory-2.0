@@ -12,22 +12,15 @@ class Carrier extends Model
     protected $table = 'carrier';
     protected $fillable = ['name', 'description'];
 
-    public function getCarrierId($name, $description = null)
+    public function getCarrierId($carrierName)
     {
-        // Attempt to find the carrier by name (and optionally description)
-        $query = $this->where('name', $name);
-
-        if ($description) {
-            $query->where('description', $description);
-        }
-
-        $carrier = $query->first();
+        $carrier = $this->where('name', $carrierName)->first();
         return $carrier->id;
     }
 
-    public function createCarrier($name, $description)
+    public function createCarrier($carrierName, $description)
     {
-        $carrier = $this->createCarrier(['name' => $name, 'description' => $description]);
+        $carrier = $this->create(['name' => $carrierName, 'description' => $description]);
         return $carrier->id;
     }
 

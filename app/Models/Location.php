@@ -12,18 +12,17 @@ class Location extends Model
     protected $table = 'location';
     protected $fillable = ['activeFlag', 'locationGroupId', 'description', 'name', 'parentId', 'pickable', 'receivable'];
 
-    public function getLocationGroup($name)
+    public function getLocationGroup($locationName)
     {
         // Attempt to find the location group by name
-        $location = $this->where('name', $name)->first();
+        $location = $this->where('name', $locationName)->first();
 
-        return ['locationGroupId' => $location->locationGroupId];
-
+        return $location->locationGroupId;
     }
 
     public function createLocationGroup($name, $countedAsAvailable = 1, $description = '', $parentId = null, $pickable = 1, $receivable = 1)
     {
-        $newLocation = $this->createLocationGroup([
+        $newLocation = $this->create([
             'activeFlag' => 1,
             'description' => $description,
             'countedAsAvailable' => $countedAsAvailable,

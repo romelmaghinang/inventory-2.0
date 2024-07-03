@@ -15,15 +15,10 @@ class Priority extends Model
 
     public function getPriorityIdByName($name)
     {
-        // Attempt to find the priority by name
         $priority = $this->where('name', $name)->first();
 
-        // If the priority exists, return its id
-        if ($priority) {
-            return $priority->id;
-        }
-
-        // If the priority does not exist, return null or handle as needed
-        return null;
+        return $priority->id;
     }
+
+    public $timestamps = false;
 }

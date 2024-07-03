@@ -28,14 +28,9 @@ class Tax extends Model
     public function createTaxRate($taxRateName)
     {
         // If the tax rate does not exist, create a new one and return its details
-        $newTaxRate = $this->createTaxRate([
+        return $this->create([
             'taxRateName' => $taxRateName
         ]);
-
-        return [
-            'taxRateId' => $newTaxRate->taxRateId,
-            'taxRateName' => $newTaxRate->taxRateName
-        ];
     }
 
     public $timestamps = false;

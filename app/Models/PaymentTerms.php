@@ -12,4 +12,13 @@ class PaymentTerms extends Model
     protected $table = 'paymentterms';
 
     protected $fillable = ['name'];
+
+    public function getPaymentTermsId($paymentTermsName)
+    {
+        $paymentTerms = $this->where('name', $paymentTermsName)->first();
+
+        return $paymentTerms->id;
+    }
+
+    public $timestamps = false;
 }
