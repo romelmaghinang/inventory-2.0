@@ -22,7 +22,7 @@ class StoreSalesOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => ['required', 'in:10,20,95'],
+            'status' => ['required', 'in:10,20,25,60,70,80,85,90,95'],
             'customerName' => ['required', 'string', 'max:255'],
             'customerContact' => ['nullable', 'string', 'max:255'],
             'billToAddress' => ['required', 'string', 'max:255'],
