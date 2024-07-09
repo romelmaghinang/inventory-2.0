@@ -8,15 +8,20 @@ use Illuminate\Http\JsonResponse;
 
 class CarrierController extends Controller
 {
-    public function getCarrierId(Request $request): JsonResponse
+    public function __invoke(Request $request): JsonResponse
     {
-        $name = $request->input('name');
-        $description = $request->input('description');
+        $carrier = Carrier::firstOrCreate([
+            'name' => $request->name,
+            'description' => $request->description,
+        ]);
 
-        $carrier = new Carrier();
-        $carrierId = $carrier->getCarrierId($name, $description);
+        $carrierService = CarrierService::firstOrCreate([
+            'carrier_id' => $carrier->id,
+            'name' => $request->name,
+            'code' => $request->code,
+        ]);
 
-        return response()->json(['carrierId' => $carrierId]);
+        return response()->json($carrierService);
     }
 }
 

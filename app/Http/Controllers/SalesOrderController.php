@@ -7,74 +7,80 @@ use App\Http\Requests\SalesOrder\UpdateSalesOrderRequest;
 use App\Models\SalesOrder;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 class SalesOrderController extends Controller
 {
-    public function store(StoreSalesOrderRequest $controllerOrderRequest): JsonResponse
+    public function store(StoreSalesOrderRequest $storeSalesOrderRequest): JsonResponse
     {
-        try {
-            // Prepare data for AddressController
-            $addressData = [
-                'accountName' => $controllerOrderRequest->accountName,
-                'countryName' => $controllerOrderRequest->countryName,
-                'stateName' => $controllerOrderRequest->stateName,
+        $addressData = [
+            'name' => $storeSalesOrderRequest->name,
+            'countryName' => $storeSalesOrderRequest->countryName,
+            'stateName' => $storeSalesOrderRequest->stateName,
+        ];
+        $addressRequest = new Request($addressData);
+
+        // Call AddressController and get response
+        $addressController = new AddressController();
+        $addressResponse = $addressController($addressRequest)->getData();
+
+        // Prepare data for TaxController
+        $taxData =
+            [
+                'taxRateName' => $storeSalesOrderRequest->taxRateName,
             ];
-            $addressRequest = new Request($addressData);
 
-            // Call AddressController and get response
-            $addressController = new AddressController();
-            $addressResponse = $addressController($addressRequest)->getData();
+        $taxRequest = new Request($taxData);
 
-            // Log response from AddressController
-            Log::info('Response from AddressController:', (array) $addressResponse);
+        // Call TaxController and get response
+        $taxController = new TaxController();
+        $taxResponse = $taxController($taxRequest)->getData();
 
-            // Ensure AddressController response contains the required data
-            if (!isset($addressResponse->accountId, $addressResponse->countryId, $addressResponse->stateId)) {
-                return response()->json(['error' => 'Invalid response from AddressController'], 500);
-            }
+        $customerData =
+            [
+                'status' => $storeSalesOrderRequest->status,
+                'name' => $storeSalesOrderRequest->name,
+                'number' => $storeSalesOrderRequest->number,
+                'taxExempt' => $storeSalesOrderRequest->taxExempt,
+                'toBeEmailed' => $storeSalesOrderRequest->toBeEmailed,
+                'toBePrinted' => $storeSalesOrderRequest->toBePrinted,
+                'url' => $storeSalesOrderRequest->url,
+            ];
 
-            // Prepare data for TaxController
-            $taxData =
-                [
-                    'taxRateName' => $controllerOrderRequest->taxRateName,
-                ];
+        $customerRequest = new Request($customerData);
 
-            $taxRequest = new Request($taxData);
+        $costumerController = new CustomerController();
+        $costumerResponse = $costumerController($customerRequest)->getData();
 
-            // Call TaxController and get response
-            $taxController = new TaxController();
-            $taxResponse = $taxController($taxRequest)->getData();
+        $carrierData = [
+            'name' => $storeSalesOrderRequest->name,
+            'description' => $storeSalesOrderRequest->description,
+            'code' => $storeSalesOrderRequest->code,
+        ];
 
-            // Log response from TaxController
-            Log::info('Response from TaxController:', (array) $taxResponse);
+        $carrierRequest = new Request($carrierData);
 
-            // Ensure TaxController response contains the required data
-            if (!isset($taxResponse->tax_id)) {
-                return response()->json(['error' => 'Invalid response from TaxController'], 500);
-            }
+        $carrierController = new CarrierController();
+        $carrierServiceResponse = $carrierController($carrierRequest)->getData();
 
-            // Create SalesOrder
-            $salesOrder = SalesOrder::create(
-                $controllerOrderRequest->except(['accountName', 'countryName', 'stateName', 'taxRateName']) +
-                [
-                    'accountId' => $addressResponse->accountId,
-                    'countryId' => $addressResponse->countryId,
-                    'stateId' => $addressResponse->stateId,
-                    'taxId' => $taxResponse->taxId,
-                ]
-            );
+        // Create SalesOrder
+        $salesOrder = SalesOrder::create(
+            $storeSalesOrderRequest->except(['accountName', 'countryName', 'stateName', 'taxRateName']) +
+            [
+                'account_type_id' => $addressResponse->account_type_id,
+                'country_id' => $addressResponse->country_id,
+                'state_id' => $addressResponse->state_id,
+                'tax_id' => $taxResponse->id,
+                'customer_id' => $costumerResponse->id,
+                'carrier_id' => $carrierServiceResponse->carrier_id,
+                'carrier_service_id' => $carrierServiceResponse->id,
+            ]
+        );
 
-            return response()->json([
-                'message' => 'Sales order created successfully',
-                'salesOrder' => $salesOrder
-            ]);
-
-        } catch (\Exception $e) {
-            // Log error and return response
-            Log::error('Error creating sales order: ' . $e->getMessage());
-            return response()->json(['error' => 'Something went wrong'], 500);
-        }
-
+        return response()->json([
+            'message' => 'Sales order created successfully',
+            'salesOrder' => $salesOrder
+        ], 201);
     }
 
     /**

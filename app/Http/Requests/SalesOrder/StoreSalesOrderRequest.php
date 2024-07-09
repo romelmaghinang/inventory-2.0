@@ -11,7 +11,7 @@ class StoreSalesOrderRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -38,6 +38,14 @@ class StoreSalesOrderRequest extends FormRequest
             'accountName' => ['required', 'string', 'max:255'],
             'countryName' => ['required', 'string', 'max:255'],
             'stateName' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:255'],
+            'number' => ['required', 'numeric'],
+            'taxExempt' => ['required', 'boolean'],
+            'toBeEmailed' => ['required', 'boolean'],
+            'toBePrinted' => ['required', 'boolean'],
+            'url' => ['nullable', 'url'],
+            'code' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string', 'max:1000'],
         ];
     }
 }

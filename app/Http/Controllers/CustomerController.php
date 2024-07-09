@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Models\CustomerStatus;
 use App\Models\PaymentTerms;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class CustomerController extends Controller
@@ -11,42 +12,22 @@ class CustomerController extends Controller
     /**
      * Find or create a customer based on the type.
      */
-    public function getOrCreateCustomer(Request $request)
+    public function __invoke(Request $request): JsonResponse
     {
-        $name = $request->input('name');
-        $number = $request->input('number');
-        $taxExempt = $request->input('taxExempt');
-        $toBeEmailed = $request->input('toBeEmailed');
-        $toBePrinted = $request->input('toBePrinted');
-        $url = $request->input('url');
+        $paymentTerms = PaymentTerms::firstOrCreate(['name' => $request->name]);
 
-        // Retrieve defaultPaymentTermsId from paymentterms table
-        $paymentTermsName = $request->input('name');
-        $paymentTerms = PaymentTerms::where('name', $paymentTermsName)->first();
-        if (!$paymentTerms) {
-            return response()->json(['message' => 'Payment Terms not found'], 404);
-        }
-        $defaultPaymentTermsId = $paymentTerms->id;
+        $customerStatus = CustomerStatus::firstOrCreate(['name'=> $request->status]);
 
-        // Retrieve statusId from customerstatus table
-        $name = $request->input('name');
-        $customerStatus = CustomerStatus::where('name', $name)->first();
-        if (!$customerStatus) {
-            return response()->json(['message' => 'Customer Status not found'], 404);
-        }
-        $statusId = $customerStatus->id;
-
-        $customer = new Customer();
-        $customerDetails = $customer->getOrCreateCustomer(
-            $name,
-            $defaultPaymentTermsId,
-            $statusId,
-            $number,
-            $taxExempt,
-            $toBeEmailed,
-            $toBePrinted,
-            $url
-        );
+        $customerDetails = Customer::firstOrCreate([
+            'payment_terms_id' => $paymentTerms->id,
+            'name' => $request->name,
+            'number' => $request->number,
+            'taxExempt' => $request->taxExempt,
+            'toBeEmailed' => $request->toBeEmailed,
+            'toBePrinted' => $request->toBePrinted,
+            'url' => $request->url,
+            'customer_status_id' => $customerStatus->id,
+        ]);
 
         return response()->json($customerDetails);
     }

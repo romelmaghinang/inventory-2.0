@@ -21,9 +21,9 @@ class SalesOrder extends Model
         'shipToCity',
         'shipToName',
         'shipToZip',
-        'tax_id',
-        'country_id',
-        'state_id',
-        'account_type_id'
+        'taxId',
+        'countryId',
+        'stateId',
+        'accountId'
     ];
 }

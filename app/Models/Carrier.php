@@ -4,24 +4,18 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
 
 class Carrier extends Model
 {
     use HasFactory;
 
-    protected $table = 'carrier';
     protected $fillable = ['name', 'description'];
 
-    public function getCarrierId($carrierName)
+    public function carrierService(): HasMany
     {
-        $carrier = $this->where('name', $carrierName)->first();
-        return $carrier->id;
-    }
-
-    public function createCarrier($carrierName, $description)
-    {
-        $carrier = $this->create(['name' => $carrierName, 'description' => $description]);
-        return $carrier->id;
+        return $this->hasMany(CarrierService::class);
     }
 
     public $timestamps = false;
