@@ -8,13 +8,14 @@ use Illuminate\Http\JsonResponse;
 
 class TaxController extends Controller
 {
-    public function getTaxRateData(Request $request): JsonResponse
+    public function __invoke(Request $request)
     {
-        $taxRateName = $request->input('taxRateName');
+        $tax = Tax::firstOrCreate(['name' => $request->taxRateName]);
 
-        $tax = new Tax();
-        $taxRateDetails = $tax->getTaxRateData($taxRateName);
-
-        return response()->json($taxRateDetails);
+        return response()->json(
+            [
+                'taxId' => $tax->id
+            ]
+        );
     }
 }
