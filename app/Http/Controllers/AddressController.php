@@ -19,9 +19,9 @@ class AddressController extends Controller
 
             $addressData = Address::create(
                 [
-                    'account_type_id' => $account_type->id,
-                    'country_id' => $country->id,
-                    'state_id' => $state->id,
+                    'accountId' => $account_type->id,
+                    'countryId' => $country->id,
+                    'stateId' => $state->id,
                 ]
             );
             return response()->json($addressData);

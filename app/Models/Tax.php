@@ -9,5 +9,7 @@ class Tax extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name'];
+    protected $fillable = ['id', 'name'];
+
+    public $timestamps = false;
 }

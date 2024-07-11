@@ -9,6 +9,12 @@ class AccountType extends Model
 {
     use HasFactory;
 
-    protected $table = 'accountType';
-    protected $fillable = 'name';
+    protected $table = 'accounttype';
+
+    protected $fillable =
+    [
+        'name',
+    ];
+
+    public $timestamps = false;
 }

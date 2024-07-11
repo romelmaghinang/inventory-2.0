@@ -9,16 +9,21 @@ class PaymentTerms extends Model
 {
     use HasFactory;
 
-    protected $table = 'paymentterms';
+    protected $table = 'payementterms';
 
-    protected $fillable = ['name'];
-
-    public function getPaymentTermsId($paymentTermsName)
-    {
-        $paymentTerms = $this->where('name', $paymentTermsName)->first();
-
-        return $paymentTerms->id;
-    }
-
-    public $timestamps = false;
+    protected $fillable = [
+        'accountingHash',
+        'accountingId',
+        'activeFlag',
+        'dateCreated',
+        'dateLastModified',
+        'defaultTerm',
+        'discount',
+        'discountDays',
+        'name',
+        'netDays',
+        'nextMonth',
+        'readOnly',
+        'typeId',
+    ];
 }

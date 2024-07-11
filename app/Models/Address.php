@@ -9,5 +9,22 @@ class Address extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['accountId','countryId', 'stateId'];
+    protected $table = 'address';
+
+    protected $fillable = [
+        'accountId',
+        'name',
+        'city',
+        'countryId',
+        'defaultFlag',
+        'locationGroupId',
+        'addressName',
+        'pipelineContactNum',
+        'stateId',
+        'address',
+        'typeID',
+        'zip',
+    ];
+
+    public $timestamps = false;
 }

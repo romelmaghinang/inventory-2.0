@@ -10,14 +10,14 @@ class qbClass extends Model
     use HasFactory;
 
     protected $table = 'qbclass';
-    protected $fillable = ['id', 'accountingHash', 'accountingId', 'activeFlag', 'dateCreated', 'name', 'parentId'];
-    public function getQbClassIdByName($name)
-    {
 
-        $qbClass = $this->where('name', $name)->first();
-
-        return $qbClass->id;
-    }
-
-    public $timestamps = false;
+    protected $fillable = [
+        'accountingHash',
+        'accountingId',
+        'activeFlag',
+        'dateCreated',
+        'dateLastModified',
+        'name'
+    ];
+    
 }

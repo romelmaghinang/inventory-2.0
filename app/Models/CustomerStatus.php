@@ -9,7 +9,8 @@ class CustomerStatus extends Model
 {
     use HasFactory;
 
-    protected $table = 'customerstatus';
-
-    protected $fillable = ['name'];
+    protected $fillable = 
+    [
+        'name'
+    ];
 }

@@ -9,16 +9,10 @@ class Priority extends Model
 {
     use HasFactory;
 
-    protected $table = 'priority'; // Ensure this matches your table name
+    protected $table = 'priority';
 
-    protected $fillable = ['id', 'name'];
-
-    public function getPriorityIdByName($name)
-    {
-        $priority = $this->where('name', $name)->first();
-
-        return $priority->id;
-    }
-
-    public $timestamps = false;
+    protected $fillable = 
+    [
+        'name'
+    ];
 }

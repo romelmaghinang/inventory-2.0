@@ -1,34 +1,64 @@
 <?php
+
 namespace App\Http\Controllers;
 
-use App\Models\Customer;
-use App\Models\CustomerStatus;
-use App\Models\PaymentTerms;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class CustomerController extends Controller
 {
     /**
-     * Find or create a customer based on the type.
+     * Display a listing of the resource.
      */
-    public function __invoke(Request $request): JsonResponse
+    public function index()
     {
-        $paymentTerms = PaymentTerms::firstOrCreate(['name' => $request->name]);
+        //
+    }
 
-        $customerStatus = CustomerStatus::firstOrCreate(['name'=> $request->status]);
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+    }
 
-        $customerDetails = Customer::firstOrCreate([
-            'payment_terms_id' => $paymentTerms->id,
-            'name' => $request->name,
-            'number' => $request->number,
-            'taxExempt' => $request->taxExempt,
-            'toBeEmailed' => $request->toBeEmailed,
-            'toBePrinted' => $request->toBePrinted,
-            'url' => $request->url,
-            'customer_status_id' => $customerStatus->id,
-        ]);
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+    }
 
-        return response()->json($customerDetails);
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
     }
 }

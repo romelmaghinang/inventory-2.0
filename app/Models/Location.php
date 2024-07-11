@@ -10,30 +10,20 @@ class Location extends Model
     use HasFactory;
 
     protected $table = 'location';
-    protected $fillable = ['activeFlag', 'locationGroupId', 'description', 'name', 'parentId', 'pickable', 'receivable'];
 
-    public function getLocationGroup($locationName)
-    {
-        // Attempt to find the location group by name
-        $location = $this->where('name', $locationName)->first();
-
-        return $location->locationGroupId;
-    }
-
-    public function createLocationGroup($name, $countedAsAvailable = 1, $description = '', $parentId = null, $pickable = 1, $receivable = 1)
-    {
-        $newLocation = $this->create([
-            'activeFlag' => 1,
-            'description' => $description,
-            'countedAsAvailable' => $countedAsAvailable,
-            'name' => $name,
-            'parentId' => $parentId,
-            'pickable' => $pickable,
-            'receivable' => $receivable
-        ]);
-
-        return ['locationGroupId' => $newLocation->locationGroupId];
-    }
-
-    public $timestamps = false;
+    protected $fillable = [
+        'activeFlag',
+        'countedAsAvailable',
+        'dateLastModified',
+        'defaultCustomerId',
+        'defaultFlag',
+        'defaultVendorId',
+        'description',
+        'locationGroupId',
+        'name',
+        'pickable',
+        'receivable',
+        'sortOrder',
+        'typeId',
+    ];
 }

@@ -10,13 +10,11 @@ class State extends Model
     use HasFactory;
 
     protected $table = 'state';
-    protected $fillable = ['name'];
 
-    public function getStateIdByName($stateName)
-    {
-        $state = $this->where('name', $stateName)->first();
-        return $state->id;
-    }
+    protected $fillable =
+    [
+        'name'
+    ];
 
     public $timestamps = false;
 }

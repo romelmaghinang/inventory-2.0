@@ -6,17 +6,18 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-
 class Carrier extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'description'];
+    protected $table = 'carrier';
 
-    public function carrierService(): HasMany
-    {
-        return $this->hasMany(CarrierService::class);
-    }
+    protected $fillable = [
+        'activeFlag',
+        'description',
+        'name',
+        'readOnly',
+        'scac',
+    ];
 
-    public $timestamps = false;
 }

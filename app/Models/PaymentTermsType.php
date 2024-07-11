@@ -9,7 +9,10 @@ class PaymentTermsType extends Model
 {
     use HasFactory;
 
-    protected $table = 'paymenttermstype'; // Ensure this matches your table name
+    protected $table = 'paymenttermstype';
 
-    protected $fillable = ['name'];
+    protected $fillable = 
+    [
+        'name',
+    ];
 }
