@@ -1,12 +1,21 @@
 <?php
 
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SalesOrderController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 
 Route::post('/login', [UserController::class, 'login']);
 Route::get('/permissions', [UserController::class, 'getUserPermissions']);
-Route::apiResource('/sales-order', SalesOrderController::class);
+
+Route::apiResources(
+    [
+        'sales-order' => SalesOrderController::class,
+        'product' => ProductController::class,
+        'customer' => CustomerController::class
+    ]
+);
 
 Route::middleware(['auth:sanctum', 'abilities:create-users,create-permission,create-role,assign-role,assign-permission'])->group(function () {
     Route::post('/create-user', [UserController::class, 'createUser']);

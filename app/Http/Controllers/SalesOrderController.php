@@ -48,8 +48,8 @@ class SalesOrderController extends Controller
         $locationGroupController = new LocationGroupController();
         $locationGroupResponse = $locationGroupController($locationGroupRequest)->getData();
 
-        // BILL TO ADDRESS
-        $billToAddressData =
+        // ADDRESS
+        $addressData =
             [
                 'accountId' => $accountType->id,
                 'billToName' => $storeSalesOrderRequest->billToName,
@@ -60,30 +60,19 @@ class SalesOrderController extends Controller
                 'billToAddress' => $storeSalesOrderRequest->billToAddress,
                 'billToStateName' => $storeSalesOrderRequest->billToStateName,
                 'billToZip' => $storeSalesOrderRequest->billToZip,
-            ];
-
-        $billToAddressRequest = new Request($billToAddressData);
-
-        $billToAddressController = new BillToAddressController();
-        $billToAddressResponse = $billToAddressController($billToAddressRequest)->getData();
-
-        // SHIP TO ADDRESS
-        $shipToAddressData =
-            [
-                'accountId' => $accountType->id,
+                // SHIP
                 'shipToName' => $storeSalesOrderRequest->shipToName,
                 'shipToCity' => $storeSalesOrderRequest->shipToCity,
                 'shipToCountryName' => $storeSalesOrderRequest->shipToCountryName,
-                'defaultFlag' => $storeSalesOrderRequest->defaultFlag,
-                'locationGroupId' => $locationGroupResponse->id,
                 'shipToAddress' => $storeSalesOrderRequest->shipToAddress,
                 'shipToStateName' => $storeSalesOrderRequest->shipToStateName,
                 'shipToZip' => $storeSalesOrderRequest->shipToZip,
             ];
 
-        $shipToAddressRequest = new Request($shipToAddressData);
-        $shipToAddressController = new ShipToAddressController();
-        $shipToAddressResponse = $shipToAddressController($shipToAddressRequest)->getData();
+        $addressRequest = new Request($addressData);
+
+        $addressController = new AddressController();
+        $addressResponse = $addressController($addressRequest)->getData();
 
         // CUSTOMER
         $customerData =
@@ -113,32 +102,34 @@ class SalesOrderController extends Controller
         $productResponse = $productController($productRequest)->getData();
 
 
-        $salesOrder = SalesOrder::create($storeSalesOrderRequest->except(
-            [
-                'billToCountryName',
-                'billToStateName',
-                'currencyName',
-                'locationGroupName',
-                'paymentTermsName',
-                'priorityName',
-                'quickBookName',
-                'shipToCountryName',
-                'shipToStateName',
-                'taxRateName',
-            ]) +
+        $salesOrder = SalesOrder::create(
+            $storeSalesOrderRequest->except(
                 [
-                    'customerId' => $customerResponse->id,
-                    'billToCountryId' => $billToAddressResponse->countryId,
-                    'billToStateId' => $billToAddressResponse->stateId,
-                    // currencyId
-                    'locationGroupId' => $locationGroupResponse->id,
-                    // paymentTermsId
-                    // priorityId
-                    // qbClassId
-                    'shipToCountryId' => $shipToAddressResponse->countryId,
-                    'shipToStateId' => $shipToAddressResponse->stateId,
-                    // taxRateId
+                    'billToCountryName',
+                    'billToStateName',
+                    'currencyName',
+                    'locationGroupName',
+                    'paymentTermsName',
+                    'priorityName',
+                    'quickBookName',
+                    'shipToCountryName',
+                    'shipToStateName',
+                    'taxRateName',
                 ]
+            ) +
+            [
+                'customerId' => $customerResponse->id,
+                'billToCountryId' => $addressResponse->billToCountryId,
+                'billToStateId' => $addressResponse->billToStateId,
+                // currencyId
+                'locationGroupId' => $locationGroupResponse->id,
+                // paymentTermsId
+                // priorityId
+                // qbClassId
+                'shipToCountryId' => $addressResponse->shipToCountryId,
+                'shipToStateId' => $addressResponse->shipToStateId,
+                // taxRateId
+            ]
         );
 
         // SALES ORDER ITEM TYPE
@@ -181,16 +172,125 @@ class SalesOrderController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateSalesOrderRequest $updateSalesOrderRequest, SalesOrder $salesOrder): JsonResponse
+    public function update(UpdateSalesOrderRequest $updateSalesOrderRequest, $id): JsonResponse
     {
-        $salesOrder->update($updateSalesOrderRequest->validated());
+        $salesOrder = SalesOrder::findOrFail($id);
 
-        return response()->json(
-            [
-                'data' => $salesOrder,
-                'message' => 'Sales Updated Successfully'
-            ]
-        );
+        // ACCOUNT TYPE
+        $accountType = AccountType::firstOrCreate(['name' => $updateSalesOrderRequest->accountTypeName]);
+
+        // LOCATION GROUP
+        $locationGroupData = [
+            'locationGroupName' => $updateSalesOrderRequest->locationGroupName,
+            'activeFlag' => $updateSalesOrderRequest->activeFlag,
+            'countedAsAvailable' => $updateSalesOrderRequest->countedAsAvailable,
+            'defaultFlag' => $updateSalesOrderRequest->defaultFlag,
+            'locationName' => $updateSalesOrderRequest->locationName,
+            'pickable' => $updateSalesOrderRequest->pickable,
+            'receivable' => $updateSalesOrderRequest->receivable,
+            'sortOrder' => $updateSalesOrderRequest->sortOrder,
+            'typeId' => $accountType->id,
+        ];
+
+        $locationGroupRequest = new Request($locationGroupData);
+        $locationGroupController = new LocationGroupController();
+        $locationGroupResponse = $locationGroupController($locationGroupRequest)->getData();
+
+        // ADDRESS
+        $addressData = [
+            'accountId' => $accountType->id,
+            'billToName' => $updateSalesOrderRequest->billToName,
+            'billToCity' => $updateSalesOrderRequest->billToCity,
+            'billToCountryName' => $updateSalesOrderRequest->billToCountryName,
+            'defaultFlag' => $updateSalesOrderRequest->defaultFlag,
+            'locationGroupId' => $locationGroupResponse->locationGroupId,
+            'billToAddress' => $updateSalesOrderRequest->billToAddress,
+            'billToStateName' => $updateSalesOrderRequest->billToStateName,
+            'billToZip' => $updateSalesOrderRequest->billToZip,
+            // SHIP
+            'shipToName' => $updateSalesOrderRequest->shipToName,
+            'shipToCity' => $updateSalesOrderRequest->shipToCity,
+            'shipToCountryName' => $updateSalesOrderRequest->shipToCountryName,
+            'shipToAddress' => $updateSalesOrderRequest->shipToAddress,
+            'shipToStateName' => $updateSalesOrderRequest->shipToStateName,
+            'shipToZip' => $updateSalesOrderRequest->shipToZip,
+        ];
+
+        $addressRequest = new Request($addressData);
+        $addressController = new AddressController();
+        $addressResponse = $addressController($addressRequest)->getData();
+
+        // CUSTOMER
+        $customerData = [
+            'accountId' => $accountType->id,
+            'customerName' => $updateSalesOrderRequest->customerName,
+            'status' => $updateSalesOrderRequest->status,
+            'defaultSalesmanId' => $updateSalesOrderRequest->salesmanId,
+            'taxExempt' => $updateSalesOrderRequest->taxExempt,
+            'toBeEmailed' => $updateSalesOrderRequest->toBeEmailed,
+            'toBePrinted' => $updateSalesOrderRequest->toBePrinted,
+        ];
+
+        $customerRequest = new Request($customerData);
+        $customerController = new CustomerIfNotExistController();
+        $customerResponse = $customerController($customerRequest)->getData();
+
+        // PRODUCT
+        $productData = [
+            'defaultSoItemType' => $updateSalesOrderRequest->soItemTypeName,
+            'details' => $updateSalesOrderRequest->productDetails,
+        ];
+
+        $productRequest = new Request($productData);
+        $productController = new ProductIfNotExistController();
+        $productResponse = $productController($productRequest)->getData();
+
+        $salesOrder->update($updateSalesOrderRequest->except([
+                'billToCountryName',
+                'billToStateName',
+                'currencyName',
+                'locationGroupName',
+                'paymentTermsName',
+                'priorityName',
+                'quickBookName',
+                'shipToCountryName',
+                'shipToStateName',
+                'taxRateName',
+            ]) + [
+                'customerId' => $customerResponse->id,
+                'billToCountryId' => $addressResponse->billToCountryId,
+                'billToStateId' => $addressResponse->billToStateId,
+                'locationGroupId' => $locationGroupResponse->id,
+                'shipToCountryId' => $addressResponse->shipToCountryId,
+                'shipToStateId' => $addressResponse->shipToStateId,
+            ]);
+
+        // SALES ORDER ITEM TYPE
+        $salesOrderItemType = SalesOrderItemType::firstOrCreate(['name' => $updateSalesOrderRequest->salesOrderItemTypeName]);
+        // SALES ORDER STATUS
+        $salesOrderStatus = SalesOrderStatus::firstOrCreate(['name' => $updateSalesOrderRequest->salesOrderStatus]);
+
+        // SALES ORDER ITEMS
+        $salesOrderItemData = [
+            'productId' => $productResponse->id,
+            'note' => $updateSalesOrderRequest->note,
+            'showItemFlag' => $updateSalesOrderRequest->defaultFlag,
+            'soLineItem' => $updateSalesOrderRequest->salesOrderLineItem,
+            'soId' => $salesOrder->id,
+            'statusId' => $salesOrderStatus->id,
+            'typeId' => $salesOrderItemType->id,
+        ];
+
+        $salesOrderItemRequest = new Request($salesOrderItemData);
+        $salesOrderItemController = new SalesOrderItemController();
+        $salesOrderItemResponse = $salesOrderItemController($salesOrderItemRequest)->getData();
+
+        return response()->json([
+            'data' => $salesOrder,
+            'products' => $productResponse,
+            'salesOrderItem' => $salesOrderItemResponse,
+            'message' => 'Sales Order updated successfully',
+        ], 200);
     }
 
     /**
