@@ -8,4 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 class Account extends Model
 {
     use HasFactory;
+
+    protected $table = 'account';
+
+    protected $fillable =[
+        'typId'
+    ];
+
+    public $timestamps = false;
 }
