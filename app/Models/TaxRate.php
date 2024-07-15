@@ -12,21 +12,21 @@ class TaxRate extends Model
     protected $table = 'taxrate';
 
     protected $fillable = [
-        'accountingHash',
-        'accountingId',
+        'accountingHash', // nullable
+        'accountingId', // nullable
         'activeFlag',
-        'code',
-        'dateCreated',
-        'dateLastModified',
+        'code', // nullable
+        'dateCreated', // nullable
+        'dateLastModified', // nullable
         'defaultFlag',
-        'description',
-        'name',
-        'orderTypeId',
-        'rate',
-        'taxAccountId',
-        'typeCode',
-        'typeId',
-        'unitCost',
-        'vendorId',
+        'description', // nullable
+        'name', // nullable
+        'orderTypeId', // nullable
+        'rate', // nullable
+        'taxAccountId', // nullable
+        'typeCode', // nullable
+        'typeId', // nullable
+        'unitCost', // nullable
+        'vendorId', // nullable
     ];
 }
