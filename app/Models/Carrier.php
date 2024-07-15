@@ -20,4 +20,5 @@ class Carrier extends Model
         'scac',
     ];
 
+    public $timestamps = false;
 }

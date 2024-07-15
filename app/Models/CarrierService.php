@@ -20,4 +20,6 @@ class CarrierService extends Model
         'readOnly',
     ];
 
+    public $timestamps = false;
+
 }

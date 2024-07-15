@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('carrierservice', function (Blueprint $table) {
             $table->id();
             $table->boolean('activeFlag')->default(false);
-            $table->foreignId('carrierId')->constrained('carrier')->cascadeOnDelete();
+            $table->unsignedBigInteger('carrierId');
             $table->string('code')->unique();
             $table->string('name')->unique();
             $table->boolean('readOnly')->default(false);

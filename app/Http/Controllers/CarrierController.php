@@ -17,14 +17,29 @@ class CarrierController extends Controller
         $carrier = Carrier::firstOrCreate([
             'name' => $request->name,
             'description' => $request->description,
+            'activeFlag'=> $request->activeFlag,
+            'description' => $request->carrierDescription,
+            'name' => $request->carrierName,
+            'readOnly' => $request->readOnly,
+            'scac' => $request->scas,
         ]);
 
         $carrierService = CarrierService::firstOrCreate([
             'carrier_id' => $carrier->id,
             'name' => $request->name,
             'code' => $request->code,
+            'code' => $request->code,
+            'activeFlag'=> $request->activeFlag,
+            'carrierId' => $carrier->id,
+            'code' => $request->carrierCode,
+            'name' => $request->carrierServiceName,
+            'readOnly' => $request->readOnly,
         ]);
 
         return response()->json($carrierService);
+        return response()->json([
+            'carrierId' => $carrier->id,
+            'carrierServiceId' => $carrierService->id,
+        ]);
     }
 }
