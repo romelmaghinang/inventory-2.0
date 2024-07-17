@@ -10,28 +10,21 @@ use Illuminate\Http\Request;
 
 class CustomerController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StoreCustomerRequest $storeCustomerRequest): JsonResponse
     {
-        $customer = Customer::create($storeCustomerRequest->validated());
+        $validateCustomer = Customer::create($storeCustomerRequest->validated());
+
+        $customer = Customer::firstOrCreate(
+            ['name' => $validateCustomer->customerName],
+            [
+                'accountId' => $validateCustomer->accountId,
+                'statusId' => $validateCustomer->status,
+                'taxExempt' => $validateCustomer->taxExempt,
+                'defaultSalesmanId' => $validateCustomer->defaultSalesmanId,
+                'toBeEmailed' => $validateCustomer->toBeEmailed,
+                'toBePrinted' => $validateCustomer->toBePrinted,
+            ]
+        );
 
         return response()->json($customer);
     }
