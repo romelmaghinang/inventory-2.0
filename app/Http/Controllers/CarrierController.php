@@ -25,7 +25,7 @@ class CarrierController extends Controller
         ]);
 
         $carrierService = CarrierService::firstOrCreate([
-            'carrier_id' => $carrier->id,
+            'carrierId' => $carrier->id,
             'name' => $request->name,
             'code' => $request->code,
             'code' => $request->code,
@@ -36,7 +36,6 @@ class CarrierController extends Controller
             'readOnly' => $request->readOnly,
         ]);
 
-        return response()->json($carrierService);
         return response()->json([
             'carrierId' => $carrier->id,
             'carrierServiceId' => $carrierService->id,

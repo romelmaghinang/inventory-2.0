@@ -3,20 +3,30 @@
 namespace App\Http\Controllers;
 
 use App\Models\Currency;
-use Illuminate\Http\Request;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+
 class CurrencyController extends Controller
 {
-    public function getCurrency(Request $request): JsonResponse
+    /**
+     * Handle the incoming request.
+     */
+    public function __invoke(Request $request): JsonResponse
     {
-        $name = $request->input('name');
-        $code = $request->input('code');
-        $symbol = $request->input('symbol');
-        $rate = $request->input('rate');
+        $currency = Currency::firstOrCreate(
+            [
+                'activeFlag' => $request->activeFlag,
+                'code' => $request->code,
+                'excludeFromUpdate' => $request->excludeFromUpdate,
+                'homeCurrency' => $request->homeCurrency,
+                'lastChangedUserId' => auth('api')->id() ?: 1,
+                'name' => $request->name,
+                'rate' => $request->rate,
+                'symbol' => $request->symbol,
+            ]
+        );
 
-        $currency = new Currency();
-        $currencyData = $currency->getCurrency($name, $code, $symbol, $rate);
-
-        return response()->json($currencyData);
+        return response()->json($currency);
     }
 }

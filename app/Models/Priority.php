@@ -15,4 +15,6 @@ class Priority extends Model
     [
         'name'
     ];
+
+    public $timestamps = false;
 }

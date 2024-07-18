@@ -15,4 +15,6 @@ class TaxRateType extends Model
     [
         'name',
     ];
+
+    public $timestamps = false;
 }

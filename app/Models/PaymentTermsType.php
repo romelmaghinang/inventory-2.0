@@ -15,4 +15,7 @@ class PaymentTermsType extends Model
     [
         'name',
     ];
+
+    public $timestamps = false;
+
 }

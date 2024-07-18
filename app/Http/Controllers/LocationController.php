@@ -12,8 +12,8 @@ class LocationController extends Controller
         $name = $request->input('name');
         $description = $request->input('description', '');
         $parentId = $request->input('parentId');
-        $pickable = $request->input('pickable', 1);
-        $receivable = $request->input('receivable', 1);
+        $pickable = $request->input('pickable');
+        $receivable = $request->input('receivable');
 
         $location = new Location();
         $locationData = $location->getLocationGroup($name, $description, $parentId, $pickable, $receivable);

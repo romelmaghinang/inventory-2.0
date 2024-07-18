@@ -23,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('tax_rate_types');
+        Schema::dropIfExists('taxratetype');
     }
 };

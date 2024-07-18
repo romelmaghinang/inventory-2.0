@@ -17,4 +17,7 @@ class LocationGroup extends Model
         'name',
         'qbClassId',
     ];
+
+    public $timestamps = false;
+
 }

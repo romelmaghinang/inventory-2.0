@@ -22,8 +22,6 @@ class StoreProductRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'accountingHash' => ['nullable', 'string', 'max:41'],
-            'accountingId' => ['nullable', 'string', 'max:41'],
             'activeFlag' => ['boolean'],
             'alertNote' => ['nullable', 'string', 'max:90'],
             'dateCreated' => ['nullable', 'date'],

@@ -29,4 +29,6 @@ class TaxRate extends Model
         'unitCost', // nullable
         'vendorId', // nullable
     ];
+
+    public $timestamps = false;
 }

@@ -18,8 +18,10 @@ class LocationGroupController extends Controller
 
         $location = Location::firstOrCreate(
             [
+                'name' => $request->locationName
+            ],
+            [
                 'locationGroupId' => $locationGroup->id,
-                'name' => $request->locationName,
                 'activeFlag' => $request->activeFlag,
                 'countedAsAvailable' => $request->countedAsAvailable,
                 'defaultFlag' => $request->defaultFlag,

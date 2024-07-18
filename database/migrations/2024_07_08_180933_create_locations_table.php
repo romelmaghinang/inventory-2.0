@@ -26,7 +26,6 @@ return new class extends Migration
             $table->boolean('receivable')->notnull();
             $table->integer('sortOrder')->nullable();
             $table->integer('typeId')->notnull();
-            $table->unique(['locationGroupId']);
             $table->index(['typeId', 'locationGroupId', 'defaultVendorId', 'defaultCustomerId', 'name'], 'Performance');
             $table->timestamps();
         });
@@ -37,6 +36,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('locations');
+        Schema::dropIfExists('location');
     }
 };

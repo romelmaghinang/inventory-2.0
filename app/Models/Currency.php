@@ -23,4 +23,6 @@ class Currency extends Model
         'rate',
         'symbol',
     ];
+
+    public $timestamps = false;
 }

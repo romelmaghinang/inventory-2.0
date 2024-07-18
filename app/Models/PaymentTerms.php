@@ -9,7 +9,7 @@ class PaymentTerms extends Model
 {
     use HasFactory;
 
-    protected $table = 'payementterms';
+    protected $table = 'paymentterms';
 
     protected $fillable = [
         'accountingHash',
@@ -26,4 +26,6 @@ class PaymentTerms extends Model
         'readOnly',
         'typeId',
     ];
+
+    public $timestamps = false;
 }

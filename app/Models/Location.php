@@ -26,4 +26,6 @@ class Location extends Model
         'sortOrder',
         'typeId',
     ];
+
+    public $timestamps = false;
 }

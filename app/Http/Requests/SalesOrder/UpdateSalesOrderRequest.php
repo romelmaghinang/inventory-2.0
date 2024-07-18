@@ -32,13 +32,21 @@ class UpdateSalesOrderRequest extends FormRequest
 
             // CARRIER
             'carrierServiceName' => ['nullable', 'integer', 'min:0'],
+            'carrierDescription' => ['nullable', 'string', 'max:255'],
+            'readOnly' => ['boolean', 'nullable'],
+            'carrierCode' => ['string', 'nullable', 'max:255'],
+            'scac' => ['string', 'nullable', 'max:4'],
             'cost' => ['nullable', 'numeric', 'between:0,999999999999999999.999999999'],
+
             //CURRENCY
             'currencyName' => ['nullable', 'integer', 'min:0'], // Currency ID
             'currencyRate' => ['nullable', 'numeric'],
+            'currencyCode' => ['string', 'nullable', 'max:255'],
+            'excludeFromUpdate' => ['boolean'],
+            'homeCurrency' => ['boolean'],
+            'currencySymbol' => ['integer', 'nullable',],
 
-            'customerContact' => ['string', 'nullable', 'max:30'],
-            'customerPO' => ['string', 'nullable', 'max:25'],
+
             'dateCompleted' => ['nullable', 'date'],
             'dateCreated' => ['nullable', 'date'],
             'dateExpired' => ['nullable', 'date'],
@@ -47,18 +55,23 @@ class UpdateSalesOrderRequest extends FormRequest
             'dateLastModified' => ['nullable', 'date'],
             'dateRevision' => ['nullable', 'date'],
             'email' => ['string', 'nullable', 'max:256', 'email'],
-            'estimatedTax' => ['nullable', 'numeric', 'between:0,999999999999999999.999999999'],
+
 
             'locationGroupName' => ['nullable', 'integer', 'min:0'], // locationGroupId EXCEPT
-            'mcTotalTax' => ['nullable', 'numeric', 'between:0,999999999999999999.999999999'],
-            'note' => ['nullable', 'string'],
             'num' => ['string', 'nullable', 'max:25'],
 
+            // PaymentTerms
             'paymentTermsName' => ['nullable', 'integer', 'min:0'], // paymentTermsID but the name is going to PaymentTermsType EXCEPT
+            'discount' => ['nullable', 'numeric', 'between:0,999999.99'],
+            'discountDays' => ['nullable', 'integer'],
+            'netDays' => ['nullable', 'integer'],
+            'nextMonth' => ['nullable', 'integer'],
+
             'phone' => ['string', 'nullable', 'max:256'],
 
             'priorityName' => ['nullable', 'integer', 'min:0'], // priorityID EXCEPT
             'quickBookName' => ['nullable', 'integer', 'min:0'], // qbClassId EXCEPT
+
             'residentialFlag' => ['boolean'],
             'revisionNum' => ['nullable', 'integer'],
 
@@ -79,13 +92,18 @@ class UpdateSalesOrderRequest extends FormRequest
 
             'status' => ['nullable', 'integer'],
 
+            // TAX RATE
             'taxRate' => ['nullable', 'numeric'],
             'taxRateName' => ['string', 'nullable', 'max:31'], // Tax Rate ID
+            'taxRateCode' => ['nullable', 'string', 'max:5'],
+            'taxRateDescription' => ['nullable', 'string', 'max:255'],
+            'mcTotalTax' => ['nullable', 'numeric', 'between:0,999999999999999999.999999999'],
+            'estimatedTax' => ['nullable', 'numeric', 'between:0,999999999999999999.999999999'],
+            'totalIncludesTax' => ['boolean'],
+            'totalTax' => ['nullable', 'numeric', 'between:0,999999999999999999.999999999'],
 
             'toBeEmailed' => ['boolean'],
             'toBePrinted' => ['boolean'],
-            'totalIncludesTax' => ['boolean'],
-            'totalTax' => ['nullable', 'numeric', 'between:0,999999999999999999.999999999'],
             'subTotal' => ['nullable', 'numeric', 'between:0,999999999999999999.999999999'],
             'totalPrice' => ['nullable', 'numeric', 'between:0,999999999999999999.999999999'],
             'typeId' => ['nullable', 'integer', 'min:0'],
@@ -108,6 +126,8 @@ class UpdateSalesOrderRequest extends FormRequest
             // CUSTOMER CONTROLLER
             'customerName' => ['string', 'max:50', 'required'],
             'taxExempt' => ['boolean', 'required'],
+            'customerContact' => ['string', 'nullable', 'max:30'],
+            'customerPO' => ['string', 'nullable', 'max:25'],
 
             // PRODUCT CONTROLLER
             'soItemTypeName' => ['required', 'integer', 'min:0'],
