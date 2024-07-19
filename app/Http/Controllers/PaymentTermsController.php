@@ -15,7 +15,6 @@ class PaymentTermsController extends Controller
 
         $paymentTerms = PaymentTerms::firstOrCreate(
             [
-                'activeFlag' => $request->activeFlag,
                 'defaultTerm' => $request->defaultTerm,
                 'discount' => $request->discount,
                 'discountDays' => $request->discountDays,

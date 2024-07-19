@@ -33,7 +33,7 @@ return new class extends Migration
             $table->decimal('qtyPicked', 28, 9)->nullable();
             $table->decimal('qtyToFulfill', 28, 9)->nullable();
             $table->string('revLevel', 15)->nullable();
-            $table->boolean('showItemFlag')->notnull();
+            $table->boolean('showItemFlag')->notnull()->default(true);
             $table->integer('soId')->notnull();
             $table->integer('soLineItem')->notnull();
             $table->integer('statusId')->notnull();

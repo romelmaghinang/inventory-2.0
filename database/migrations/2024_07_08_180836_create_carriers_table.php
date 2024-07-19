@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('carrier', function (Blueprint $table) {
             $table->id();
-            $table->boolean('activeFlag')->nullable();
+            $table->boolean('activeFlag')->default(true);
             $table->string('description', 256)->nullable();
             $table->string('name', 60)->nullable()->unique('u_name');
             $table->boolean('readOnly')->nullable();

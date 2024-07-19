@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('location', function (Blueprint $table) {
             $table->id();
-            $table->boolean('activeFlag')->notnull();
+            $table->boolean('activeFlag')->notnull()->default(true);
             $table->boolean('countedAsAvailable')->notnull();
             $table->datetime('dateLastModified')->nullable();
             $table->integer('defaultCustomerId')->nullable();
-            $table->boolean('defaultFlag')->notnull();
+            $table->boolean('defaultFlag')->notnull()->default(true);
             $table->integer('defaultVendorId')->nullable();
             $table->string('description', 252)->nullable();
             $table->integer('locationGroupId')->notnull();

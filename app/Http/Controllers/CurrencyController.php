@@ -16,7 +16,6 @@ class CurrencyController extends Controller
     {
         $currency = Currency::firstOrCreate(
             [
-                'activeFlag' => $request->activeFlag,
                 'code' => $request->code,
                 'excludeFromUpdate' => $request->excludeFromUpdate,
                 'homeCurrency' => $request->homeCurrency,

@@ -10,6 +10,7 @@ class SalesOrder extends Model
 {
     use HasFactory;
 
+    public mixed $accountId;
     protected $table = 'so'; 
 
     protected $fillable = [

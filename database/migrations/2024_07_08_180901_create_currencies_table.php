@@ -14,7 +14,7 @@ return new class extends Migration
     {
         Schema::create('currency', function (Blueprint $table) {
             $table->id();
-            $table->boolean('activeFlag')->default(false);
+            $table->boolean('activeFlag')->default(true);
             $table->string('code', 3)->nullable();
             $table->dateTime('dateCreated')->nullable();
             $table->dateTime('dateLastModified')->nullable();

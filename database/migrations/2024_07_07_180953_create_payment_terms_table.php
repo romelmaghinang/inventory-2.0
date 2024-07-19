@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('accountingHash', 30)->nullable();
             $table->string('accountingId', 36)->nullable();
-            $table->boolean('activeFlag')->notnull();
+            $table->boolean('activeFlag')->notnull()->default(true);
             $table->dateTime('dateCreated')->nullable();
             $table->dateTime('dateLastModified')->nullable();
             $table->boolean('defaultTerm')->notnull();

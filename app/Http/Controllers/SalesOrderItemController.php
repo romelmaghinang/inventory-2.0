@@ -16,7 +16,6 @@ class SalesOrderItemController extends Controller
         $salesOrderItem = SalesOrderItems::create([
             'productId' => $request->productId,
             'note' => $request->note,
-            'showItemFlag' => $request->showItemFlag,
             'soLineItem' => $request->soLineItem,
             'soId' => $request->soId,
             'statusId' => $request->statusId,

@@ -15,9 +15,7 @@ class TaxRateController extends Controller
         $taxRateType = TaxRate::firstOrCreate(['name' => $request->taxRateName]);
 
         $taxRate = TaxRate::firstOrCreate([
-            'activeFlag' => $request->activeFlag,
             'code' => $request->code,
-            'defaultFlag' => $request->defaultFlag,
             'description' => $request->description,
             'orderTypeId' => $request->orderTypeId,
             'rate' => $request->rate,

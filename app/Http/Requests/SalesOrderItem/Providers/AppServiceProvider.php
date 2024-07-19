@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Providers;
+namespace App\Http\Requests\SalesOrderItem\Providers;
 
+use App\Providers\Route;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\PersonalAccessToken;
 use Laravel\Sanctum\Sanctum;

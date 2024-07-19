@@ -9,13 +9,8 @@ use App\Http\Controllers\UserController;
 Route::post('/login', [UserController::class, 'login']);
 Route::get('/permissions', [UserController::class, 'getUserPermissions']);
 
-Route::apiResources(
-    [
-        'sales-order' => SalesOrderController::class,
-        'product' => ProductController::class,
-        'customer' => CustomerController::class
-    ]
-);
+
+
 
 Route::middleware(['auth:sanctum', 'abilities:create-users,create-permission,create-role,assign-role,assign-permission'])->group(function () {
     Route::post('/create-user', [UserController::class, 'createUser']);
@@ -23,6 +18,14 @@ Route::middleware(['auth:sanctum', 'abilities:create-users,create-permission,cre
     Route::post('/assign-role', [UserController::class, 'assignRole']);
     Route::post('/assign-permission', [UserController::class, 'assignPermission']);
     Route::post('/create-permission', [UserController::class, 'createPermission']);
+
+    Route::apiResources(
+        [
+            'sales-order' => SalesOrderController::class,
+            'product' => ProductController::class,
+            'customer' => CustomerController::class
+        ]
+    );
 });
 
 

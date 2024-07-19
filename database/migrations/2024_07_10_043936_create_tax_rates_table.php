@@ -15,11 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('accountingHash', 30)->nullable();
             $table->string('accountingId', 36)->nullable();
-            $table->boolean('activeFlag')->default(false);
+            $table->boolean('activeFlag')->default(true);
             $table->string('code', 5)->nullable();
             $table->dateTime('dateCreated')->nullable();
             $table->dateTime('dateLastModified')->nullable();
-            $table->boolean('defaultFlag')->default(false);
+            $table->boolean('defaultFlag')->default(true);
             $table->string('description', 255)->nullable();
             $table->string('name', 31)->nullable()->unique('u_name');
             $table->integer('orderTypeId')->nullable();

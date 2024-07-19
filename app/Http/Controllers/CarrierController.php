@@ -17,7 +17,6 @@ class CarrierController extends Controller
         $carrier = Carrier::firstOrCreate([
             'name' => $request->name,
             'description' => $request->description,
-            'activeFlag'=> $request->activeFlag,
             'description' => $request->carrierDescription,
             'name' => $request->carrierName,
             'readOnly' => $request->readOnly,
@@ -29,7 +28,6 @@ class CarrierController extends Controller
             'name' => $request->name,
             'code' => $request->code,
             'code' => $request->code,
-            'activeFlag'=> $request->activeFlag,
             'carrierId' => $carrier->id,
             'code' => $request->carrierCode,
             'name' => $request->carrierServiceName,

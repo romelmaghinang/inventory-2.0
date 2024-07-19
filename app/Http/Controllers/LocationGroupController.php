@@ -22,9 +22,7 @@ class LocationGroupController extends Controller
             ],
             [
                 'locationGroupId' => $locationGroup->id,
-                'activeFlag' => $request->activeFlag,
                 'countedAsAvailable' => $request->countedAsAvailable,
-                'defaultFlag' => $request->defaultFlag,
                 'pickable' => $request->pickable,
                 'receivable' => $request->receivable,
                 'sortOrder' => $request->sortOrder,

@@ -78,6 +78,7 @@ return new class extends Migration
             $table->string('url', 256)->nullable();
             $table->string('username', 30)->nullable();
             $table->string('vendorPO', 25)->nullable();
+            $table->string('customField')->nullable();
             $table->timestamps();
         });
     }
