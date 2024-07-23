@@ -32,10 +32,9 @@ class SalesOrderController extends Controller
         $qbclass = qbClass::firstOrCreate(['name' => $storeSalesOrderRequest->quickBookClassName]);
         $status = SalesOrderStatus::firstOrCreate(['name' => $storeSalesOrderRequest->status]);
         $carrier = Carrier::where('name', $storeSalesOrderRequest->carrierName)->first();
-        // $carrierService = CarrierService::where('name', $storeSalesOrderRequest->carrierService)->first();
-        // Tax Rate
-        // $taxRate = TaxRate::where('name', $storeSalesOrderRequest->taxRateName)->first();
-        // $customer = Customer::where('name', $storeSalesOrderRequest->customerName)->first();
+        $carrierService = CarrierService::where('name', $storeSalesOrderRequest->carrierService)->first();
+        $taxRate = TaxRate::where('name', $storeSalesOrderRequest->taxRateName)->first();
+        $customer = Customer::where('name', $storeSalesOrderRequest->customerName)->first();
 
         // SoNum
         $lastNum = optional(SalesOrder::orderBy('id', 'desc')->first())->num;
@@ -48,12 +47,12 @@ class SalesOrderController extends Controller
                     'billToStateId' => $billToState->id,
                     'shipToCountryId' => $shipToCountry->id,
                     'shipToStateId' => $shipToState->id,
-                    // 'taxRateId' => $taxRate->id,
-                    // 'taxRate' => $taxRate->rate,
+                    'taxRateId' => $taxRate->id,
+                    'taxRate' => $taxRate->rate,
                     'statusId' => $status->id,
-                    // 'customerId' => $customer->id,
+                    'customerId' => $customer->id,
                     'carrierId' => $carrier->id,
-                    // 'carrierServiceId' => $carrierService->id,
+                    'carrierServiceId' => $carrierService->id,
                     'residentialFlag' => $storeSalesOrderRequest->shipToResidential,
                     'qbClassId' => $qbclass->id,
                     'num' => $newNum,
@@ -98,8 +97,8 @@ class SalesOrderController extends Controller
         $qbclass = qbClass::firstOrCreate(['name' => $updateSalesOrderRequest->quickBookClassName]);
         $status = SalesOrderStatus::firstOrCreate(['name' => $updateSalesOrderRequest->status]);
         $carrier = Carrier::where('name', $updateSalesOrderRequest->carrierName)->first();
-        // $carrierService = CarrierService::where('name', $updateSalesOrderRequest->carrierService)->first();
-        // $taxRate = TaxRate::where('name', $updateSalesOrderRequest->taxRateName)->first();
+        $carrierService = CarrierService::where('name', $updateSalesOrderRequest->carrierService)->first();
+        $taxRate = TaxRate::where('name', $updateSalesOrderRequest->taxRateName)->first();
 
         $salesOrder->update(
             $updateSalesOrderRequest->except('items') +
@@ -108,11 +107,11 @@ class SalesOrderController extends Controller
                     'billToStateId' => $billToState->id,
                     'shipToCountryId' => $shipToCountry->id,
                     'shipToStateId' => $shipToState->id,
-                    // 'taxRateId' => $taxRate->id,
-                    // 'taxRate' => $taxRate->rate,
+                    'taxRateId' => $taxRate->id,
+                    'taxRate' => $taxRate->rate,
                     'statusId' => $status->id,
                     'carrierId' => $carrier->id,
-                    // 'carrierServiceId' => $carrierService->id,
+                    'carrierServiceId' => $carrierService->id,
                     'residentialFlag' => $updateSalesOrderRequest->shipToResidential,
                     'qbClassId' => $qbclass->id,
                 ]
