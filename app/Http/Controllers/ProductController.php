@@ -2,26 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Product\StoreProductRequest;
 use App\Http\Requests\Product\UpdateProductRequest;
 use App\Models\Product;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class ProductController extends Controller
 {
     public function store(StoreProductRequest $storeProductRequest): JsonResponse
     {
-        $validateProduct = Product::create($storeProductRequest->validated());
+        $product = Product::create($storeProductRequest->validated());
 
-        $product = Product::firstOrCreate(
+        return response()->json(
             [
-                'defaultSoItemType' => $validateProduct->defaultSoItemType,
-                'details' => $validateProduct->details,
+                'product' => $product,
+                'message' => 'Product Create Successfully!'
             ]
         );
-
-        return response()->json($product);
     }
 
     /**
@@ -29,15 +28,7 @@ class ProductController extends Controller
      */
     public function show(Product $product): JsonResponse
     {
-        return response()->json($product);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
+        return response()->json($product, Response::HTTP_OK);
     }
 
     /**
@@ -47,7 +38,12 @@ class ProductController extends Controller
     {
         $product->update($updateProductRequest->validated());
 
-        return response()->json($product);
+        return response()->json(
+            [
+                'product' => $product,
+                'message' => 'Product Updated Successfully!'
+            ]
+        );
     }
 
     /**
@@ -57,8 +53,10 @@ class ProductController extends Controller
     {
         $product->delete();
 
-        return response()->json([
-            "message" => "success",
-        ]);
+        return response()->json(
+            [
+                'message' => 'Product Deleted Successfully!'
+            ]
+        );
     }
 }

@@ -3,6 +3,10 @@
 namespace App\Http\Requests\Customer;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Symfony\Component\HttpFoundation\Response;
+
 
 class UpdateCustomerRequest extends FormRequest
 {
@@ -22,9 +26,7 @@ class UpdateCustomerRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'accountId' => ['required', 'integer'],
-            'accountingHash' => ['nullable', 'string', 'max:30'],
-            'accountingId' => ['nullable', 'string', 'max:36'],
+            'accountTypeId' => ['nullable', 'integer'],
             'activeFlag' => ['nullable', 'boolean'],
             'creditLimit' => ['nullable', 'numeric'],
             'currencyId' => ['nullable', 'integer'],
@@ -33,26 +35,50 @@ class UpdateCustomerRequest extends FormRequest
             'dateLastModified' => ['nullable', 'date'],
             'defaultCarrierId' => ['nullable', 'integer'],
             'defaultPaymentTermsId' => ['nullable', 'integer'],
-            'defaultSalesmanId' => ['required', 'integer'],
+            'defaultSalesmanId' => ['nullable', 'integer'],
             'defaultShipTermsId' => ['nullable', 'integer'],
             'jobDepth' => ['nullable', 'integer'],
             'lastChangedUser' => ['nullable', 'string', 'max:15'],
-            'name' => ['required', 'string', 'max:41'],
+            'customerName' => ['nullable', 'string', 'max:41'],
             'note' => ['nullable', 'string', 'max:90'],
             'number' => ['nullable', 'string', 'max:30'],
             'parentId' => ['nullable', 'integer'],
             'pipelineAccountNum' => ['nullable', 'integer'],
             'qbClassId' => ['nullable', 'integer'],
-            'statusId' => ['required', 'integer'],
+            'statusId' => ['nullable', 'integer'],
             'sysUserId' => ['nullable', 'integer'],
-            'taxExempt' => ['required', 'boolean'],
+            'taxExempt' => ['nullable', 'boolean'],
             'taxExemptNumber' => ['nullable', 'string', 'max:30'],
             'taxRateId' => ['nullable', 'integer'],
-            'toBeEmailed' => ['required', 'boolean'],
-            'toBePrinted' => ['required', 'boolean'],
+            'toBeEmailed' => ['nullable', 'boolean'],
+            'toBePrinted' => ['nullable', 'boolean'],
             'url' => ['nullable', 'url', 'max:30'],
             'issuableStatusId' => ['nullable', 'integer'],
             'carrierServiceId' => ['nullable', 'integer'],
+
+            //with address
+            'name' => ['required', 'string', 'max:41'],
+            'city' => ['nullable', 'string', 'max:30'],
+            'countryId' => ['nullable', 'integer', 'min:0'],
+            'locationGroupId' => ['nullable', 'integer', 'min:0'],
+            'addressName' => ['nullable', 'string', 'max:90'],
+            'pipelineContactNum' => ['nullable', 'integer'],
+            'stateId' => ['nullable', 'integer', 'min:0'],
+            'address' => ['required', 'string', 'max:90'],
+            'typeID' => ['nullable', 'integer', 'min:0'],
+            'zip' => ['nullable', 'string', 'max:10'],
         ];
+    }
+
+    protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(response()->json(
+            [
+                'success' => false,
+                'message' => 'Validation errors',
+                'data' => $validator->errors()
+            ],
+            Response::HTTP_UNPROCESSABLE_ENTITY
+        ));
     }
 }

@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -19,6 +20,14 @@ return new class extends Migration
             $table->boolean('readOnly')->nullable();
             $table->string('scac', 4)->nullable();
         });
+
+        DB::table('carrier')->insert([
+            ['name' => 'Delivery', 'description' => 'Deliver to Customer'],
+            ['name' => 'Fedex', 'description' => 'Federal Express'],
+            ['name' => 'UPS', 'description' => 'United Parcel Service'],
+            ['name' => 'USPS', 'description' => 'United States Postal Service'],
+            ['name' => 'Will Call', 'description' => 'Customer will Pickup'],
+        ]);
     }
 
     /**

@@ -3,6 +3,10 @@
 namespace App\Http\Requests\Customer;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Symfony\Component\HttpFoundation\Response;
+
 
 class StoreCustomerRequest extends FormRequest
 {
@@ -22,7 +26,8 @@ class StoreCustomerRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'accountId' => ['nullable', 'integer'],
+            'accountTypeId' => ['nullable', 'integer'],
+            'activeFlag' => ['nullable', 'boolean'],
             'creditLimit' => ['nullable', 'numeric'],
             'currencyId' => ['nullable', 'integer'],
             'currencyRate' => ['nullable', 'numeric'],
@@ -50,6 +55,30 @@ class StoreCustomerRequest extends FormRequest
             'url' => ['nullable', 'url', 'max:30'],
             'issuableStatusId' => ['nullable', 'integer'],
             'carrierServiceId' => ['nullable', 'integer'],
+
+            //with address
+            'name' => ['required', 'string', 'max:41'],
+            'city' => ['nullable', 'string', 'max:30'],
+            'countryId' => ['nullable', 'integer', 'min:0'],
+            'locationGroupId' => ['nullable', 'integer', 'min:0'],
+            'addressName' => ['nullable', 'string', 'max:90'],
+            'pipelineContactNum' => ['nullable', 'integer'],
+            'stateId' => ['nullable', 'integer', 'min:0'],
+            'address' => ['required', 'string', 'max:90'],
+            'typeID' => ['nullable', 'integer', 'min:0'],
+            'zip' => ['nullable', 'string', 'max:10'],
         ];
+    }
+
+    protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(response()->json(
+            [
+                'success' => false,
+                'message' => 'Validation errors',
+                'data' => $validator->errors()
+            ],
+            Response::HTTP_UNPROCESSABLE_ENTITY
+        ));
     }
 }

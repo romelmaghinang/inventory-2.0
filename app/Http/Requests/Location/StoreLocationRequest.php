@@ -3,6 +3,10 @@
 namespace App\Http\Requests\Location;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Symfony\Component\HttpFoundation\Response;
+
 
 class StoreLocationRequest extends FormRequest
 {
@@ -30,5 +34,17 @@ class StoreLocationRequest extends FormRequest
             'receivable' => ['boolean', 'required'],
             'sortOrder' => ['integer', 'nullable', 'min:0', 'max:9999'],
         ];
+    }
+
+    protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(response()->json(
+            [
+                'success' => false,
+                'message' => 'Validation errors',
+                'data' => $validator->errors()
+            ],
+            Response::HTTP_UNPROCESSABLE_ENTITY
+        ));
     }
 }

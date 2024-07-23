@@ -3,6 +3,10 @@
 namespace App\Http\Requests\Carrier;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Symfony\Component\HttpFoundation\Response;
+
 
 class StoreCarrierRequest extends FormRequest
 {
@@ -29,5 +33,17 @@ class StoreCarrierRequest extends FormRequest
             'scac' => ['string', 'nullable', 'max:4'],
             'cost' => ['nullable', 'numeric', 'between:0,999999999999999999.999999999'],
         ];
+    }
+
+    protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(response()->json(
+            [
+                'success' => false,
+                'message' => 'Validation errors',
+                'data' => $validator->errors()
+            ],
+            Response::HTTP_UNPROCESSABLE_ENTITY
+        ));
     }
 }
