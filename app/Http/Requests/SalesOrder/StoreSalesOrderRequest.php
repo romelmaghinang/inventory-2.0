@@ -25,8 +25,8 @@ class StoreSalesOrderRequest extends FormRequest
     public function rules()
     {
         return [
-                'flag' => ['boolean'],
-                'status' => ['integer'], 
+                'flag' => ['boolean', 'required'],
+                'status' => ['integer', 'required'], 
                 'customerName' => ['required', 'string', 'max:100'], 
                 'customerContact' => ['string', 'required', 'max:30'], 
                 'billToName' => ['string', 'required', 'max:41'],
