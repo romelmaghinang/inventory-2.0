@@ -10,13 +10,13 @@ Route::post('/login', [UserController::class, 'login']);
 Route::get('/permissions', [UserController::class, 'getUserPermissions']);
 
 Route::middleware('auth:api')->group(function () {
-  Route::apiResources(
-    [
-        'sales-order' => SalesOrderController::class,
-        'product' => ProductController::class,
-        'customer' => CustomerController::class
-    ]
-); 
+    Route::apiResources(
+        [
+            'sales-order' => SalesOrderController::class,
+            'product' => ProductController::class,
+            'customer' => CustomerController::class
+        ]
+    ); 
 });
 
 Route::middleware(['auth:sanctum', 'abilities:create-users,create-permission,create-role,assign-role,assign-permission'])->group(function () {

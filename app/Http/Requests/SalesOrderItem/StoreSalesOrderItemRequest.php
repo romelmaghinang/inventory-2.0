@@ -25,34 +25,22 @@ class StoreSalesOrderItemRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // SALES ORDER ITEMS
             'items' => ['required', 'array'],
-            'items.*.adjustAmount' => ['nullable', 'numeric'],
-            'items.*.adjustPercentage' => ['nullable', 'numeric'],
-            'items.*.customerPartNum' => ['nullable', 'string'],
-            'items.*.dateLastFulfillment' => ['nullable', 'date'],
-            'items.*.dateScheduledFulfillment' => ['nullable', 'date'],
-            'items.*.description' => ['nullable', 'string'],
-            'items.*.exchangeSOLineItem' => ['nullable', 'integer'],
-            'items.*.itemAdjustId' => ['nullable', 'integer'],
-            'items.*.markupCost' => ['nullable', 'numeric'],
-            'items.*.mcTotalPrice' => ['nullable', 'numeric'],
-            'items.*.note' => ['nullable', 'string'],
-            'items.*.productId' => ['required', 'integer'],
-            'items.*.productNum' => ['nullable', 'string'],
-            'items.*.qtyFulfilled' => ['nullable', 'integer'],
+            'items.*.Flag' => ['required', 'boolean'],
+            'items.*.productNum' => ['nullable', 'string', 'max:70'],
+            'items.*.description' => ['nullable', 'string', 'max:256'],
             'items.*.qtyOrdered' => ['required', 'integer'],
-            'items.*.qtyPicked' => ['nullable', 'integer'],
-            'items.*.qtyToFulfill' => ['nullable', 'integer'],
-            'items.*.revLevel' => ['nullable', 'string'],
-            'items.*.showItemFlag' => ['nullable', 'boolean'],
-            'items.*.soLineItem' => ['nullable', 'integer'],
-            'items.*.taxId' => ['nullable', 'integer'],
-            'items.*.taxableFlag' => ['nullable', 'boolean'],
-            'items.*.totalCost' => ['nullable', 'numeric'],
-            'items.*.typeId' => ['nullable', 'integer'],
-            'items.*.unitPrice' => ['required', 'numeric'],
-            'items.*.uomId' => ['nullable', 'integer']
+            'items.*.uomId' => ['nullable', 'integer'],
+            'items.*.unitPrice' => ['nullable', 'numeric', 'digits_between:1,28'],
+            'items.*.taxableFlag' => ['required', 'boolean'],
+            'items.*.taxRateCode' => ['required', 'integer'],
+            'items.*.note' => ['required', 'string'],
+            'items.*.qbClassId' => ['nullable', 'integer'],
+            'items.*.dateScheduledFulfillment' => ['required', 'date'],
+            'items.*.showItemFlag' => ['required', 'boolean'],
+            'items.*.typeId' => ['required', 'integer'],
+            'items.*.revLevel' => ['required', 'string'],
+            'items.*.customerPartNum' => ['nullable', 'string', 'max:70'],
         ];
     }
 

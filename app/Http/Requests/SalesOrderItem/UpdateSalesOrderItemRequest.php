@@ -25,7 +25,6 @@ class UpdateSalesOrderItemRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // SALES ORDER ITEMS
             'items' => ['required', 'array'],
             'items.*.adjustAmount' => ['nullable', 'numeric'],
             'items.*.adjustPercentage' => ['nullable', 'numeric'],

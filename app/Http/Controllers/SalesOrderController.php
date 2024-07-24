@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Customer\StoreCustomerRequest;
 use App\Http\Requests\SalesOrder\StoreSalesOrderRequest;
 use App\Http\Requests\SalesOrder\UpdateSalesOrderRequest;
 use App\Http\Requests\SalesOrderItem\StoreSalesOrderItemRequest;
 use App\Http\Requests\SalesOrderItem\UpdateSalesOrderItemRequest;
+use App\Models\Account;
+use App\Models\Address;
 use App\Models\Carrier;
 use App\Models\CarrierService;
 use App\Models\Country;
@@ -22,9 +25,9 @@ use Symfony\Component\HttpFoundation\Response;
 
 class SalesOrderController extends Controller
 {
-   public function store(StoreSalesOrderRequest $storeSalesOrderRequest, StoreSalesOrderItemRequest $storeSalesOrderItemRequest): JsonResponse
+    public function store(StoreSalesOrderRequest $storeSalesOrderRequest, StoreSalesOrderItemRequest $storeSalesOrderItemRequest, StoreCustomerRequest $storeCustomerRequest): JsonResponse
     {
-    
+ 
         $billToCountry = Country::firstOrCreate(['name' => $storeSalesOrderRequest->billToCountry]);
         $billToState = State::firstOrCreate(['name' => $storeSalesOrderRequest->billToState]);
         $shipToCountry = Country::firstOrCreate(['name' => $storeSalesOrderRequest->shipToCountry]);
@@ -33,8 +36,45 @@ class SalesOrderController extends Controller
         $status = SalesOrderStatus::firstOrCreate(['name' => $storeSalesOrderRequest->status]);
         $carrier = Carrier::where('name', $storeSalesOrderRequest->carrierName)->first();
         $carrierService = CarrierService::where('name', $storeSalesOrderRequest->carrierService)->first();
-        $taxRate = TaxRate::where('name', $storeSalesOrderRequest->taxRateName)->first();
-        $customer = Customer::where('name', $storeSalesOrderRequest->customerName)->first();
+        $taxRate = TaxRate::firstOrCreate(['name' => $storeSalesOrderRequest->taxRateName]);
+        $account = Account::create(['typeId' => $storeCustomerRequest->accountTypeId]);
+
+        $customer  = Customer::firstOrCreate(
+            ['name' => $storeCustomerRequest->customerName],
+            $storeCustomerRequest->except([
+                'accountTypeId',
+                'city',
+                'countryId',
+                'locationGroupId',
+                'addressName',
+                'pipelineContactNum',
+                'stateId',
+                'address',
+                'typeId',
+                'zip'
+            ]) +
+                [
+                    'statusId' => $storeSalesOrderRequest->status,
+                    'accountId' => $account->id,
+                ]
+        );
+
+        $address = Address::create(
+            $storeCustomerRequest->only([
+                'name',
+                'countryId',
+                'locationGroupId',
+                'addressName',
+                'pipelineContactNum',
+                'stateId',
+                'address',
+                'typeId',
+                'zip'
+            ]) +
+                [
+                    'accountId' => $account->id,
+                ]
+        );
 
         // SoNum
         $lastNum = optional(SalesOrder::orderBy('id', 'desc')->first())->num;
@@ -49,7 +89,7 @@ class SalesOrderController extends Controller
                     'shipToStateId' => $shipToState->id,
                     'taxRateId' => $taxRate->id,
                     'taxRate' => $taxRate->rate,
-                    'statusId' => $status->id,
+                    'statusId' => $storeSalesOrderRequest->status,
                     'customerId' => $customer->id,
                     'carrierId' => $carrier->id,
                     'carrierServiceId' => $carrierService->id,
@@ -64,6 +104,7 @@ class SalesOrderController extends Controller
         foreach ($storeSalesOrderItemRequest->validated()['items'] as $item) {
             $item['soId'] = $salesOrder->id;
             $item['statusId'] = $status->id;
+            $item['taxableFlag'] = $storeSalesOrderItemRequest->Flas;
             $salesOrderItems[] = SalesOrderItems::create($item);
         }
 
@@ -71,6 +112,8 @@ class SalesOrderController extends Controller
             [
                 'salesOrder' => $salesOrder,
                 'salesOrderItem' => $salesOrderItems,
+                'customer' => $customer,
+                'address' => $address,
                 'message' => 'Sales Order Created Successfully!',
             ],
             Response::HTTP_CREATED
@@ -90,6 +133,7 @@ class SalesOrderController extends Controller
      */
     public function update(UpdateSalesOrderRequest $updateSalesOrderRequest, UpdateSalesOrderItemRequest $updateSalesOrderItemRequest, SalesOrder $salesOrder): JsonResponse
     {
+        
         $billToCountry = Country::firstOrCreate(['name' => $updateSalesOrderRequest->billToCountry]);
         $billToState = State::firstOrCreate(['name' => $updateSalesOrderRequest->billToState]);
         $shipToCountry = Country::firstOrCreate(['name' => $updateSalesOrderRequest->shipToCountry]);

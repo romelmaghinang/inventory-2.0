@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('name', 41);
             $table->string('city', 30)->nullable();
             $table->integer('countryId')->unsigned()->nullable();
-            $table->boolean('defaultFlag');
+            $table->boolean('defaultFlag')->default(true);;
             $table->integer('locationGroupId')->unsigned()->nullable();
             $table->string('addressName', 90)->nullable()->unique();
             $table->integer('pipelineContactNum')->nullable();

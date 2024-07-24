@@ -137,7 +137,8 @@ class CustomerController extends Controller
         return response()->json(
             [
                 'message' => 'Customer Deleted Successfully!',
-            ]
+            ],
+            Response::HTTP_OK
         );
     }
 }
