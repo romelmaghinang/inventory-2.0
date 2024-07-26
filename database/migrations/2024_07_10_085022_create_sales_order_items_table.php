@@ -35,7 +35,7 @@ return new class extends Migration
             $table->string('revLevel', 15)->nullable();
             $table->boolean('showItemFlag')->notnull()->default(true);
             $table->integer('soId')->notnull();
-            $table->integer('soLineItem')->nullable();
+            $table->integer('soLineItem')->notnull();
             $table->integer('statusId')->notnull();
             $table->integer('taxId')->nullable();
             $table->float('taxRate', 8, 8)->nullable();

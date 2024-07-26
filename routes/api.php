@@ -3,6 +3,7 @@
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SalesOrderController;
+use App\Http\Controllers\SalesOrderItemController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 
@@ -14,7 +15,9 @@ Route::middleware('auth:api')->group(function () {
         [
             'sales-order' => SalesOrderController::class,
             'product' => ProductController::class,
-            'customer' => CustomerController::class
+            'customer' => CustomerController::class,
+            'part' => PartController::class,
+            'so-item' => SalesOrderItemController::class,
         ]
     ); 
 });

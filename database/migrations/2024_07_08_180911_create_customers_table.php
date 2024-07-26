@@ -26,7 +26,7 @@ return new class extends Migration
             $table->dateTime('dateLastModified')->nullable();
             $table->unsignedBigInteger('defaultCarrierId')->nullable();
             $table->unsignedBigInteger('defaultPaymentTermsId')->nullable();
-            $table->unsignedBigInteger('defaultSalesmanId')->nullable(false);
+            $table->unsignedBigInteger('defaultSalesmanId')->nullable();
             $table->unsignedBigInteger('defaultShipTermsId')->nullable();
             $table->integer('jobDepth')->nullable();
             $table->string('lastChangedUser', 15)->nullable();

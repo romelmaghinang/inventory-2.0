@@ -25,9 +25,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 class SalesOrderController extends Controller
 {
-    public function store(StoreSalesOrderRequest $storeSalesOrderRequest, StoreSalesOrderItemRequest $storeSalesOrderItemRequest, StoreCustomerRequest $storeCustomerRequest): JsonResponse
+        public function store(StoreSalesOrderRequest $storeSalesOrderRequest, StoreCustomerRequest $storeCustomerRequest): JsonResponse
     {
- 
         $billToCountry = Country::firstOrCreate(['name' => $storeSalesOrderRequest->billToCountry]);
         $billToState = State::firstOrCreate(['name' => $storeSalesOrderRequest->billToState]);
         $shipToCountry = Country::firstOrCreate(['name' => $storeSalesOrderRequest->shipToCountry]);
@@ -35,50 +34,58 @@ class SalesOrderController extends Controller
         $qbclass = qbClass::firstOrCreate(['name' => $storeSalesOrderRequest->quickBookClassName]);
         $status = SalesOrderStatus::firstOrCreate(['name' => $storeSalesOrderRequest->status]);
         $carrier = Carrier::where('name', $storeSalesOrderRequest->carrierName)->first();
-        $carrierService = CarrierService::where('name', $storeSalesOrderRequest->carrierService)->first();
+        // $carrierService = CarrierService::where('name', $storeSalesOrderRequest->carrierService)->first();
         $taxRate = TaxRate::firstOrCreate(['name' => $storeSalesOrderRequest->taxRateName]);
-        $account = Account::create(['typeId' => $storeCustomerRequest->accountTypeId]);
+        $customerId = null;
 
-        $customer  = Customer::firstOrCreate(
-            ['name' => $storeCustomerRequest->customerName],
-            $storeCustomerRequest->except([
-                'accountTypeId',
-                'city',
-                'countryId',
-                'locationGroupId',
-                'addressName',
-                'pipelineContactNum',
-                'stateId',
-                'address',
-                'typeId',
-                'zip'
-            ]) +
-                [
+        //customer
+        if ($storeCustomerRequest->customerName !== null) {
+            $account = Account::create(['typeId' => $storeCustomerRequest->accountTypeId]);
+            $customer = Customer::firstOrNew(
+                ['name' => $storeCustomerRequest->customerName]
+            );
+
+            //check if the customer is newly created
+            if (!$customer->exists) {
+                $customer->fill($storeCustomerRequest->except([
+                    'accountTypeId',
+                    'city',
+                    'countryId',
+                    'locationGroupId',
+                    'addressName',
+                    'pipelineContactNum',
+                    'stateId',
+                    'address',
+                    'typeId',
+                    'zip'
+                ]) + [
                     'statusId' => $storeSalesOrderRequest->status,
                     'accountId' => $account->id,
-                ]
-        );
+                ]);
+                $customer->save();
 
-        $address = Address::create(
-            $storeCustomerRequest->only([
-                'name',
-                'countryId',
-                'locationGroupId',
-                'addressName',
-                'pipelineContactNum',
-                'stateId',
-                'address',
-                'typeId',
-                'zip'
-            ]) +
-                [
-                    'accountId' => $account->id,
-                ]
-        );
+                $address = Address::create(
+                    $storeCustomerRequest->only([
+                        'name',
+                        'countryId',
+                        'locationGroupId',
+                        'addressName',
+                        'pipelineContactNum',
+                        'stateId',
+                        'address',
+                        'typeId',
+                        'zip'
+                    ]) + [
+                        'accountId' => $account->id,
+                    ]
+                );
+            }
+            $customerId = $customer->id;
+        }
 
         // SoNum
         $lastNum = optional(SalesOrder::orderBy('id', 'desc')->first())->num;
-        $newNum = $lastNum ? (string)((int)$lastNum + 1) : '10001';
+        $newNum = $lastNum ? (string)((int)$lastNum + 1) : '1001';
 
         $salesOrder = SalesOrder::create(
             $storeSalesOrderRequest->except('items') +
@@ -88,32 +95,22 @@ class SalesOrderController extends Controller
                     'shipToCountryId' => $shipToCountry->id,
                     'shipToStateId' => $shipToState->id,
                     'taxRateId' => $taxRate->id,
-                    'taxRate' => $taxRate->rate,
+                    // 'taxRate' => $taxRate->rate,
                     'statusId' => $storeSalesOrderRequest->status,
-                    'customerId' => $customer->id,
+                    'customerId' => $customerId,
                     'carrierId' => $carrier->id,
-                    'carrierServiceId' => $carrierService->id,
+                    // 'carrierServiceId' => $carrierService->id,
                     'residentialFlag' => $storeSalesOrderRequest->shipToResidential,
                     'qbClassId' => $qbclass->id,
-                    'num' => $newNum,
+                    'num' =>  $storeSalesOrderRequest->soNum ?? $newNum,
                 ]
         );
-
-        $salesOrderItems = [];
-
-        foreach ($storeSalesOrderItemRequest->validated()['items'] as $item) {
-            $item['soId'] = $salesOrder->id;
-            $item['statusId'] = $status->id;
-            $item['taxableFlag'] = $storeSalesOrderItemRequest->Flas;
-            $salesOrderItems[] = SalesOrderItems::create($item);
-        }
 
         return response()->json(
             [
                 'salesOrder' => $salesOrder,
-                'salesOrderItem' => $salesOrderItems,
-                'customer' => $customer,
-                'address' => $address,
+                'customer' => $customer ?? null,
+                'address' => $address ?? null,
                 'message' => 'Sales Order Created Successfully!',
             ],
             Response::HTTP_CREATED
@@ -131,18 +128,54 @@ class SalesOrderController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateSalesOrderRequest $updateSalesOrderRequest, UpdateSalesOrderItemRequest $updateSalesOrderItemRequest, SalesOrder $salesOrder): JsonResponse
+    public function update(UpdateSalesOrderRequest $updateSalesOrderRequest, UpdateCustomerRequest $updateCustomerRequest, SalesOrder $salesOrder): JsonResponse
     {
-        
         $billToCountry = Country::firstOrCreate(['name' => $updateSalesOrderRequest->billToCountry]);
         $billToState = State::firstOrCreate(['name' => $updateSalesOrderRequest->billToState]);
         $shipToCountry = Country::firstOrCreate(['name' => $updateSalesOrderRequest->shipToCountry]);
         $shipToState = State::firstOrCreate(['name' => $updateSalesOrderRequest->shipToState]);
         $qbclass = qbClass::firstOrCreate(['name' => $updateSalesOrderRequest->quickBookClassName]);
-        $status = SalesOrderStatus::firstOrCreate(['name' => $updateSalesOrderRequest->status]);
+        $status = SalesOrderStatus::where(['name' => $updateSalesOrderRequest->status]);
         $carrier = Carrier::where('name', $updateSalesOrderRequest->carrierName)->first();
-        $carrierService = CarrierService::where('name', $updateSalesOrderRequest->carrierService)->first();
-        $taxRate = TaxRate::where('name', $updateSalesOrderRequest->taxRateName)->first();
+        $taxRate = TaxRate::firstOrCreate(['name' => $updateSalesOrderRequest->taxRateName]);
+
+        //customer
+        if ($updateCustomerRequest->customerName !== null) {
+            $customer = Customer::findOrFail($salesOrder->customerId);
+
+            $customer->update($updateCustomerRequest->except([
+                'accountTypeId',
+                'city',
+                'countryId',
+                'locationGroupId',
+                'addressName',
+                'pipelineContactNum',
+                'stateId',
+                'address',
+                'typeId',
+                'zip'
+            ]) + [
+                'statusId' => $updateSalesOrderRequest->status,
+            ]);
+
+            // Update the associated address
+            $address = Address::where('accountId', $customer->accountId)->first();
+            if ($address) {
+                $address->update(
+                    $updateCustomerRequest->only([
+                        'name',
+                        'countryId',
+                        'locationGroupId',
+                        'addressName',
+                        'pipelineContactNum',
+                        'stateId',
+                        'address',
+                        'typeId',
+                        'zip'
+                    ])
+                );
+            }
+        }
 
         $salesOrder->update(
             $updateSalesOrderRequest->except('items') +
@@ -152,47 +185,23 @@ class SalesOrderController extends Controller
                     'shipToCountryId' => $shipToCountry->id,
                     'shipToStateId' => $shipToState->id,
                     'taxRateId' => $taxRate->id,
-                    'taxRate' => $taxRate->rate,
-                    'statusId' => $status->id,
+                    'statusId' => $updateSalesOrderRequest->status,
                     'carrierId' => $carrier->id,
-                    'carrierServiceId' => $carrierService->id,
                     'residentialFlag' => $updateSalesOrderRequest->shipToResidential,
                     'qbClassId' => $qbclass->id,
                 ]
         );
 
-        // Update or create sales order items
-        $updatedSalesOrderItems = [];
-
-        foreach ($updateSalesOrderItemRequest->validated()['items'] as $item) {
-            $item['soId'] = $salesOrder->id;
-            $item['statusId'] = $status->id;
-
-            if (isset($item['id'])) {
-                $salesOrderItem = SalesOrderItems::findOrFail($item['id']);
-                $salesOrderItem->update($item);
-                $updatedSalesOrderItems[] = $salesOrderItem;
-            } else {
-                $updatedSalesOrderItems[] = SalesOrderItems::create($item);
-            }
-        }
-
-        // Delete items that are not in the update request
-        $existingItemIds = array_column($updateSalesOrderItemRequest->validated()['items'], 'id');
-        SalesOrderItems::where('soId', $salesOrder->id)
-            ->whereNotIn('id', $existingItemIds)
-            ->delete();
-
         return response()->json(
             [
                 'salesOrder' => $salesOrder,
-                'salesOrderItems' => $updatedSalesOrderItems,
+                'customer' => $customer ?? null,
+                'address' => $address ?? null,
                 'message' => 'Sales Order Updated Successfully!',
             ],
             Response::HTTP_OK
         );
     }
-
 
     /**
      * Remove the specified resource from storage.

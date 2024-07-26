@@ -26,32 +26,23 @@ class UpdateSalesOrderItemRequest extends FormRequest
     {
         return [
             'items' => ['required', 'array'],
-            'items.*.adjustAmount' => ['nullable', 'numeric'],
-            'items.*.adjustPercentage' => ['nullable', 'numeric'],
-            'items.*.customerPartNum' => ['nullable', 'string'],
-            'items.*.dateLastFulfillment' => ['nullable', 'date'],
-            'items.*.dateScheduledFulfillment' => ['nullable', 'date'],
-            'items.*.description' => ['nullable', 'string'],
-            'items.*.exchangeSOLineItem' => ['nullable', 'integer'],
-            'items.*.itemAdjustId' => ['nullable', 'integer'],
-            'items.*.markupCost' => ['nullable', 'numeric'],
-            'items.*.mcTotalPrice' => ['nullable', 'numeric'],
-            'items.*.note' => ['nullable', 'string'],
-            'items.*.productId' => ['required', 'integer'],
-            'items.*.productNum' => ['nullable', 'string'],
-            'items.*.qtyFulfilled' => ['nullable', 'integer'],
-            'items.*.qtyOrdered' => ['required', 'integer'],
-            'items.*.qtyPicked' => ['nullable', 'integer'],
-            'items.*.qtyToFulfill' => ['nullable', 'integer'],
-            'items.*.revLevel' => ['nullable', 'string'],
-            'items.*.showItemFlag' => ['nullable', 'boolean'],
-            'items.*.soLineItem' => ['nullable', 'integer'],
-            'items.*.taxId' => ['nullable', 'integer'],
-            'items.*.taxableFlag' => ['nullable', 'boolean'],
-            'items.*.totalCost' => ['nullable', 'numeric'],
-            'items.*.typeId' => ['nullable', 'integer'],
-            'items.*.unitPrice' => ['required', 'numeric'],
-            'items.*.uomId' => ['nullable', 'integer']
+            'items.*.flag' => ['required', 'boolean'],
+            'items.*.soItemTypeId' => ['required', 'integer', 'exists:soitemtype,id'], // typeId
+            'items.*.soId' => ['required', 'integer', 'exists:so,id'],
+            'items.*.statusId' => ['required' , 'integer'],
+            'items.*.productNumber' => ['nullable', 'string', 'max:70'], // productNum
+            'items.*.productDescription' => ['nullable', 'string', 'max:256'], // description
+            'items.*.productQuantity' => ['required', 'integer'], // qtyOrdered
+            'items.*.uom' => ['nullable', 'integer'],
+            'items.*.productPrice' => ['nullable', 'numeric'], // unitPrice
+            'items.*.taxable' => ['required', 'boolean'],
+            'items.*.taxCode' => ['required', 'integer'],
+            'items.*.note' => ['required', 'string'],
+            'items.*.itemQuickBooksClassName' => ['nullable', 'integer'],  //qbClassId
+            'items.*.itemScheduledFulfillment' => ['required', 'date'], //dateScheduledFulfillment
+            'items.*.showItem' => ['required', 'boolean'],
+            'items.*.revisionLevel' => ['required', 'string'], // revLevel
+            'items.*.customerPartNumber' => ['nullable', 'string', 'max:70'],
         ];
     }
 
