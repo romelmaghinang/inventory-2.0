@@ -35,7 +35,7 @@ return new class extends Migration
             $table->string('revLevel', 15)->nullable();
             $table->boolean('showItemFlag')->notnull()->default(true);
             $table->integer('soId')->notnull();
-            $table->integer('soLineItem')->notnull();
+            $table->integer('soLineItem')->nullable();
             $table->integer('statusId')->notnull();
             $table->integer('taxId')->nullable();
             $table->float('taxRate', 8, 8)->nullable();
@@ -45,15 +45,16 @@ return new class extends Migration
             $table->integer('typeId')->notnull();
             $table->decimal('unitPrice', 28, 9)->nullable();
             $table->integer('uomId')->nullable();
-            $table->timestamps();
+            $table->string('customFieldItem')->nullable();
         });
     }
 
     /**
      * Reverse the migrations.
+     * 
      */
     public function down(): void
     {
-        Schema::dropIfExists('soitem');
+        Schema::dropIfExists('sales_order_items');
     }
 };

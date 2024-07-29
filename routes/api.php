@@ -1,9 +1,14 @@
 <?php
 
+use App\Http\Controllers\CountryAndStateController;
+use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\PartController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\QuickBookClassController;
 use App\Http\Controllers\SalesOrderController;
 use App\Http\Controllers\SalesOrderItemController;
+use App\Http\Controllers\TaxRateController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 
@@ -11,13 +16,16 @@ Route::post('/login', [UserController::class, 'login']);
 Route::get('/permissions', [UserController::class, 'getUserPermissions']);
 
 Route::middleware('auth:api')->group(function () {
-    Route::apiResources(
+   Route::apiResources(
         [
             'sales-order' => SalesOrderController::class,
             'product' => ProductController::class,
             'customer' => CustomerController::class,
             'part' => PartController::class,
-            'so-item' => SalesOrderItemController::class,
+            'country-state' => CountryAndStateController::class,
+            'qbclass' => QuickBookClassController::class,
+            'taxrate' => TaxRateController::class,
+            'currency' => CurrencyController::class,
         ]
     ); 
 });

@@ -1,14 +1,15 @@
 <?php
 
-namespace App\Http\Requests\Currency;
+namespace App\Http\Requests\QuickBook;
 
 use Illuminate\Foundation\Http\FormRequest;
+
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Symfony\Component\HttpFoundation\Response;
 
 
-class StoreCurrencyRequest extends FormRequest
+class UpdateQuickBookClassRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,11 +27,8 @@ class StoreCurrencyRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255', 'unique:currency,name'],
-            'code' => ['required', 'string',  'max:255'],
+            'name' => ['required', 'string', 'max:30', 'unique:qbclass,name'],
             'active' => ['required', 'boolean'],
-            'quickBookCurrencyRate' => ['nullable', 'numeric'],
-            'globalCurrencyRate' => ['required', 'numeric'],
         ];
     }
 

@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('customer', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('accountId')->nullable(false);
+            $table->unsignedBigInteger('accountId')->nullable();
             $table->string('accountingHash', 30)->nullable();
             $table->string('accountingId', 36)->nullable();
             $table->boolean('activeFlag')->nullable();
@@ -38,11 +38,11 @@ return new class extends Migration
             $table->unsignedBigInteger('qbClassId')->nullable();
             $table->unsignedBigInteger('statusId')->nullable(false);
             $table->unsignedBigInteger('sysUserId')->nullable();
-            $table->boolean('taxExempt')->nullable(false);
+            $table->boolean('taxExempt')->nullable(false)->default(true);
             $table->string('taxExemptNumber', 30)->nullable();
             $table->unsignedBigInteger('taxRateId')->nullable();
-            $table->boolean('toBeEmailed')->nullable(false);
-            $table->boolean('toBePrinted')->nullable(false);
+            $table->boolean('toBeEmailed')->nullable(false)->default(true);
+            $table->boolean('toBePrinted')->nullable(false)->default(true);
             $table->string('url', 30)->nullable();
             $table->unsignedBigInteger('issuableStatusId')->nullable();
             $table->unsignedBigInteger('carrierServiceId')->nullable();
@@ -58,6 +58,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('customer');
+        Schema::dropIfExists('customers');
     }
 };

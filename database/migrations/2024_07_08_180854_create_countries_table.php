@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('country', function (Blueprint $table) {
             $table->id();
             $table->string('name', 30)->nullable()->unique('u_name');
-            $table->timestamps();
         });
     }
 
@@ -23,6 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('country');
+        Schema::dropIfExists('countries');
     }
 };

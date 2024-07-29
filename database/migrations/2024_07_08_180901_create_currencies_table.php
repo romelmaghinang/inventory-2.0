@@ -20,7 +20,7 @@ return new class extends Migration
             $table->dateTime('dateLastModified')->nullable();
             $table->boolean('excludeFromUpdate')->nullable();
             $table->boolean('homeCurrency')->nullable();
-            $table->unsignedBigInteger('lastChangedUserId')->nullable(false);
+            $table->unsignedBigInteger('lastChangedUserId')->nullable();
             $table->string('name', 255)->nullable();
             $table->integer('rate')->nullable();
             $table->integer('symbol')->nullable();
@@ -34,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('currency');
+        Schema::dropIfExists('currencies');
     }
 };

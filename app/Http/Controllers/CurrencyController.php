@@ -2,30 +2,84 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Currency\StoreCurrencyRequest;
+use App\Http\Requests\Currency\UpdateCurrencyRequest;
 use App\Models\Currency;
-use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class CurrencyController extends Controller
 {
-    /**
-     * Handle the incoming request.
-     */
-    public function __invoke(Request $request): JsonResponse
+    public function store(StoreCurrencyRequest $storeCurrencyRequest): JsonResponse
     {
-        $currency = Currency::firstOrCreate(
+        $currency = Currency::create($storeCurrencyRequest->only(
             [
-                'code' => $request->code,
-                'excludeFromUpdate' => $request->excludeFromUpdate,
-                'homeCurrency' => $request->homeCurrency,
-                'lastChangedUserId' => auth('api')->id() ?: 1,
-                'name' => $request->name,
-                'rate' => $request->rate,
-                'symbol' => $request->symbol,
+                'name',
+                'code',
+            ]
+        ) +
+            [
+                'activeFlag' => $storeCurrencyRequest->active,
+                'rate' => $storeCurrencyRequest->globalCurrencyRate,
+            ]);
+
+        return response()->json(
+            [
+                'message' => 'Currency Created Successfully!',
+                'data' => $currency,
+            ],
+            Response::HTTP_CREATED
+        );
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(Currency $currency): JsonResponse
+    {
+        return response()->json($currency, Response::HTTP_OK);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(UpdateCurrencyRequest $updateCurrencyRequest, Currency $currency): JsonResponse
+    {
+        $currency->update(
+            $updateCurrencyRequest->only(
+                [
+                    'name',
+                    'code'
+                ]
+            ) + [
+                'activeFlag' => $updateCurrencyRequest->active,
+                'rate' => $updateCurrencyRequest->globalCurrencyRate,
             ]
         );
 
-        return response()->json($currency);
+        return response()->json(
+            [
+                'message' => 'Currency Update Successfully!',
+                'data' => $currency,
+            ],
+            Response::HTTP_OK
+        );
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Currency $currency): JsonResponse
+    {
+        $currency->delete();
+
+        return response()->json(
+            [
+                'message' => 'Currency Deleted Succesfully!'
+            ],
+            Response::HTTP_OK
+        );
     }
 }

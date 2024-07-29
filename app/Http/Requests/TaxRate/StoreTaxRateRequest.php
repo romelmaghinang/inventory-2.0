@@ -4,6 +4,11 @@ namespace App\Http\Requests\TaxRate;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Symfony\Component\HttpFoundation\Response;
+
+
 class StoreTaxRateRequest extends FormRequest
 {
     /**
@@ -22,14 +27,28 @@ class StoreTaxRateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'taxRate' => ['nullable', 'numeric'],
-            'taxRateName' => ['string', 'nullable', 'max:31'], // Tax Rate ID
-            'taxRateCode' => ['nullable', 'string', 'max:5'],
-            'taxRateDescription' => ['nullable', 'string', 'max:255'],
-            'mcTotalTax' => ['nullable', 'numeric', 'between:0,999999999999999999.999999999'],
-            'estimatedTax' => ['nullable', 'numeric', 'between:0,999999999999999999.999999999'],
-            'totalIncludesTax' => ['boolean'],
-            'totalTax' => ['nullable', 'numeric', 'between:0,999999999999999999.999999999'],
+            // TAX RATE
+            'taxName' => ['required', 'string', 'max:31'], // Tax Rate ID 
+            'taxCode' => ['required', 'string', 'max:5'],
+            'taxType' => ['required', 'string', 'exists:taxratetype,name'],
+            'description' => ['required', 'string', 'max:255'],
+            'rate' => ['required', 'numeric'],
+            'amount' => ['required', 'numeric'],
+            'taxAgencyName' => ['required', 'string'],
+            'defaultFlag' => ['required', 'boolean'],
+            'activeFlag' => ['required', 'boolean'],
         ];
+    }
+
+    protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(response()->json(
+            [
+                'success' => false,
+                'message' => 'Validation errors',
+                'data' => $validator->errors()
+            ],
+            Response::HTTP_UNPROCESSABLE_ENTITY
+        ));
     }
 }
