@@ -39,7 +39,7 @@ return new class extends Migration
             ['carrierId' => 4, 'code' => '06' , 'name' =>  'SmartPost',],
             ['carrierId' => 4, 'code' => '08' , 'name' =>  'International Priority',],
             ['carrierId' => 4, 'code' => '09' , 'name' =>  'International Ground',],
-            ['carrierId' => 5, 'code' => '' , 'name' =>  'Priority Mall',],
+            ['carrierId' => 5, 'code' => '' , 'name' =>  'Priority Mail',],
         ]);
     }
 
