@@ -12,37 +12,39 @@ class SalesOrderItems extends Model
     protected $table = 'soitem';
 
     protected $fillable = [
-        'adjustAmount', // nullable
-        'adjustPercentage', // nullable
-        'customerPartNum', // nullable
-        'dateLastFulfillment', // nullable
-        'dateLastModified', // nullable
-        'dateScheduledFulfillment', // nullable
-        'description', // nullable
-        'exchangeSOLineItem', // nullable
-        'itemAdjustId', // nullable
-        'markupCost', // nullable
-        'mcTotalPrice', // nullable
+        'adjustAmount', 
+        'adjustPercentage',  
+        'customerPartNum',  
+        'dateLastFulfillment',  
+        'dateLastModified',  
+        'dateScheduledFulfillment',  
+        'description',  
+        'exchangeSOLineItem',  
+        'itemAdjustId',  
+        'markupCost',  
+        'mcTotalPrice',  
         'note',
-        'productId', // nullable
-        'productNum', // nullable
-        'qbClassId', // nullable
-        'qtyFulfilled', // nullable
-        'qtyOrdered', // nullable
-        'qtyPicked', // nullable
-        'qtyToFulfill', // nullable
-        'revLevel', // nullable
+        'productId',  
+        'productNum',  
+        'qbClassId',  
+        'qtyFulfilled',  
+        'qtyOrdered',  
+        'qtyPicked',  
+        'qtyToFulfill',  
+        'revLevel',  
         'showItemFlag',
         'soId',
         'soLineItem',
         'statusId',
-        'taxId', // nullable
-        'taxRate', // nullable
+        'taxId',  
+        'taxRate',  
         'taxableFlag',
-        'totalCost', // nullable
-        'totalPrice', // nullable
+        'totalCost',  
+        'totalPrice',  
         'typeId',
-        'unitPrice', // nullable
-        'uomId', // nullable
+        'unitPrice',  
+        'uomId',  
     ];
+
+    public $timestamps = false;
 }
