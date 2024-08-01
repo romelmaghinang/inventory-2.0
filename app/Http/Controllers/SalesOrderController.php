@@ -3,14 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Customer\StoreCustomerRequest;
-use App\Http\Requests\Customer\UpdateCustomerRequest;
 use App\Http\Requests\SalesOrder\StoreSalesOrderRequest;
 use App\Http\Requests\SalesOrder\UpdateSalesOrderRequest;
-use App\Http\Requests\SalesOrderItem\StoreSalesOrderItemRequest;
-use App\Http\Requests\SalesOrderItem\UpdateSalesOrderItemRequest;
-use App\Models\Account;
-use App\Models\Address;
 use App\Models\Carrier;
 use App\Models\CarrierService;
 use App\Models\Country;
@@ -23,7 +17,6 @@ use App\Models\SalesOrderItems;
 use App\Models\SalesOrderStatus;
 use App\Models\State;
 use App\Models\TaxRate;
-use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -39,45 +32,66 @@ class SalesOrderController extends Controller
                 'shipToCountry' => Country::where('name', $storeSalesOrderRequest->shipToCountry)->firstOrFail(),
                 'shipToState' => State::where('name', $storeSalesOrderRequest->shipToState)->firstOrFail(),
                 'qbclass' => qbClass::where('name', $storeSalesOrderRequest->quickBookClassName)->firstOrFail(),
-                'status' => SalesOrderStatus::where('id', $storeSalesOrderRequest->status)->firstOrFail(), 
+                'status' => SalesOrderStatus::where('id', $storeSalesOrderRequest->status)->firstOrFail(), // Have Data
                 'currency' => Currency::where('name', $storeSalesOrderRequest->currencyName)->firstOrFail(),
-                'carrier' => Carrier::where('name', $storeSalesOrderRequest->carrierName)->firstOrFail(), 
-                'carrierService' => CarrierService::where('name', $storeSalesOrderRequest->carrierService)->firstOrFail(), 
+                'carrier' => Carrier::where('name', $storeSalesOrderRequest->carrierName)->firstOrFail(), // Have Data
+                'carrierService' => CarrierService::where('name', $storeSalesOrderRequest->carrierService)->firstOrFail(), // Have Data
                 'taxRate' => TaxRate::where('name', $storeSalesOrderRequest->taxRateName)->firstOrFail(),
             ];
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => $e->getMessage()], Response::HTTP_NOT_FOUND);
         }
 
-        // CUSTOMER
-        $customer = Customer::firstOrCreate(
-            ['name' => $storeSalesOrderRequest->customerName],
-            [
-                'statusId' => $data['status']->id,
-            ]
-        );
+        $customer = Customer::firstOrCreate(['name' => $storeSalesOrderRequest->customerName]);
 
-        // SoNum
         $lastNum = optional(SalesOrder::orderBy('id', 'desc')->first())->num;
         $newNum = $lastNum ? (string)((int)$lastNum + 1) : '1001';
 
         $salesOrder = SalesOrder::create(
-            $storeSalesOrderRequest->except('items') +
-                [
-                    'billToCountryId' => $data['billToCountry']->id,
-                    'billToStateId' => $data['billToState']->id,
-                    'shipToCountryId' => $data['shipToCountry']->id,
-                    'shipToStateId' => $data['shipToState']->id,
-                    'taxRateId' => $data['taxRate']->id,
-                    'statusId' => $data['status']->id,
-                    'currencyId' => $data['currency']->id,
-                    'customerId' => $customer->id,
-                    'carrierId' => $data['carrier']->id,
-                    'carrierServiceId' => $data['carrierService']->id,
-                    'residentialFlag' => $storeSalesOrderRequest->shipToResidential,
-                    'qbClassId' => $data['qbclass']->id,
-                    'num' =>  $storeSalesOrderRequest->soNum ?? $newNum,
-                ]
+            $storeSalesOrderRequest->only([
+                'customerName',
+                'customerContact',
+                'billToName',
+                'billToAddress',
+                'billToCity',
+                'billToZip',
+                'shipToName',
+                'shipToAddress',
+                'shipToCity',
+                'shipToZip',
+                'orderDateScheduled',
+                'poNum',
+                'vendorPONum',
+                'date',
+                'dateExpired',
+                'salesman',
+                'shippingTerms',
+                'priorityId',
+                'paymentTerms',
+                'fob',
+                'note',
+                'locationGroupName',
+                'phone',
+                'email',
+                'url',
+                'category',
+                'customField',
+                'currencyRate',
+            ]) + [
+                'billToCountryId' => $data['billToCountry']->id,
+                'billToStateId' => $data['billToState']->id,
+                'shipToCountryId' => $data['shipToCountry']->id,
+                'shipToStateId' => $data['shipToState']->id,
+                'taxRateId' => $data['taxRate']->id,
+                'statusId' => $data['status']->id,
+                'currencyId' => $data['currency']->id,
+                'customerId' => $customer->id,
+                'carrierId' => $data['carrier']->id,
+                'carrierServiceId' => $data['carrierService']->id,
+                'residentialFlag' => $storeSalesOrderRequest->shipToResidential,
+                'qbClassId' => $data['qbclass']->id,
+                'num' =>  $storeSalesOrderRequest->soNum ?? $newNum,
+            ]
         );
 
         $salesOrderItems = [];
@@ -234,7 +248,7 @@ class SalesOrderController extends Controller
             );
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => $e->getMessage()], Response::HTTP_NOT_FOUND);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }

@@ -16,18 +16,18 @@ Route::post('/login', [UserController::class, 'login']);
 Route::get('/permissions', [UserController::class, 'getUserPermissions']);
 
 Route::middleware('auth:api')->group(function () {
-   Route::apiResources(
-        [
-            'sales-order' => SalesOrderController::class,
-            'product' => ProductController::class,
-            'customer' => CustomerController::class,
-            'part' => PartController::class,
-            'country-state' => CountryAndStateController::class,
-            'qbclass' => QuickBookClassController::class,
-            'taxrate' => TaxRateController::class,
-            'currency' => CurrencyController::class,
-        ]
-    ); 
+    Route::apiResources(
+            [
+                'sales-order' => SalesOrderController::class,
+                'product' => ProductController::class,
+                'customer' => CustomerController::class,
+                'part' => PartController::class,
+                'country-state' => CountryAndStateController::class,
+                'qbclass' => QuickBookClassController::class,
+                'taxrate' => TaxRateController::class,
+                'currency' => CurrencyController::class,
+            ]
+        );  
 });
 
 Route::middleware(['auth:sanctum', 'abilities:create-users,create-permission,create-role,assign-role,assign-permission'])->group(function () {
