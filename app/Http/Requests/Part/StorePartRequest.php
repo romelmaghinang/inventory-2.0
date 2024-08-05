@@ -25,64 +25,29 @@ class StorePartRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'abcCode' => ['nullable', 'string', 'max:1'],
-            'accountingHash' => ['nullable', 'string', 'max:30'],
-            'accountingId' => ['nullable', 'string', 'max:36'],
-            'activeFlag' => ['required', 'boolean'],
-            'alertNote' => ['nullable', 'string', 'max:256'],
-            'alwaysManufacture' => ['required', 'boolean'],
-            'configurable' => ['required', 'boolean'],
+            'partNumber' => ['required', 'string', 'max:70', 'unique:part,num'], // num
+            'partDescription' => ['required', 'string', 'max:252'], // description
+            'partDetails' => ['required', 'string'],
+            'uom' => ['required', 'string', 'exists:uom,name'], // uomId
+            'upc' => ['required', 'string', 'max:31'],
+            'partType' => ['required', 'string', 'exists:parttype,name'], // typeId
+            'active' => ['required', 'boolean'], // active Flag
+            'abcCode' => ['required', 'string', 'max:1'],
+            'weight' => ['required', 'numeric'],
+            'weightUom' => ['required', 'integer'], // weightuomId
+            'width' => ['required', 'numeric'],
+            'length' => ['required', 'numeric'], // lenght
+            'sizeUom' => ['required', 'integer'], // size Uom Id
             'consumptionRate' => ['required', 'numeric'],
-            'controlledFlag' => ['required', 'boolean'],
-            'cycleCountTol' => ['nullable', 'numeric'],
-            'dateCreated' => ['nullable', 'date'],
-            'dateLastModified' => ['nullable', 'date'],
-            'defaultBomId' => ['nullable', 'integer'],
-            'defaultOutsourcedReturnItemId' => ['nullable', 'integer'],
-            'defaultPoItemTypeId' => ['nullable', 'integer'],
-            'defaultProductId' => ['nullable', 'integer'],
-            'description' => ['nullable', 'string', 'max:252'],
-            'details' => ['nullable', 'string'],
-            'height' => ['nullable', 'numeric'],
-            'inventoryAccountId' => ['nullable', 'integer'],
-            'lastChangedUser' => ['nullable', 'string', 'max:100'],
-            'leadTime' => ['nullable', 'integer'],
-            'len' => ['nullable', 'numeric'],
-            'num' => ['required', 'string', 'max:70', 'unique:part,num'],
-            'partClassId' => ['nullable', 'integer'],
-            'pickInUomOfPart' => ['required', 'boolean'],
-            'receivingTol' => ['nullable', 'numeric'],
-            'revision' => ['nullable', 'string', 'max:15'],
-            'scrapAccountId' => ['nullable', 'integer'],
-            'serializedFlag' => ['required', 'boolean'],
-            'sizeUomId' => ['nullable', 'integer'],
-            'stdCost' => ['nullable', 'numeric'],
-            'taxId' => ['nullable', 'integer'],
-            'trackingFlag' => ['required', 'boolean'],
-            'typeId' => ['required', 'integer'],
-            'uomId' => ['required', 'integer'],
-            'upc' => ['nullable', 'string', 'max:31'],
-            'url' => ['nullable', 'string', 'max:256', 'url'],
-            'varianceAccountId' => ['nullable', 'integer'],
-            'weight' => ['nullable', 'numeric'],
-            'weightUomId' => ['nullable', 'integer'],
-            'width' => ['nullable', 'numeric'],
-            'customFields' => ['nullable'],
-
-            // PRODUCT 
-            'defaultSoItemType' => ['required', 'integer'],
-            'displayTypeId' => ['required', 'integer'],
-            'heigh' => ['nullable', 'numeric'],
-            'incomeAccountId' => ['required', 'integer'],
-            'kitFlag' => ['boolean'],
-            'kitGroupedFlag' => ['boolean'],
-            'price' => ['nullable', 'numeric'],
-            'qbClassId' => ['nullable', 'integer'],
-            'sellableInOtherUoms' => ['boolean'],
-            'showSoComboFlag' => ['boolean'],
-            'sku' => ['nullable', 'string', 'max:41'],
-            'taxableFlag' => ['boolean'],
-            'usePriceFlag' => ['boolean'],
+            'alertNote' => ['required', 'string', 'max:256'],
+            'pictureUrl' => ['required', 'string', 'max:256', 'url'], // url
+            'revision' => ['required', 'string', 'max:15'],
+            'poItemType' => ['required', 'string', 'exists:poitemtype,name'], // defualtPoItemTypeId
+            'defaultOutsourcedReturnItem' => ['required', 'integer'], // defaultOutsourcedReturnItemId
+            'primaryTracking' => ['required', 'string'],
+            'tracks' => ['required', 'string'],
+            'nextValue' => ['required', 'string'],
+            'cf' => ['required', 'string'], // customFields
         ];
     }
 

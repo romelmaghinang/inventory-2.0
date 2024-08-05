@@ -7,12 +7,11 @@ use App\Http\Requests\Currency\StoreCurrencyRequest;
 use App\Http\Requests\Currency\UpdateCurrencyRequest;
 use App\Models\Currency;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class CurrencyController extends Controller
 {
-    public function store(StoreCurrencyRequest $storeCurrencyRequest): JsonResponse
+   public function store(StoreCurrencyRequest $storeCurrencyRequest): JsonResponse
     {
         $currency = Currency::create($storeCurrencyRequest->only(
             [

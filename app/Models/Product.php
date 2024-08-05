@@ -21,28 +21,28 @@ class Product extends Model
         'defaultSoItemType',
         'description', // nullable
         'details',
-        // 'displayTypeId',
+        'displayTypeId',
         'heigh', // nullable
-        // 'incomeAccountId',
+        'incomeAccountId',
         'kitFlag',
         'kitGroupedFlag',
         'len', // nullable
         'num', // nullable
-        // 'partId', // nullable
+        'partId', // nullable
         'price', // nullable
-        // 'qbClassId', // nullable
+        'qbClassId', // nullable
         'sellableInOtherUoms',
         'showSoComboFlag',
-        // 'sizeUomId', // nullable
+        'sizeUomId', // nullable
         'sku', // nullable
-        // 'taxId', // nullable
+        'taxId', // nullable
         'taxableFlag',
-        // 'uomId',
+        'uomId',
         'upc', // nullable
         'url', // nullable
         'usePriceFlag',
         'weight', // nullable
-        // 'weightUomId', // nullable
+        'weightUomId', // nullable
         'width', // nullable
     ];
 

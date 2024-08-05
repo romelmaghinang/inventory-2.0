@@ -4,30 +4,34 @@ use App\Http\Controllers\CountryAndStateController;
 use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\PartController;
+use App\Http\Controllers\PaymentTermsController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\QuickBookClassController;
 use App\Http\Controllers\SalesOrderController;
-use App\Http\Controllers\SalesOrderItemController;
 use App\Http\Controllers\TaxRateController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UnitOfMeasureController;
 use App\Http\Controllers\UserController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [UserController::class, 'login']);
 Route::get('/permissions', [UserController::class, 'getUserPermissions']);
 
 Route::middleware('auth:api')->group(function () {
-    Route::apiResources(
-            [
-                'sales-order' => SalesOrderController::class,
-                'product' => ProductController::class,
-                'customer' => CustomerController::class,
-                'part' => PartController::class,
-                'country-state' => CountryAndStateController::class,
-                'qbclass' => QuickBookClassController::class,
-                'taxrate' => TaxRateController::class,
-                'currency' => CurrencyController::class,
-            ]
-        );  
+   Route::apiResources(
+        [
+            'sales-order' => SalesOrderController::class,   
+            'product' => ProductController::class,
+            'customer' => CustomerController::class,
+            'part' => PartController::class,
+            'country-state' => CountryAndStateController::class,
+            'qbclass' => QuickBookClassController::class,
+            'taxrate' => TaxRateController::class,
+            'currency' => CurrencyController::class,
+            'uom' => UnitOfMeasureController::class,
+            'payment-terms' => PaymentTermsController::class,
+        ]
+    ); 
 });
 
 Route::middleware(['auth:sanctum', 'abilities:create-users,create-permission,create-role,assign-role,assign-permission'])->group(function () {

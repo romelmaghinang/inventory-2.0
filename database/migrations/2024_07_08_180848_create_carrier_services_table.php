@@ -24,22 +24,22 @@ return new class extends Migration
         });
 
         DB::table('carrierservice')->insert([
-            ['carrierId' => 3, 'code' => '01' , 'name' =>  'Next Day Air',],
-            ['carrierId' => 3, 'code' => '02' , 'name' =>  '2nd Day Air ',],
-            ['carrierId' => 3, 'code' => '03' , 'name' =>  'Ground',],
-            ['carrierId' => 3, 'code' => '12' , 'name' =>  '3 Day Select',],
-            ['carrierId' => 3, 'code' => '13' , 'name' =>  'Next Day Air Saver',],
-            ['carrierId' => 3, 'code' => '14' , 'name' =>  'Next Day Air Early A.M.',],
-            ['carrierId' => 3, 'code' => '59' , 'name' =>  '2nd Day Air A.M.',],
-            ['carrierId' => 4, 'code' => '01' , 'name' =>  'Ground',],
-            ['carrierId' => 4, 'code' => '02' , 'name' =>  'First Overnight',],
-            ['carrierId' => 4, 'code' => '03' , 'name' =>  'Standard Overnight',],
-            ['carrierId' => 4, 'code' => '04' , 'name' =>  '2Day',],
-            ['carrierId' => 4, 'code' => '05' , 'name' =>  'Express Saver',],
-            ['carrierId' => 4, 'code' => '06' , 'name' =>  'SmartPost',],
-            ['carrierId' => 4, 'code' => '08' , 'name' =>  'International Priority',],
-            ['carrierId' => 4, 'code' => '09' , 'name' =>  'International Ground',],
-            ['carrierId' => 5, 'code' => '' , 'name' =>  'Priority Mail',],
+            ['carrierId' => 3, 'code' => '01', 'name' =>  'Next Day Air',],
+            ['carrierId' => 3, 'code' => '02', 'name' =>  '2nd Day Air ',],
+            ['carrierId' => 3, 'code' => '03', 'name' =>  'Ground',],
+            ['carrierId' => 3, 'code' => '12', 'name' =>  '3 Day Select',],
+            ['carrierId' => 3, 'code' => '13', 'name' =>  'Next Day Air Saver',],
+            ['carrierId' => 3, 'code' => '14', 'name' =>  'Next Day Air Early A.M.',],
+            ['carrierId' => 3, 'code' => '59', 'name' =>  '2nd Day Air A.M.',],
+            ['carrierId' => 4, 'code' => '01', 'name' =>  'Ground',],
+            ['carrierId' => 4, 'code' => '02', 'name' =>  'First Overnight',],
+            ['carrierId' => 4, 'code' => '03', 'name' =>  'Standard Overnight',],
+            ['carrierId' => 4, 'code' => '04', 'name' =>  '2Day',],
+            ['carrierId' => 4, 'code' => '05', 'name' =>  'Express Saver',],
+            ['carrierId' => 4, 'code' => '06', 'name' =>  'SmartPost',],
+            ['carrierId' => 4, 'code' => '08', 'name' =>  'International Priority',],
+            ['carrierId' => 4, 'code' => '09', 'name' =>  'International Ground',],
+            ['carrierId' => 5, 'code' => '', 'name' =>  'Priority Mall',],
         ]);
     }
 

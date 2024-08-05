@@ -23,8 +23,8 @@ return new class extends Migration
             $table->integer('discountDays')->nullable();
             $table->string('name', 30)->notnull()->unique('u_name');
             $table->integer('netDays')->nullable();
-            $table->integer('nextMonth')->nullable();
-            $table->boolean('readOnly')->notnull();
+            $table->date('nextMonth')->nullable();
+            $table->boolean('readOnly')->notnull()->default(true);
             $table->integer('typeId')->notnull();
             $table->index('typeId', 'Performance');
         });

@@ -2,57 +2,96 @@
 
 namespace App\Http\Controllers;
 
-use App\DataTables\CustomerDataTable;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Customer\StoreCustomerRequest;
 use App\Http\Requests\Customer\UpdateCustomerRequest;
 use App\Models\Account;
 use App\Models\Address;
+use App\Models\AddressType;
+use App\Models\Carrier;
+use App\Models\CarrierService;
+use App\Models\Country;
+use App\Models\Currency;
 use App\Models\Customer;
+use App\Models\CustomerStatus;
+use App\Models\PaymentTerms;
+use App\Models\Priority;
+use App\Models\qbClass;
+use App\Models\ShipTerms;
+use App\Models\State;
+use App\Models\TaxRate;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
 
 class CustomerController extends Controller
 {
     public function store(StoreCustomerRequest $storeCustomerRequest): JsonResponse
     {
-        $account = Account::create(['typeId' => $storeCustomerRequest->accountTypeId]);
+        try {
+            $currency = Currency::where('name', $storeCustomerRequest->currencyName)->firstOrFail();
+            $customerStatus = CustomerStatus::where('name', $storeCustomerRequest->status)->firstOrFail();
+            $taxRate = TaxRate::where('name', $storeCustomerRequest->taxRate)->firstOrFail();
+            $priority = Priority::where('name', $storeCustomerRequest->defaultPriority)->firstOrFail();
+            $paymentTerms = PaymentTerms::where('name', $storeCustomerRequest->paymentTerms)->firstOrFail();
+            $carrier = Carrier::where('name', $storeCustomerRequest->carrierName)->firstOrFail();
+            $carrierService = CarrierService::where('name', $storeCustomerRequest->carrierService)->firstOrFail();
+            // $shipTerms = ShipTerms::where('name', $storeCustomerRequest->shippingTerms)->firstOrFail();
+            $quickBook = qbClass::where('name', $storeCustomerRequest->quickBooksClassName)->firstOrFail();
 
-        $customer = Customer::create($storeCustomerRequest->except(
-            [
-                'accountTypeId',
-                'name',
-                'city',
-                'countryId',
-                'locationGroupId',
-                'addressName',
-                'pipelineContactNum',
-                'stateId',
-                'address',
-                'typeId',
-                'zip'
-            ]
-        ) +
-            [
-                'accountId' => $account->id,
-                'name' => $storeCustomerRequest->customerName,
-            ]);
+            $addressType = AddressType::where('name', $storeCustomerRequest->addressType)->firstOrFail();
+            $state = State::where('name', $storeCustomerRequest->state)->firstOrFail();
+            $country = Country::where('name', $storeCustomerRequest->country)->firstOrFail();
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => $e->getMessage()], Response::HTTP_NOT_FOUND);
+        };
+
+        $customer = Customer::create(
+            $storeCustomerRequest->only(
+                [
+                    'name',
+                    'currencyRate',
+                    'creditLimit',
+                    'number',
+                    'taxExempt',
+                    'taxExemptNumber',
+                    'url',
+                    'toBeEmailed',
+                    'toBePrinted',
+                    'cf'
+                ]
+            )
+                +
+                [
+                    'currencyId' => $currency->id,
+                    'statusId' => $customerStatus->id,
+                    'activeFLag' => $storeCustomerRequest->active,
+                    'taxRateId' => $taxRate->id,
+                    'defaultPaymentTermsId' => $paymentTerms->id,
+                    'defaultCarrierId' => $carrier->id,
+                    'carrierServiceId' => $carrierService->id,
+                    'qbClassId' => $quickBook->id,
+                ]
+        );
 
         $address = Address::create(
-            $storeCustomerRequest->only([
-                'name',
-                'countryId',
-                'locationGroupId',
-                'addressName',
-                'pipelineContactNum',
-                'stateId',
-                'address',
-                'typeId',
-                'zip'
-            ]) +
+            $storeCustomerRequest->only(
                 [
-                    'accountId' => $account->id
+                    'addressName',
+                    'address',
+                    'city',
+                    'zip',
+
+                ]
+            ) +
+                [
+                    'accountId' => 1,
+                    'piplineContactNum' => $storeCustomerRequest->addressContact,
+                    'typeId' => $addressType->id,
+                    'activeFlag' => $storeCustomerRequest->isDefault,
+                    'stateId' => $state->id,
+                    'countryId' => $country->id,
+                    'name' => $storeCustomerRequest->addressName,
                 ]
         );
 
@@ -77,46 +116,74 @@ class CustomerController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateCustomerRequest $updateCustomerRequest, Customer $customer): JsonResponse
+    public function update(UpdateCustomerRequest $request, Customer $customer): JsonResponse
     {
-        $account = Account::findOrFail($customer->accountId);
-        $address = Address::where('accountId', $account->id)->firstOrFail();
+        try {
+            $account = Account::findOrFail($customer->account_id);
+            $address = Address::where('customer_id', $customer->id)->firstOrFail();
+            $currency = Currency::where('name', $request->currencyName)->firstOrFail();
+            $customerStatus = CustomerStatus::where('name', $request->status)->firstOrFail();
+            $taxRate = TaxRate::where('name', $request->taxRate)->firstOrFail();
+            $priority = Priority::where('name', $request->defaultPriority)->firstOrFail();
+            $paymentTerms = PaymentTerms::where('name', $request->paymentTerms)->firstOrFail();
+            $carrier = Carrier::where('name', $request->carrierName)->firstOrFail();
+            $carrierService = CarrierService::where('name', $request->carrierService)->firstOrFail();
+            $shipTerms = ShipTerms::where('name', $request->shippingTerms)->firstOrFail();
+            $quickBook = QbClass::where('name', $request->quickBooksClassName)->firstOrFail();
+            $addressType = AddressType::where('name', $request->addressType)->firstOrFail();
+            $state = State::where('name', $request->state)->firstOrFail();
+            $country = Country::where('name', $request->country)->firstOrFail();
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => $e->getMessage()], Response::HTTP_NOT_FOUND);
+        }
 
-        $account->update(['typeId' => $updateCustomerRequest->accountTypeId]);
+        $account->update(['typeId' => $request->accountTypeId]);
 
-        $customer->update($updateCustomerRequest->except(
-            [
-                'accountTypeId',
-                'name',
-                'city',
-                'countryId',
-                'locationGroupId',
-                'addressName',
-                'pipelineContactNum',
-                'stateId',
-                'address',
-                'typeId',
-                'zip'
-            ]
-        ) +
-            [
-                'accountId' => $account->id,
-                'name' => $updateCustomerRequest->customerName,
-            ]);
+        $customer->update(
+            $request->only(
+                [
+                    'name',
+                    'currencyRate',
+                    'creditLimit',
+                    'number',
+                    'taxExempt',
+                    'taxExemptNumber',
+                    'url',
+                    'toBeEmailed',
+                    'toBePrinted',
+                    'cf'
+                ]
+            )
+                +
+                [
+                    'currencyId' => $currency->id,
+                    'statusId' => $customerStatus->id,
+                    'activeFLag' => $request->active,
+                    'taxRateId' => $taxRate->id,
+                    'defaultPaymentTermsId' => $paymentTerms->id,
+                    'defaultCarrierId' => $carrier->id,
+                    'carrierServiceId' => $carrierService->id,
+                    'qbClassId' => $quickBook->id,
+                ]
+        );
 
         $address->update(
-            [
-                'accountId' => $account->id,
-                'name' => $updateCustomerRequest->name,
-                'countryId' => $updateCustomerRequest->countryId,
-                'locationGroupId' => $updateCustomerRequest->locationGroupId,
-                'addressName' => $updateCustomerRequest->addressName,
-                'pipelineContactNum' => $updateCustomerRequest->pipelineContactNum,
-                'stateId' => $updateCustomerRequest->stateId,
-                'address' => $updateCustomerRequest->address,
-                'typeId' => $updateCustomerRequest->typeId,
-                'zip' => $updateCustomerRequest->zip,
-            ]
+            $request->only(
+                [
+                    'addressName',
+                    'address',
+                    'city',
+                    'zip',
+                ]
+            )
+                +
+                [
+                    'piplineContactNum' => $request->addressContact,
+                    'typeId' => $addressType->id,
+                    'activeFlag' => $request->isDefault,
+                    'stateId' => $state->id,
+                    'countryId' => $country->id,
+                ]
         );
 
         return response()->json(

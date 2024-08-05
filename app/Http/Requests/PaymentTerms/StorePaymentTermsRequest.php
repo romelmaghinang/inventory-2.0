@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Payment;
+namespace App\Http\Requests\PaymentTerms;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdatePaymentTermsRequest extends FormRequest
+class StorePaymentTermsRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

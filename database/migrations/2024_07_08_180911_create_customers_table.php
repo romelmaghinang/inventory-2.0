@@ -36,7 +36,7 @@ return new class extends Migration
             $table->unsignedBigInteger('parentId')->nullable();
             $table->unsignedBigInteger('pipelineAccountNum')->nullable();
             $table->unsignedBigInteger('qbClassId')->nullable();
-            $table->unsignedBigInteger('statusId')->nullable(false);
+            $table->unsignedBigInteger('statusId')->nullable();
             $table->unsignedBigInteger('sysUserId')->nullable();
             $table->boolean('taxExempt')->nullable(false)->default(true);
             $table->string('taxExemptNumber', 30)->nullable();
@@ -46,6 +46,7 @@ return new class extends Migration
             $table->string('url', 30)->nullable();
             $table->unsignedBigInteger('issuableStatusId')->nullable();
             $table->unsignedBigInteger('carrierServiceId')->nullable();
+            $table->string('cf')->nullable();
             $table->unique('name', 'u_name');
             $table->unique('number', 'u_number');
             $table->unique('parentId', 'u_parentId');

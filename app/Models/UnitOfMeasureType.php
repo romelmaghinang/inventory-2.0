@@ -5,14 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class CustomerStatus extends Model
+class UnitOfMeasureType extends Model
 {
     use HasFactory;
 
-    protected $table = 'customerstatus';
-
-    protected $fillable = 
-    [
-        'name'
-    ];
+    protected $table = 'uomtype';
 }
