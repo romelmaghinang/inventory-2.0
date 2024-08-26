@@ -1,13 +1,5 @@
 <?php
 
-use App\Models\AccountType;
-use App\Models\Carrier;
-use App\Models\CarrierService;
-use App\Models\Country;
-use App\Models\Currency;
-use App\Models\Customer;
-use App\Models\State;
-use App\Models\Tax;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -23,17 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('billToAddress', 90)->nullable();
             $table->string('billToCity', 30)->nullable();
-            $table->unsignedBigInteger('billToCountryId')->nullable();
             $table->string('billToName', 41)->nullable();
-            $table->unsignedBigInteger('billToStateId')->nullable();
             $table->string('billToZip', 10)->nullable();
-            $table->unsignedBigInteger('carrierId')->nullable();
-            $table->unsignedBigInteger('carrierServiceId')->nullable();
             $table->decimal('cost', 28, 9)->nullable();
-            $table->unsignedBigInteger('currencyId')->nullable();
             $table->double('currencyRate')->nullable();
             $table->string('customerContact', 30)->nullable();
-            $table->unsignedBigInteger('customerId')->nullable();
             $table->string('customerPO', 25)->nullable();
             $table->dateTime('dateCompleted')->nullable();
             $table->dateTime('dateCreated')->nullable();
@@ -44,29 +30,20 @@ return new class extends Migration
             $table->dateTime('dateRevision')->nullable();
             $table->string('email', 256)->nullable();
             $table->decimal('estimatedTax', 28, 9)->nullable();
-            $table->unsignedBigInteger('locationGroupId')->nullable();
             $table->decimal('mcTotalTax', 28, 9)->nullable();
             $table->longText('note')->nullable();
             $table->string('num', 25)->nullable();
-            $table->unsignedBigInteger('paymentTermsId')->nullable();
             $table->string('phone', 256)->nullable();
-            $table->unsignedBigInteger('priorityId')->nullable();
-            $table->unsignedBigInteger('qbClassId')->nullable();
             $table->boolean('residentialFlag')->default(false);
             $table->integer('revisionNum')->nullable();
             $table->string('salesman', 30)->nullable();
             $table->unsignedBigInteger('salesmanId')->nullable();
             $table->string('salesmanInitials', 5)->nullable();
-            $table->unsignedBigInteger('shipTermsId')->nullable();
             $table->string('shipToAddress', 90)->nullable();
             $table->string('shipToCity', 30)->nullable();
-            $table->unsignedBigInteger('shipToCountryId')->nullable();
             $table->string('shipToName', 41)->nullable();
-            $table->unsignedBigInteger('shipToStateId')->nullable();
             $table->string('shipToZip', 10)->nullable();
-            $table->unsignedBigInteger('statusId')->nullable();
             $table->double('taxRate')->nullable();
-            $table->unsignedBigInteger('taxRateId')->nullable();
             $table->string('taxRateName', 31)->nullable();
             $table->boolean('toBeEmailed')->default(false);
             $table->boolean('toBePrinted')->default(false);
@@ -79,7 +56,22 @@ return new class extends Migration
             $table->string('username', 30)->nullable();
             $table->string('vendorPO', 25)->nullable();
             $table->string('customField')->nullable();
-            $table->timestamps();
+
+            $table->foreignId('billToCountryId')->nullable()->constrained('country');
+            $table->foreignId('billToStateId')->nullable()->constrained('state');
+            $table->foreignId('carrierId')->nullable()->constrained('carrier');
+            $table->foreignId('carrierServiceId')->nullable()->constrained('carrierservice');
+            $table->foreignId('currencyId')->nullable()->constrained('currency');
+            $table->foreignId('customerId')->nullable()->constrained('customer');
+            $table->foreignId('locationGroupId')->nullable()->constrained('locationgroup');
+            $table->foreignId('paymentTermsId')->nullable()->constrained('paymentterms');
+            $table->foreignId('shipTermsId')->nullable()->constrained('shipterms');
+            $table->foreignId('priorityId')->nullable()->constrained('priority');
+            $table->foreignId('qbClassId')->nullable()->constrained('qbclass');
+            $table->foreignId('shipToCountryId')->nullable()->constrained('country');
+            $table->foreignId('shipToStateId')->nullable()->constrained('state');
+            $table->foreignId('statusId')->nullable()->constrained('sostatus');
+            $table->foreignId('taxRateId')->nullable()->constrained('taxrate');
         });
     }
 

@@ -18,11 +18,11 @@ return new class extends Migration
         });
 
         DB::table('addresstype')->insert([
-            ['name' => 'Bill To'],
-            ['name' => 'Home'],
-            ['name' => 'Main Office'],
-            ['name' => 'Remit To'],
-            ['name' => 'Ship To'],
+            ['id' => 20,'name' => 'Bill To'],
+            ['id' => 40,'name' => 'Home'],
+            ['id' => 50,'name' => 'Main Office'],
+            ['id' => 30,'name' => 'Remit To'],
+            ['id' => 10,'name' => 'Ship To'],
         ]);
     }
 

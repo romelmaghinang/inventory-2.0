@@ -1,8 +1,5 @@
 <?php
 
-use App\Models\AccountType;
-use App\Models\State;
-use App\Models\Country;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
@@ -16,18 +13,20 @@ return new class extends Migration
     {
         Schema::create('address', function (Blueprint $table) {
             $table->id();
-            $table->integer('accountId')->unsigned();
+            $table->unsignedBigInteger('accountId')->nullable();
             $table->string('name', 41);
             $table->string('city', 30)->nullable();
-            $table->integer('countryId')->unsigned()->nullable();
-            $table->boolean('defaultFlag')->default(true);;
-            $table->integer('locationGroupId')->unsigned()->nullable();
-            $table->string('addressName', 90)->nullable();
+            $table->boolean('defaultFlag')->default(true);
+            $table->string('addressName', 90)->nullable()->unique();
             $table->integer('pipelineContactNum')->nullable();
-            $table->integer('stateId')->unsigned()->nullable();
             $table->string('address', 90);
-            $table->integer('typeID')->unsigned()->nullable();
             $table->string('zip', 10)->nullable();
+
+            $table->foreignId('countryId')->nullable()->constrained('country');
+            $table->foreignId('typeId')->nullable()->constrained('addresstype');
+            $table->foreignId('stateId')->nullable()->constrained('state');
+            $table->foreignId('locationGroupId')->nullable()->constrained('locationgroup');
+
             $table->index(['accountId', 'locationGroupId', 'stateId', 'typeID', 'countryId'], 'Performance');
         });
     }
@@ -37,6 +36,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('address');
+        Schema::dropIfExists('addresses');
     }
 };
