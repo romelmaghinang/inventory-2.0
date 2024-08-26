@@ -22,7 +22,7 @@ class Address extends Model
         'pipelineContactNum',
         'stateId',
         'address',
-        'typeID',
+        'typeId',
         'zip',
     ];
 

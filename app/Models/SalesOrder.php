@@ -14,62 +14,64 @@ class SalesOrder extends Model
     protected $table = 'so'; 
 
     protected $fillable = [
-        'billToAddress', // nullable
-        'billToCity', // nullable
-        'billToCountryId', // nullable
-        'billToName', // nullable
-        'billToStateId', // nullable
-        'billToZip', // nullable
-        'carrierId', // nullable
-        'carrierServiceId', // nullable
-        'cost', // nullable
-        'currencyId', // nullable
-        'currencyRate', // nullable
-        'customerContact', // nullable
-        'customerId', // nullable
-        'customerPO', // nullable
-        'dateCompleted', // nullable
-        'dateCreated', // nullable
-        'dateExpired', // nullable
-        'dateFirstShip', // nullable
-        'dateIssued', // nullable
-        'dateLastModified', // nullable
-        'dateRevision', // nullable
-        'email', // nullable
-        'estimatedTax', // nullable
-        'locationGroupId', // nullable
-        'mcTotalTax', // nullable
-        'note', // nullable
-        'num', // nullable
-        'paymentTermsId', // nullable
-        'phone', // nullable
-        'priorityId', // nullable
-        'qbClassId', // nullable
+        'billToAddress', 
+        'billToCity', 
+        'billToCountryId', 
+        'billToName', 
+        'billToStateId', 
+        'billToZip', 
+        'carrierId', 
+        'carrierServiceId', 
+        'cost', 
+        'currencyId', 
+        'currencyRate', 
+        'customerContact', 
+        'customerId', 
+        'customerPO', 
+        'dateCompleted', 
+        'dateCreated', 
+        'dateExpired', 
+        'dateFirstShip', 
+        'dateIssued', 
+        'dateLastModified', 
+        'dateRevision', 
+        'email', 
+        'estimatedTax', 
+        'locationGroupId', 
+        'mcTotalTax', 
+        'note', 
+        'num', 
+        'paymentTermsId', 
+        'phone', 
+        'priorityId', 
+        'qbClassId', 
         'residentialFlag', // default(false)
-        'revisionNum', // nullable
-        'salesman', // nullable
-        'salesmanId', // nullable
-        'salesmanInitials', // nullable
-        'shipTermsId', // nullable
-        'shipToAddress', // nullable
-        'shipToCity', // nullable
-        'shipToCountryId', // nullable
-        'shipToName', // nullable
-        'shipToStateId', // nullable
-        'shipToZip', // nullable
-        'statusId', // nullable
-        'taxRate', // nullable
-        'taxRateId', // nullable
-        'taxRateName', // nullable
+        'revisionNum', 
+        'salesman', 
+        'salesmanId', 
+        'salesmanInitials', 
+        'shipTermsId', 
+        'shipToAddress', 
+        'shipToCity', 
+        'shipToCountryId', 
+        'shipToName', 
+        'shipToStateId', 
+        'shipToZip', 
+        'statusId', 
+        'taxRate', 
+        'taxRateId', 
+        'taxRateName', 
         'toBeEmailed', // default(false)
         'toBePrinted', // default(false)
         'totalIncludesTax', // default(false)
-        'totalTax', // nullable
-        'subTotal', // nullable
-        'totalPrice', // nullable
-        'typeId', // nullable
-        'url', // nullable
-        'username', // nullable
-        'vendorPO', // nullable
+        'totalTax', 
+        'subTotal', 
+        'totalPrice', 
+        'typeId', 
+        'url', 
+        'username', 
+        'vendorPO', 
     ];
+
+    public $timestamps = false;
 }
