@@ -12,16 +12,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('taxratetype', function (Blueprint $table) {
+        Schema::create('productincltype', function (Blueprint $table) {
             $table->id();
-            $table->string('name', 30)->nullable(false);
-            $table->timestamps();
+            $table->string('name');
         });
 
-        DB::table('taxratetype')->insert(
+        DB::table('productincltype')->insert(
             [
-                ['name' => 'Percentage'],
-                ['name' => 'Flat Rate'],
+                ['id' => 1, 'name' => 'All'],
+                ['id' => 2, 'name' => 'Part Category'],
+                ['id'=> 3, 'name'=> 'Product'],
+                ['id'=> 4, 'name'=> 'Product Tree'],
             ]
         );
     }
@@ -31,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('taxratetype');
+        Schema::dropIfExists('product_incl_types');
     }
 };

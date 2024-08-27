@@ -24,7 +24,7 @@ return new class extends Migration
             $table->dateTime('dateShipped')->nullable();
             $table->integer('locationGroupId');
             $table->longText('note')->nullable();
-            $table->string('num', 35)->nullable();
+            $table->string('num', 35)->nullable()->unique();
             $table->integer('orderTypeId');
             $table->boolean('ownerIsFrom');
             $table->integer('poId')->nullable();
@@ -34,7 +34,6 @@ return new class extends Migration
             $table->integer('soId')->nullable();
             $table->integer('statusId')->nullable();
             $table->integer('xoId')->nullable();
-            $table->unique('num');
             $table->index(['shippedBy', 'carrierId', 'locationGroupId', 'orderTypeId', 'statusId', 'FOBPointId', 'carrierServiceId', 'soId', 'xoId', 'poId', 'dateShipped'], 'Performance');
             $table->timestamps();
         });
@@ -45,6 +44,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('ship');
+        Schema::dropIfExists('shippings');
     }
 };

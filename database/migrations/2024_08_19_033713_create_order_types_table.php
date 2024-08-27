@@ -12,15 +12,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pickitemtype', function (Blueprint $table) {
+        Schema::create('ordertype', function (Blueprint $table) {
             $table->id();
             $table->string('name');
         });
 
-        DB::table('pickitemtype')->insert([
-            ['id' => 30,'name'=> 'BTO'],
-            ['id' => 10,'name'=> 'Normal'],
-            ['id' => 20,'name'=> 'PFL'],
+        DB::table('ordertype')->insert([
+            ['id' => 1, 'name' => 'None'],
+            ['id' => 10, 'name' => 'PO'],
+            ['id' => 20, 'name' => 'SO'],
+            ['id' => 30, 'name' => 'TO'],
+            ['id' => 40, 'name' => 'WO'],
         ]);
     }
 
@@ -29,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('pickitemtype');
+        Schema::dropIfExists('order_types');
     }
 };

@@ -13,8 +13,7 @@ return new class extends Migration
     {
         Schema::create('accounttype', function (Blueprint $table) {
             $table->id();
-            $table->string('name', 30)->nullable();
-            $table->unique('name', 'u_name');
+            $table->string('name', 30)->nullable()->unique();
         });
     }
 
@@ -23,6 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('accounttype');
+        Schema::dropIfExists('account_types');
     }
 };

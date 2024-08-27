@@ -21,10 +21,9 @@ return new class extends Migration
             $table->boolean('excludeFromUpdate')->nullable();
             $table->boolean('homeCurrency')->nullable();
             $table->unsignedBigInteger('lastChangedUserId')->nullable();
-            $table->string('name', 255)->nullable();
+            $table->string('name', 255)->nullable()->unique();
             $table->integer('rate')->nullable();
             $table->integer('symbol')->nullable();
-            $table->unique('name', 'u_name');
             $table->index('lastChangedUserId', 'Performance');
         });
     }

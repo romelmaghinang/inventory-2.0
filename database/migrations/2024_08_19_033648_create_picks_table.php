@@ -20,8 +20,8 @@ return new class extends Migration
             $table->dateTime('dateStarted')->nullable();
             $table->string('num', 35)->nullable();
             $table->unsignedBigInteger('userId')->nullable();
-            
-            $table->foreignId('locationGroupId')->constrained('locationgroup');
+
+            $table->unsignedBigInteger('locationGroupId');
             $table->foreignId('statusId')->constrained('pickstatus');
             $table->foreignId('typeId')->constrained('picktype');
             $table->foreignId('priority')->constrained('priority');
@@ -33,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('pick');
+        Schema::dropIfExists('picks');
     }
 };

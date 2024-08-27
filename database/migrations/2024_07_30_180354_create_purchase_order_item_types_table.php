@@ -23,7 +23,7 @@ return new class extends Migration
                 ['id' => 11, 'name' => 'Misc. Purchase'],
                 ['id' => 20, 'name' => 'Credit Return'],
                 ['id' => 21, 'name' => 'Misc. Credit'],
-                ['id' => 30, 'name' => 'Outsourced'],
+                ['id' => 30, 'name' => 'Out Sourced'],
                 ['id' => 40, 'name' => 'Shipping'],
             ]
         );

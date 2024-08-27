@@ -13,21 +13,22 @@ return new class extends Migration
     {
         Schema::create('location', function (Blueprint $table) {
             $table->id();
-            $table->boolean('activeFlag')->notnull()->default(true);
-            $table->boolean('countedAsAvailable')->notnull();
+            $table->boolean('activeFlag')->default(false);
+            $table->boolean('countedAsAvailable');
             $table->datetime('dateLastModified')->nullable();
             $table->integer('defaultCustomerId')->nullable();
-            $table->boolean('defaultFlag')->notnull()->default(true);
+            $table->boolean('defaultFlag')->default(true);
             $table->integer('defaultVendorId')->nullable();
             $table->string('description', 252)->nullable();
-            $table->integer('locationGroupId')->notnull();
-            $table->string('name', 30)->notnull()->unique();
-            $table->boolean('pickable')->notnull();
-            $table->boolean('receivable')->notnull();
+            $table->string('name', 30)->unique();
+            $table->boolean('pickable');
+            $table->boolean('receivable');
             $table->integer('sortOrder')->nullable();
-            $table->integer('typeId')->notnull();
+
+            $table->foreignId('locationGroupId')->constrained('locationgroup');
+            $table->foreignId('typeId')->constrained('locationtype');
+            
             $table->index(['typeId', 'locationGroupId', 'defaultVendorId', 'defaultCustomerId', 'name'], 'Performance');
-            $table->timestamps();
         });
     }
 
@@ -36,6 +37,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('location');
+        Schema::dropIfExists('locations');
     }
 };

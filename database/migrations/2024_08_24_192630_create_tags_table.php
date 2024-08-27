@@ -22,7 +22,7 @@ return new class extends Migration
             $table->boolean('serializedFlag');
             $table->string('trackingEncoding', 30);
             $table->boolean('usedFlag');
-
+            
             $table->unsignedInteger('woItemId')->nullable();
             $table->unsignedInteger('partId')->nullable();
             $table->unsignedInteger('typeId');

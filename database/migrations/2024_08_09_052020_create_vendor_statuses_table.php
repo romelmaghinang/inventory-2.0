@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -11,14 +12,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('locationgroup', function (Blueprint $table) {
+        Schema::create('vendorstatus', function (Blueprint $table) {
             $table->id();
-            $table->boolean('activeFlag')->default(0);
-            $table->dateTime('dateLastModified')->nullable();
             $table->string('name', 30)->unique();
-            $table->integer('qbClassId')->nullable();
-            $table->timestamps();
         });
+
+        DB::table('vendorstatus')->insert([
+            ['name' => 'Normal'],
+            ['name' => 'Preferred'],
+            ['name' => 'Hold PO'],
+            ['name' => 'Hold Receipt'],
+            ['name' => 'Hold All'],
+        ]);
     }
 
     /**
@@ -26,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('locationgroup');
+        Schema::dropIfExists('vendor_statuses');
     }
 };

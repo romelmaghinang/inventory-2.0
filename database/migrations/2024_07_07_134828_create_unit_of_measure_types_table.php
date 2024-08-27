@@ -12,16 +12,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('picktype', function (Blueprint $table) {
+        Schema::create('uomtype', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('name', 15)->unique();
         });
 
-        DB::table('picktype')->insert(
+        DB::table('uomtype')->insert(
             [
-                ['id' => 30, 'name' => 'Move'],
-                ['id' => 10, 'name' => 'Pick'],
-                ['id' => 20, 'name' => 'Putaway'],
+                ['name' => 'Count'],
+                ['name' => 'Weight'],
+                ['name' => 'Length'],
+                ['name' => 'Area'],
+                ['name' => 'Volume'],
+                ['name' => 'Time'],
             ]
         );
     }
@@ -31,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('picktype');
+        Schema::dropIfExists('unit_of_measure_types');
     }
 };

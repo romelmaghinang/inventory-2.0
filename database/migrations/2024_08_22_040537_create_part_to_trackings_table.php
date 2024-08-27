@@ -11,9 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('country', function (Blueprint $table) {
+        Schema::create('parttotracking', function (Blueprint $table) {
             $table->id();
-            $table->string('name', 30)->nullable()->unique();
+            $table->string('nextValue', 41)->nullable();
+            $table->boolean('primaryFlag')->nullable();
+
+            $table->foreignId('partTrackingId')->constrained('parttracking');
+            $table->foreignId('partId')->constrained('part');
         });
     }
 
@@ -22,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('countries');
+        Schema::dropIfExists('part_to_trackings');
     }
 };

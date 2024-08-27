@@ -15,17 +15,17 @@ return new class extends Migration
             $table->id();
             $table->string('accountingHash', 30)->nullable();
             $table->string('accountingId', 36)->nullable();
-            $table->boolean('activeFlag')->notnull()->default(true);
+            $table->boolean('activeFlag')->default(true);
             $table->dateTime('dateCreated')->nullable();
             $table->dateTime('dateLastModified')->nullable();
-            $table->boolean('defaultTerm')->notnull();
+            $table->boolean('defaultTerm');
             $table->float('discount', 8, 2)->nullable();
             $table->integer('discountDays')->nullable();
-            $table->string('name', 30)->notnull()->unique('u_name');
+            $table->string('name', 30)->unique('u_name');
             $table->integer('netDays')->nullable();
             $table->date('nextMonth')->nullable();
-            $table->boolean('readOnly')->notnull()->default(true);
-            $table->integer('typeId')->notnull();
+            $table->boolean('readOnly')->default(true);
+            $table->foreignId('typeId')->nullable()->constrained('paymenttermstype');
             $table->index('typeId', 'Performance');
         });
     }
@@ -35,6 +35,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('paymentterms');
+        Schema::dropIfExists('payment_terms');
     }
 };

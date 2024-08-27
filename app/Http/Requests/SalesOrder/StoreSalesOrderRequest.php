@@ -53,7 +53,7 @@ class StoreSalesOrderRequest extends FormRequest
             'orderDateScheduled' => ['required', 'date'],
             'dateExpired' => ['required', 'date'], 
             'salesman' => ['required', 'string', 'max:100'], 
-            'shippingTerms' => ['required', 'integer', 'in:10,20,30'], 
+            'shippingTerms' => ['required', 'string', 'max:50'],
             'paymentTerms' => ['required', 'string', 'max:50'],
             'fob' => ['required', 'string', 'max:50'], 
             'note' => ['required', 'string', 'max:500'], 

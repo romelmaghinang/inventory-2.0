@@ -22,7 +22,7 @@ return new class extends Migration
             $table->boolean('alwaysManufacture')->default(true);
             $table->unsignedInteger('cogsAccountId')->nullable();
             $table->boolean('configurable')->default(true);
-            $table->decimal('consumptionRate', 28, 9)->default(0);
+            $table->decimal('consumptionRate', 28, 9)->default(false);
             $table->boolean('controlledFlag')->default(true);
             $table->decimal('cycleCountTol', 28, 9)->nullable();
             $table->dateTime('dateCreated', 6)->nullable();
@@ -47,10 +47,7 @@ return new class extends Migration
             $table->boolean('serializedFlag')->default(true);
             $table->unsignedInteger('sizeUomId')->nullable();
             $table->decimal('stdCost', 28, 9)->nullable();
-            $table->unsignedInteger('taxId')->nullable();
             $table->boolean('trackingFlag')->default(true);
-            $table->unsignedInteger('typeId');
-            $table->unsignedInteger('uomId');
             $table->string('upc', 31)->nullable();
             $table->string('url', 256)->nullable();
             $table->unsignedInteger('varianceAccountId')->nullable();
@@ -61,6 +58,10 @@ return new class extends Migration
             $table->index('num', 'partNumIdx');
             $table->index('description', 'partDescriptionIdx');
             $table->index('upc', 'partUPCIdx');
+
+            $table->foreignId('uomId')->constrained('uom');
+            $table->foreignId('typeId')->constrained('parttype');
+            $table->foreignId('taxId')->nullable()->constrained('taxrate');
         });
     }
 

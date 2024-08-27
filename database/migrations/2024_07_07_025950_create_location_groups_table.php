@@ -11,14 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('qbclass', function (Blueprint $table) {
+        Schema::create('locationgroup', function (Blueprint $table) {
             $table->id();
-            $table->string('accountingHash', 30)->nullable();
-            $table->string('accountingId', 36)->nullable();
-            $table->boolean('activeFlag')->default(true);
-            $table->dateTime('dateCreated')->nullable();
+            $table->boolean('activeFlag')->default(false);
             $table->dateTime('dateLastModified')->nullable();
-            $table->string('name', 31)->nullable()->unique('u_name');
+            $table->string('name', 30)->unique();
+            $table->unsignedBigInteger('qbClassId')->nullable();
         });
     }
 
@@ -27,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('qbclass');
+        Schema::dropIfExists('location_groups');
     }
 };

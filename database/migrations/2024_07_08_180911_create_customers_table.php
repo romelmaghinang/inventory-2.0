@@ -20,37 +20,40 @@ return new class extends Migration
             $table->string('accountingId', 36)->nullable();
             $table->boolean('activeFlag')->nullable();
             $table->decimal('creditLimit', 28, 9)->nullable();
-            $table->unsignedBigInteger('currencyId')->nullable();
             $table->decimal('currencyRate', 28, 9)->nullable();
             $table->dateTime('dateCreated')->nullable();
             $table->dateTime('dateLastModified')->nullable();
-            $table->unsignedBigInteger('defaultCarrierId')->nullable();
-            $table->unsignedBigInteger('defaultPaymentTermsId')->nullable();
             $table->unsignedBigInteger('defaultSalesmanId')->nullable();
-            $table->unsignedBigInteger('defaultShipTermsId')->nullable();
             $table->integer('jobDepth')->nullable();
             $table->string('lastChangedUser', 15)->nullable();
-            $table->string('name', 41)->nullable(false);
+            $table->string('name', 41)->unique();
             $table->string('note', 90)->nullable();
-            $table->string('number', 30)->nullable();
-            $table->unsignedBigInteger('parentId')->nullable();
+            $table->string('number', 30)->nullable()->unique();
+            $table->unsignedBigInteger('parentId')->nullable()->unique('u_parentId');
             $table->unsignedBigInteger('pipelineAccountNum')->nullable();
-            $table->unsignedBigInteger('qbClassId')->nullable();
             $table->unsignedBigInteger('statusId')->nullable();
             $table->unsignedBigInteger('sysUserId')->nullable();
-            $table->boolean('taxExempt')->nullable(false)->default(true);
+            $table->boolean('taxExempt')->default(true);
             $table->string('taxExemptNumber', 30)->nullable();
-            $table->unsignedBigInteger('taxRateId')->nullable();
-            $table->boolean('toBeEmailed')->nullable(false)->default(true);
-            $table->boolean('toBePrinted')->nullable(false)->default(true);
+            $table->boolean('toBeEmailed')->default(true);
+            $table->boolean('toBePrinted')->default(true);
             $table->string('url', 30)->nullable();
-            $table->unsignedBigInteger('issuableStatusId')->nullable();
-            $table->unsignedBigInteger('carrierServiceId')->nullable();
             $table->string('cf')->nullable();
-            $table->unique('name', 'u_name');
-            $table->unique('number', 'u_number');
-            $table->unique('parentId', 'u_parentId');
-            $table->index(['name', 'number', 'carrierServiceId', 'accountId', 'statusId', 'taxRateId', 'defaultPaymentTermsId', 'parentId', 'qbClassId', 'defaultShipTermsId', 'currencyId', 'defaultCarrierId', 'issuableStatusId'], 'Performance');
+
+            $table->foreignId('qbClassId')->nullable()->constrained('qbclass');
+            $table->foreignId('defaultShipTermsId')->nullable()->constrained('shipterms');
+            $table->foreignId('currencyId')->nullable()->constrained('currency');
+            $table->foreignId('defaultPaymentTermsId')->nullable()->constrained('paymentterms');
+            $table->foreignId('defaultCarrierId')->nullable()->constrained('carrier');
+            $table->foreignId('issuableStatusId')->nullable()->constrained('customerstatus');
+            $table->foreignId('carrierServiceId')->nullable()->constrained('carrierservice');
+            $table->foreignId('taxRateId')->nullable()->constrained('taxrate');
+
+            $table->index([
+                'name', 'number', 'carrierServiceId', 'accountId', 'statusId', 'taxRateId',
+                'defaultPaymentTermsId', 'parentId', 'qbClassId', 'defaultShipTermsId',
+                'currencyId', 'defaultCarrierId', 'issuableStatusId'
+            ], 'Performance');
         });
     }
 

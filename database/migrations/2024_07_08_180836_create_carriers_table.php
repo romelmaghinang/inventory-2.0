@@ -16,7 +16,7 @@ return new class extends Migration
             $table->id();
             $table->boolean('activeFlag')->default(true);
             $table->string('description', 256)->nullable();
-            $table->string('name', 60)->nullable()->unique('u_name');
+            $table->string('name', 60)->nullable()->unique();
             $table->boolean('readOnly')->nullable();
             $table->string('scac', 4)->nullable();
         });
@@ -35,6 +35,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('carrier');
+        Schema::dropIfExists('carriers');
     }
 };
