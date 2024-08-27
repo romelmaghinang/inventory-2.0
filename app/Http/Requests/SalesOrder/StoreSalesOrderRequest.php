@@ -80,7 +80,7 @@ class StoreSalesOrderRequest extends FormRequest
             'items.*.taxable' => ['required', 'boolean'],
             'items.*.taxCode' => ['required', 'integer'],
             'items.*.note' => ['required', 'string'],
-            'items.*.itemQuickBooksClassName' => ['required', 'integer'],  
+            'items.*.itemQuickBooksClassName' => ['required', 'string', 'exists:qbclass,name'],  
             'items.*.itemDateScheduled' => ['required', 'date'], 
             'items.*.showItem' => ['required', 'boolean'],
             'items.*.revisionLevel' => ['required', 'string'], 

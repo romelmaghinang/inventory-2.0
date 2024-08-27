@@ -14,43 +14,33 @@ use App\Models\Product;
 use App\Models\qbClass;
 use App\Models\SalesOrder;
 use App\Models\SalesOrderItems;
-use App\Models\SalesOrderStatus;
+use App\Models\ShipTerms;
 use App\Models\State;
 use App\Models\TaxRate;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
 class SalesOrderController extends Controller
 {
     public function store(StoreSalesOrderRequest $storeSalesOrderRequest): JsonResponse
     {
-        try {
-            $data = [
-                'billToCountry' => Country::where('name', $storeSalesOrderRequest->billToCountry)->firstOrFail(),
-                'billToState' => State::where('name', $storeSalesOrderRequest->billToState)->firstOrFail(),
-                'shipToCountry' => Country::where('name', $storeSalesOrderRequest->shipToCountry)->firstOrFail(),
-                'shipToState' => State::where('name', $storeSalesOrderRequest->shipToState)->firstOrFail(),
-                'qbclass' => qbClass::where('name', $storeSalesOrderRequest->quickBookClassName)->firstOrFail(),
-                'status' => SalesOrderStatus::where('id', $storeSalesOrderRequest->status)->firstOrFail(),
-                'currency' => Currency::where('name', $storeSalesOrderRequest->currencyName)->firstOrFail(),
-                'carrier' => Carrier::where('name', $storeSalesOrderRequest->carrierName)->firstOrFail(),
-                'carrierService' => CarrierService::where('name', $storeSalesOrderRequest->carrierService)->firstOrFail(),
-                'taxRate' => TaxRate::where('name', $storeSalesOrderRequest->taxRateName)->firstOrFail(),
-            ];
-        } catch (ModelNotFoundException $e) {
-            return response()->json(['error' => $e->getMessage()], Response::HTTP_NOT_FOUND);
-        }
+        $billToCountry = Country::where('name', $storeSalesOrderRequest->billToCountry)->firstOrFail();
+        $billToState = State::where('name', $storeSalesOrderRequest->billToState)->firstOrFail();
+        $shipToCountry = Country::where('name', $storeSalesOrderRequest->shipToCountry)->firstOrFail();
+        $shipToState = State::where('name', $storeSalesOrderRequest->shipToState)->firstOrFail();
+        $qbclass = qbClass::where('name', $storeSalesOrderRequest->quickBookClassName)->firstOrFail();
+        $currency = Currency::where('name', $storeSalesOrderRequest->currencyName)->firstOrFail();
+        $carrier = Carrier::where('name', $storeSalesOrderRequest->carrierName)->firstOrFail();
+        $carrierService = CarrierService::where('name', $storeSalesOrderRequest->carrierService)->firstOrFail();
+        $taxRate = TaxRate::where('name', $storeSalesOrderRequest->taxRateName)->firstOrFail();
+        $shipterms = ShipTerms::where('name', $storeSalesOrderRequest->shippingTerms)->firstOrFail();
 
         $customer = Customer::firstOrCreate(['name' => $storeSalesOrderRequest->customerName]);
 
-        $lastNum = optional(SalesOrder::orderBy('id', 'desc')->first())->num;
-        $newNum = $lastNum ? (string)((int)$lastNum + 1) : '1001';
+        $newNum = (string)((optional(SalesOrder::latest('id')->first())->num ?? 1000) + 1);
 
         $salesOrder = SalesOrder::create(
             $storeSalesOrderRequest->only([
-                'customerName',
                 'customerContact',
                 'billToName',
                 'billToAddress',
@@ -60,13 +50,10 @@ class SalesOrderController extends Controller
                 'shipToAddress',
                 'shipToCity',
                 'shipToZip',
-                'orderDateScheduled',
-                'poNum',
                 'vendorPONum',
                 'date',
                 'dateExpired',
                 'salesman',
-                'shippingTerms',
                 'priorityId',
                 'paymentTerms',
                 'fob',
@@ -79,18 +66,20 @@ class SalesOrderController extends Controller
                 'customField',
                 'currencyRate',
             ]) + [
-                'billToCountryId' => $data['billToCountry']->id,
-                'billToStateId' => $data['billToState']->id,
-                'shipToCountryId' => $data['shipToCountry']->id,
-                'shipToStateId' => $data['shipToState']->id,
-                'taxRateId' => $data['taxRate']->id,
-                'statusId' => $data['status']->id,
-                'currencyId' => $data['currency']->id,
+                'activeFlag' => $storeSalesOrderRequest->flag,
+                'shipTermsId' => $shipterms->id,
+                'billToCountryId' => $billToCountry->id,
+                'billToStateId' => $billToState->id,
+                'shipToCountryId' => $shipToCountry->id,
+                'shipToStateId' => $shipToState->id,
+                'taxRateId' => $taxRate->id,
+                'statusId' => $storeSalesOrderRequest->status,
+                'currencyId' => $currency->id,
                 'customerId' => $customer->id,
-                'carrierId' => $data['carrier']->id,
-                'carrierServiceId' => $data['carrierService']->id,
+                'carrierId' => $carrier->id,
+                'carrierServiceId' => $carrierService->id,
                 'residentialFlag' => $storeSalesOrderRequest->shipToResidential,
-                'qbClassId' => $data['qbclass']->id,
+                'qbClassId' => $qbclass->id,
                 'num' =>  $storeSalesOrderRequest->soNum ?? $newNum,
             ]
         );
@@ -99,7 +88,7 @@ class SalesOrderController extends Controller
 
         foreach ($storeSalesOrderRequest->validated()['items'] as $item) {
             $product = Product::where('num', $item['productNumber'])->firstOrFail();
-            $qbClass = qbClass::firstOrCreate(['name' => $item['itemQuickBooksClassName']]);
+            $qbClass = qbClass::where('name', $item['itemQuickBooksClassName'])->firstOrFail();
 
             $transformedItem = [
                 'note' => $item['note'],
@@ -119,7 +108,7 @@ class SalesOrderController extends Controller
                 'customFieldItem' => $item['cfi'],
                 'soId' => $salesOrder->id,
                 'qbClassId' => $qbClass->id,
-                'statusId' => $data['status']->id,
+                'statusId' => $storeSalesOrderRequest->status,
             ];
 
             $salesOrderItems[] = SalesOrderItems::create($transformedItem);
@@ -147,28 +136,22 @@ class SalesOrderController extends Controller
      */
     public function update(UpdateSalesOrderRequest $updateSalesOrderRequest, SalesOrder $salesOrder): JsonResponse
     {
-        try {
-            $data = [
-                'billToCountry' => Country::where('name', $updateSalesOrderRequest->billToCountry)->firstOrFail(),
-                'billToState' => State::where('name', $updateSalesOrderRequest->billToState)->firstOrFail(),
-                'shipToCountry' => Country::where('name', $updateSalesOrderRequest->shipToCountry)->firstOrFail(),
-                'shipToState' => State::where('name', $updateSalesOrderRequest->shipToState)->firstOrFail(),
-                'qbclass' => qbClass::where('name', $updateSalesOrderRequest->quickBookClassName)->firstOrFail(),
-                'status' => SalesOrderStatus::where('id', $updateSalesOrderRequest->status)->firstOrFail(),
-                'currency' => Currency::where('name', $updateSalesOrderRequest->currencyName)->firstOrFail(),
-                'carrier' => Carrier::where('name', $updateSalesOrderRequest->carrierName)->firstOrFail(),
-                'carrierService' => CarrierService::where('name', $updateSalesOrderRequest->carrierService)->firstOrFail(),
-                'taxRate' => TaxRate::where('name', $updateSalesOrderRequest->taxRateName)->firstOrFail(),
-            ];
-        } catch (ModelNotFoundException $e) {
-            return response()->json(['error' => $e->getMessage()], Response::HTTP_NOT_FOUND);
-        }
+        $billToCountry = Country::where('name', $updateSalesOrderRequest->billToCountry)->firstOrFail();
+        $billToState = State::where('name', $updateSalesOrderRequest->billToState)->firstOrFail();
+        $shipToCountry = Country::where('name', $updateSalesOrderRequest->shipToCountry)->firstOrFail();
+        $shipToState = State::where('name', $updateSalesOrderRequest->shipToState)->firstOrFail();
+        $qbclass = qbClass::where('name', $updateSalesOrderRequest->quickBookClassName)->firstOrFail();
+        $currency = Currency::where('name', $updateSalesOrderRequest->currencyName)->firstOrFail();
+        $carrier = Carrier::where('name', $updateSalesOrderRequest->carrierName)->firstOrFail();
+        $carrierService = CarrierService::where('name', $updateSalesOrderRequest->carrierService)->firstOrFail();
+        $taxRate = TaxRate::where('name', $updateSalesOrderRequest->taxRateName)->firstOrFail();
+        $shipterms = ShipTerms::where('name', $updateSalesOrderRequest->shippingTerms)->firstOrFail();
 
         $customer = Customer::firstOrCreate(['name' => $updateSalesOrderRequest->customerName]);
 
+        // Update Sales Order
         $salesOrder->update(
             $updateSalesOrderRequest->only([
-                'customerName',
                 'customerContact',
                 'billToName',
                 'billToAddress',
@@ -178,13 +161,10 @@ class SalesOrderController extends Controller
                 'shipToAddress',
                 'shipToCity',
                 'shipToZip',
-                'orderDateScheduled',
-                'poNum',
                 'vendorPONum',
                 'date',
                 'dateExpired',
                 'salesman',
-                'shippingTerms',
                 'priorityId',
                 'paymentTerms',
                 'fob',
@@ -197,19 +177,20 @@ class SalesOrderController extends Controller
                 'customField',
                 'currencyRate',
             ]) + [
-                'billToCountryId' => $data['billToCountry']->id,
-                'billToStateId' => $data['billToState']->id,
-                'shipToCountryId' => $data['shipToCountry']->id,
-                'shipToStateId' => $data['shipToState']->id,
-                'taxRateId' => $data['taxRate']->id,
-                'statusId' => $data['status']->id,
-                'currencyId' => $data['currency']->id,
+                'activeFlag' => $updateSalesOrderRequest->flag,
+                'shipTermsId' => $shipterms->id,
+                'billToCountryId' => $billToCountry->id,
+                'billToStateId' => $billToState->id,
+                'shipToCountryId' => $shipToCountry->id,
+                'shipToStateId' => $shipToState->id,
+                'taxRateId' => $taxRate->id,
+                'statusId' => $updateSalesOrderRequest->status,
+                'currencyId' => $currency->id,
                 'customerId' => $customer->id,
-                'carrierId' => $data['carrier']->id,
-                'carrierServiceId' => $data['carrierService']->id,
+                'carrierId' => $carrier->id,
+                'carrierServiceId' => $carrierService->id,
                 'residentialFlag' => $updateSalesOrderRequest->shipToResidential,
-                'qbClassId' => $data['qbclass']->id,
-                'num' => $updateSalesOrderRequest->soNum ?? $salesOrder->num,
+                'qbClassId' => $qbclass->id,
             ]
         );
 
@@ -218,6 +199,7 @@ class SalesOrderController extends Controller
 
         $salesOrderItems = [];
 
+        // Add new items
         foreach ($updateSalesOrderRequest->validated()['items'] as $item) {
             $product = Product::where('num', $item['productNumber'])->firstOrFail();
             $qbClass = qbClass::firstOrCreate(['name' => $item['itemQuickBooksClassName']]);
@@ -240,7 +222,7 @@ class SalesOrderController extends Controller
                 'customFieldItem' => $item['cfi'],
                 'soId' => $salesOrder->id,
                 'qbClassId' => $qbClass->id,
-                'statusId' => $data['status']->id,
+                'statusId' => $updateSalesOrderRequest->status,
             ];
 
             $salesOrderItems[] = SalesOrderItems::create($transformedItem);
@@ -255,7 +237,6 @@ class SalesOrderController extends Controller
             Response::HTTP_OK
         );
     }
-
 
     /**
      * Remove the specified resource from storage.

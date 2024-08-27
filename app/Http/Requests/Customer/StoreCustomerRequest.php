@@ -62,7 +62,7 @@ class StoreCustomerRequest extends FormRequest
             'url' => ['nullable', 'url', 'max:30'], 
             'carrierName' => ['nullable', 'string', 'exists:carrier,name'], 
             'carrierService' => ['nullable', 'string', 'exists:carrierservice,name'], 
-            'shippingTerms' => ['nullable', 'string'], 
+            'shippingTerms' => ['required', 'string', 'exists:shipterms,name'], 
             'alertNotes' => ['required', 'string'],
             'quickBooksClassName' => ['nullable', 'string', 'exists:qbclass,name'], 
             'toBeEmailed' => ['nullable', 'boolean'], 

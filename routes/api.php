@@ -20,15 +20,16 @@ Route::get('/permissions', [UserController::class, 'getUserPermissions']);
 Route::middleware('auth:api')->group(function () {
    Route::apiResources(
         [
-            'sales-order' => SalesOrderController::class,   
+            'pick' => PickController::class,
+            'sales-order' => SalesOrderController::class,
             'product' => ProductController::class,
             'customer' => CustomerController::class,
             'part' => PartController::class,
+            'vendor' => VendorController::class,
             'country-state' => CountryAndStateController::class,
             'qbclass' => QuickBookClassController::class,
             'taxrate' => TaxRateController::class,
             'currency' => CurrencyController::class,
-            'uom' => UnitOfMeasureController::class,
             'payment-terms' => PaymentTermsController::class,
         ]
     ); 

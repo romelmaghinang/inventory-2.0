@@ -16,11 +16,8 @@ class TaxRateController extends Controller
 {
     public function store(StoreTaxRateRequest $storeTaxRateRequest): JsonResponse
     {
-        try {
-            $taxRateType = TaxRateType::where(['name' => $storeTaxRateRequest->taxType])->firstOrFail();
-        } catch (ModelNotFoundException $e) {
-            return response()->json(['error' => $e->getMessage()], Response::HTTP_NOT_FOUND);
-        }
+        $taxRateType = TaxRateType::where(['name' => $storeTaxRateRequest->taxType])->firstOrFail();
+
 
         $taxRate = TaxRate::create($storeTaxRateRequest->only(
             [
@@ -58,13 +55,10 @@ class TaxRateController extends Controller
      */
     public function update(UpdateTaxRateRequest $updateTaxRateRequest, TaxRate $taxRate): JsonResponse
     {
-        try {
-            // Find the tax rate type by name
-            $taxRateType = TaxRateType::where(['name' => $updateTaxRateRequest->taxType])->firstOrFail();
-        } catch (ModelNotFoundException $e) {
-            return response()->json(['error' => 'Tax rate type not found'], Response::HTTP_NOT_FOUND);
-        }
-    
+
+        $taxRateType = TaxRateType::where(['name' => $updateTaxRateRequest->taxType])->firstOrFail();
+
+
         try {
             // Update the tax rate fields
             $taxRate->update(
@@ -79,7 +73,7 @@ class TaxRateController extends Controller
                     'typeId' => $taxRateType->id,
                 ]
             );
-    
+
             return response()->json(
                 [
                     'message' => 'Tax Rate Updated Successfully!',

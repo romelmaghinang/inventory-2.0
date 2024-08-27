@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Part\StorePartRequest;
 use App\Http\Requests\Part\UpdatePartRequest;
 use App\Models\Part;
+use App\Models\PartToTracking;
+use App\Models\PartTracking;
+use App\Models\PartTrackingType;
 use App\Models\PartType;
 use App\Models\PurchaseOrderItemType;
 use App\Models\UnitOfMeasure;
@@ -17,13 +20,10 @@ class PartController extends Controller
 {
     public function store(StorePartRequest $storePartRequest): JsonResponse
     {
-        try {
-            $uom = UnitOfMeasure::where('name', $storePartRequest->uom)->firstOrFail();
-            $partType = PartType::where('name', $storePartRequest->partType)->firstOrFail();
-            $poItemType = PurchaseOrderItemType::where('name', $storePartRequest->poItemType)->firstOrFail();
-        } catch (ModelNotFoundException $e) {
-            return response()->json(['error' => $e->getMessage()], Response::HTTP_NOT_FOUND);
-        };
+        $uom = UnitOfMeasure::where('name', $storePartRequest->uom)->firstOrFail();
+        $partType = PartType::where('name', $storePartRequest->partType)->firstOrFail();
+        $poItemType = PurchaseOrderItemType::where('name', $storePartRequest->poItemType)->firstOrFail();
+        $partTrackingType = PartTrackingType::where('name', $storePartRequest->tracks)->firstOrFail();
 
         $part = Part::create(
             $storePartRequest->only(
@@ -50,10 +50,30 @@ class PartController extends Controller
                 ]
         );
 
+        $partTracking = PartTracking::create(
+            $storePartRequest->only('description') +
+                [
+                    'name' => $storePartRequest->primaryTracking,
+                    'typeId' => $partTrackingType->id,
+                    'abbr' => $storePartRequest->uom,
+                ]
+        );
+
+        $partToTracking = PartToTracking::create(
+            $storePartRequest->only('nextValue') +
+                [
+                    'partTrackingId' => $partTracking->id,
+                    'partId' => $part->id,
+                ]
+        );
+
+
         return response()->json(
             [
                 'message' => 'Product Created Successfully!',
                 'partData' => $part,
+                'partTrackingData' => $partToTracking,
+                'partToTrackingData' => $partToTracking,
             ],
             Response::HTTP_CREATED
         );
@@ -72,16 +92,12 @@ class PartController extends Controller
      */
     public function update(UpdatePartRequest $updatePartRequest, Part $part): JsonResponse
     {
-        try {
-            // Find related models based on the request data
-            $uom = UnitOfMeasure::where('name', $updatePartRequest->uom)->firstOrFail();
-            $partType = PartType::where('name', $updatePartRequest->partType)->firstOrFail();
-            $poItemType = PurchaseOrderItemType::where('name', $updatePartRequest->partType)->firstOrFail();
-        } catch (ModelNotFoundException $e) {
-            return response()->json(['error' => $e->getMessage()], Response::HTTP_NOT_FOUND);
-        };
+        $uom = UnitOfMeasure::where('name', $updatePartRequest->uom)->firstOrFail();
+        $partType = PartType::where('name', $updatePartRequest->partType)->firstOrFail();
+        $poItemType = PurchaseOrderItemType::where('name', $updatePartRequest->poItemType)->firstOrFail();
 
-        // Update the part's attributes
+        $partTrackingType = PartTrackingType::where('name', $updatePartRequest->tracks)->firstOrFail();
+
         $part->update(
             $updatePartRequest->only(
                 [
@@ -91,6 +107,7 @@ class PartController extends Controller
                     'width',
                     'consumptionRate',
                     'revision',
+                    'length'
                 ]
             ) +
                 [
@@ -100,22 +117,37 @@ class PartController extends Controller
                     'typeId' => $partType->id,
                     'activeFlag' => $updatePartRequest->active,
                     'weightUomId' => $updatePartRequest->weightUom,
-                    'len' => $updatePartRequest->lenght,
                     'sizeUomId' => $updatePartRequest->sizeUom,
                     'url' => $updatePartRequest->pictureUrl,
                     'defaultPoItemTypeId' => $poItemType->id,
                 ]
         );
 
+        $partTracking = PartTracking::updateOrCreate(
+            ['part_id' => $part->id],
+            $updatePartRequest->only('description') +
+                [
+                    'name' => $updatePartRequest->primaryTracking,
+                    'typeId' => $partTrackingType->id,
+                    'abbr' => $updatePartRequest->uom,
+                ]
+        );
+
+        $partToTracking = PartToTracking::updateOrCreate(
+            ['partTrackingId' => $partTracking->id, 'partId' => $part->id],
+            $updatePartRequest->only('nextValue')
+        );
+
         return response()->json(
             [
-                'partData' => $part,
                 'message' => 'Product Updated Successfully!',
+                'partData' => $part,
+                'partTrackingData' => $partTracking,
+                'partToTrackingData' => $partToTracking,
             ],
             Response::HTTP_OK
         );
     }
-
 
     /**
      * Remove the specified resource from storage.

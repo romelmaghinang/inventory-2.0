@@ -15,11 +15,7 @@ class PaymentTermsController extends Controller
 {
     public function store(StorePaymentTermsRequest $storePaymentTermsRequest): JsonResponse
     {
-        try {
-            $paymentTermsType = PaymentTermsType::where('name', $storePaymentTermsRequest->termsType)->firstOrFail();
-        } catch (ModelNotFoundException $e) {
-            return response()->json(['error' => $e->getMessage()], Response::HTTP_NOT_FOUND);
-        }
+        $paymentTermsType = PaymentTermsType::where('name', $storePaymentTermsRequest->termsType)->firstOrFail();
 
         $paymentTerms = PaymentTerms::create(
             $storePaymentTermsRequest->only(
@@ -59,11 +55,8 @@ class PaymentTermsController extends Controller
      */
     public function update(UpdatePaymentTermsRequest $updatePaymentTermsRequest, PaymentTerms $paymentTerms): JsonResponse
     {
-        try {
-            $paymentTermsType = PaymentTermsType::where('name', $updatePaymentTermsRequest->termsType)->firstOrFail();
-        } catch (ModelNotFoundException $e) {
-            return response()->json(['error' => $e->getMessage()], Response::HTTP_NOT_FOUND);
-        }
+        $paymentTermsType = PaymentTermsType::where('name', $updatePaymentTermsRequest->termsType)->firstOrFail();
+
 
         $paymentTerms->update(
             $updatePaymentTermsRequest->only(

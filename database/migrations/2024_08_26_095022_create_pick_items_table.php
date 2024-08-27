@@ -14,23 +14,25 @@ return new class extends Migration
         Schema::create('pickitem', function (Blueprint $table) {
             $table->id();
             $table->decimal('qty', 28, 9)->nullable();
-            $table->bigInteger('destTagId')->nullable();
-            $table->integer('orderId');
-            $table->integer('orderTypeId');
-            $table->integer('partId');
-            $table->integer('pickId');
-            $table->integer('poItemId');
-            $table->integer('shipId')->nullable();
             $table->integer('slotNum')->nullable();
-            $table->integer('soItemId')->nullable();
             $table->integer('srcLocationId')->nullable();
             $table->bigInteger('srcTagId')->nullable();
-            $table->integer('statusId')->nullable();
             $table->bigInteger('tagId')->nullable();
-            $table->integer('typeId');
-            $table->integer('uomId');
-            $table->integer('woItemId')->nullable();
-            $table->integer('xoItemId')->nullable();
+
+            $table->unsignedBigInteger('destTagId');
+            $table->unsignedBigInteger('orderId');
+            $table->unsignedBigInteger('shipId')->nullable();
+
+            $table->foreignId('orderTypeId')->constrained('ordertype');
+            $table->foreignId('partId')->constrained('part');
+            $table->foreignId('pickId')->constrained('pick');
+            $table->foreignId('poItemId')->nullable()->constrained('poitem');
+            $table->foreignId('soItemId')->nullable()->constrained('soitem');
+            $table->foreignId('statusId')->nullable()->constrained('pickitemstatus');
+            $table->foreignId('typeId')->constrained('pickitemtype');
+            $table->foreignId('uomId')->constrained('uom');
+            $table->foreignId('woItemId')->nullable()->constrained('woitem');
+            $table->foreignId('xoItemId')->nullable()->constrained('xoitem');
 
             $table->index([
                 'partId',
