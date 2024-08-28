@@ -4,6 +4,10 @@ namespace App\Http\Requests\Pick;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Symfony\Component\HttpFoundation\Response;
+
 class StorePickRequest extends FormRequest
 {
     /**
@@ -28,29 +32,41 @@ class StorePickRequest extends FormRequest
             'dateScheduled' => ['nullable', 'date'],
             'dateStarted' => ['nullable', 'date'],
             'num' => ['required', 'string', 'max:35'],
-            'locationGroupId' => ['required', 'integer', ], // 'exists:locationgroup,id'
+            'locationGroupId' => ['required', 'integer',], // 'exists:locationgroup,id'
             'priority' => ['required', 'integer', 'exists:priority,id'],
-            'pickStatusId' => ['required', 'integer', 'exists:pickstatus,id'], 
-            'pickTypeId' => ['required', 'integer', 'exists:picktype,id'], 
+            'pickStatusId' => ['required', 'integer', 'exists:pickstatus,id'], // statusId
+            'pickTypeId' => ['required', 'integer', 'exists:picktype,id'],
             'userId' => ['required', 'integer',], // 'exists:sysuser,id'
 
-            'destTagId' => ['nullable', 'integer'],  // bigint
-            'orderId' => ['required', 'integer'],
-            'orderTypeId' => ['required', 'integer', 'exists:ordertype,id'],
-            'partId' => ['required', 'integer', 'exists:part,id'],
-            'poItemId' => ['nullable', 'integer', 'exists:poitem,id'], 
-            'qty' => ['nullable', 'numeric',],  // decimal(28,9)
-            'shipId' => ['nullable', 'integer',],
-            'slotNum' => ['nullable', 'integer',],
-            'soItemId' => ['nullable', 'integer', 'exists:soitem,id'],
-            'srcLocationId' => ['nullable', 'integer',],
-            'srcTagId' => ['nullable', 'integer',],  // bigint
-            'pickItemStatusId' => ['required', 'integer', 'exists:pickitemstatus,id'], // statusId
-            'tagId' => ['nullable', 'integer',],  // bigint
-            'pickItemTypeId' => ['required', 'integer', 'exists:pickitemtype,id'], // typeId
-            'uomId' => ['required', 'integer', 'exists:uom,id'],
-            'woItemId' => ['nullable', 'integer', 'exists:woitem,id'],
-            'xoItemId' => ['nullable', 'integer', 'exists:xoitem,id'],
+            'items.*.destTagId' => ['nullable', 'integer'],  
+            'items.*.orderId' => ['required', 'integer'],
+            'items.*.orderTypeId' => ['required', 'integer', 'exists:ordertype,id'],
+            'items.*.partId' => ['required', 'integer', 'exists:part,id'],
+            'items.*.poItemId' => ['nullable', 'integer', 'exists:poitem,id'],
+            'items.*.qty' => ['nullable', 'numeric'],  // decimal(28,9)
+            'items.*.shipId' => ['nullable', 'integer'],
+            'items.*.slotNum' => ['nullable', 'integer'],
+            'items.*.soItemId' => ['nullable', 'integer', 'exists:soitem,id'],
+            'items.*.srcLocationId' => ['nullable', 'integer'],
+            'items.*.srcTagId' => ['nullable', 'integer'],  
+            'items.*.pickItemStatusId' => ['required', 'integer', 'exists:pickitemstatus,id'], 
+            'items.*.tagId' => ['nullable', 'integer'],  
+            'items.*.pickItemTypeId' => ['required', 'integer', 'exists:pickitemtype,id'], 
+            'items.*.uomId' => ['required', 'integer', 'exists:uom,id'],
+            'items.*.woItemId' => ['nullable', 'integer', 'exists:woitem,id'],
+            'items.*.xoItemId' => ['nullable', 'integer', 'exists:xoitem,id'],
         ];
+    }
+
+    protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(response()->json(
+            [
+                'success' => false,
+                'message' => 'Validation errors',
+                'data' => $validator->errors()
+            ],
+            Response::HTTP_UNPROCESSABLE_ENTITY
+        ));
     }
 }
