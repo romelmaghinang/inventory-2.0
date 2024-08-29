@@ -23,18 +23,23 @@ class StoreLocationRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
+    public function rules()
     {
         return [
-            'locationGroupName' => ['nullable', 'integer', 'min:0'], // locationGroupId EXCEPT
-            'activeFlag' => ['boolean'],
-            'countedAsAvailable' => ['boolean'],
-            'locationName' => ['string', 'nullable', 'max:50'],
-            'pickable' => ['boolean'],
-            'receivable' => ['boolean', 'required'],
-            'sortOrder' => ['integer', 'nullable', 'min:0', 'max:9999'],
+            'location' => ['required', 'string', 'max:30', 'unique:location,name'],
+            'description' => ['required', 'string', 'max:90'],
+            'type' => ['required', 'string', 'exists:locationtype,name'],
+            'locationGroup' => ['required', 'string', 'max:30'],
+            'locationNum' => ['nullable', 'numeric'],
+            'customerName' => ['nullable', 'string', 'max:30'],
+            'active' => ['required', 'boolean'],
+            'available' => ['required', 'boolean'],
+            'pickable' => ['required', 'boolean'],
+            'receivable' => ['required', 'boolean'],
+            'sortOrder' => ['nullable', 'numeric'],
         ];
     }
+
 
     protected function failedValidation(Validator $validator)
     {

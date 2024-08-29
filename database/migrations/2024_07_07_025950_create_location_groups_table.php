@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('locationgroup', function (Blueprint $table) {
             $table->id();
-            $table->boolean('activeFlag')->default(false);
+            $table->boolean('activeFlag')->default(true);
             $table->dateTime('dateLastModified')->nullable();
             $table->string('name', 30)->unique();
             $table->unsignedBigInteger('qbClassId')->nullable();

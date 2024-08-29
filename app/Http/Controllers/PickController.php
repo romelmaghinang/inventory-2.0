@@ -5,16 +5,37 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Pick\StorePickRequest;
 use App\Http\Requests\Pick\UpdatePickRequest;
+use App\Models\InventoryLog;
+use App\Models\Part;
 use App\Models\Pick;
 use App\Models\PickItem;
+use App\Models\Product;
+use App\Models\TrackingInfo;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class PickController extends Controller
 {
     public function store(StorePickRequest $storePickRequest): JsonResponse
     {
+        $items = $storePickRequest->input('items', []);
+
+        foreach ($items as $item) {
+            $part = Part::find($item['partId']);
+
+            if ($part->trackingFlag == true) {
+                $inventoryLog = InventoryLog::where('partId', $part->id)->firstOrFail();
+
+                $product = Product::where('partId', $part->id)->firstOrFail();
+
+                $trackingInfo = TrackingInfo::firstOrCreate(
+                    [
+                        'partTrackingId' => $inventoryLog->partTrackingId,
+                    ]
+                );
+            }
+        }
+
         $pick = Pick::create(
             $storePickRequest->only([
                 'dateCreated',
@@ -46,12 +67,12 @@ class PickController extends Controller
             );
         }
 
-
         return response()->json(
             [
                 'message' => 'Pick Created Successfully!',
                 'pickData' => $pick,
                 'pickItemData' => $pickItem,
+                'trackingInfo' => $trackingInfo
             ],
             Response::HTTP_CREATED
         );

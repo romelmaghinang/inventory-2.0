@@ -19,5 +19,4 @@ class LocationGroup extends Model
     ];
 
     public $timestamps = false;
-
 }

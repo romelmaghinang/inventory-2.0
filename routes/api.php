@@ -3,6 +3,8 @@
 use App\Http\Controllers\CountryAndStateController;
 use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\InventoryLogController;
+use App\Http\Controllers\LocationController;
 use App\Http\Controllers\PartController;
 use App\Http\Controllers\PaymentTermsController;
 use App\Http\Controllers\PickController;
@@ -20,12 +22,14 @@ Route::post('/login', [UserController::class, 'login']);
 Route::get('/permissions', [UserController::class, 'getUserPermissions']);
 
 Route::middleware('auth:api')->group(function () {
-  Route::apiResources(
+    Route::apiResources(
     [
         'pick' => PickController::class,
         'sales-order' => SalesOrderController::class,
         'product' => ProductController::class,
         'customer' => CustomerController::class,
+        'location' => LocationController::class,
+        'inventory' => InventoryLogController::class,
         'part' => PartController::class,
         'vendor' => VendorController::class,
         'country-state' => CountryAndStateController::class,
@@ -36,6 +40,7 @@ Route::middleware('auth:api')->group(function () {
     ]
 ); 
 });
+
 
 Route::middleware(['auth:sanctum', 'abilities:create-users,create-permission,create-role,assign-role,assign-permission'])->group(function () {
     Route::post('/create-user', [UserController::class, 'createUser']);
