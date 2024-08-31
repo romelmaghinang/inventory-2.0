@@ -91,6 +91,23 @@ class PickController extends Controller
      */
     public function update(UpdatePickRequest $updatePickRequest, Pick $pick): JsonResponse
     {
+        $items = $updatePickRequest->input('items', []);
+
+        foreach ($items as $item) {
+            $part = Part::find($item['partId']);
+
+            if ($part && $part->trackingFlag == true) {
+                $inventoryLog = InventoryLog::where('partId', $part->id)->firstOrFail();
+                $product = Product::where('partId', $part->id)->firstOrFail();
+
+                $trackingInfo = TrackingInfo::firstOrCreate(
+                    [
+                        'partTrackingId' => $inventoryLog->partTrackingId,
+                    ]
+                );
+            }
+        }
+
         $pick->update(
             $updatePickRequest->only([
                 'dateCreated',
@@ -105,20 +122,22 @@ class PickController extends Controller
             ]) +
                 [
                     'statusId' =>  $updatePickRequest->pickStatusId,
-                    'typeId' => $updatePickRequest->pickTypeId,
+                    'typeId'   => $updatePickRequest->pickTypeId,
                 ]
         );
 
         foreach ($updatePickRequest->items as $item) {
             $pickItem = PickItem::updateOrCreate(
                 [
-                    'pickId' => $pick->id,
+                    'pickId'  => $pick->id,
+                    'partId'  => $item['partId'],
                 ],
                 array_merge(
                     $item,
                     [
                         'statusId' => $item['pickItemStatusId'],
-                        'typeId' => $item['pickItemTypeId'],
+                        'typeId'   => $item['pickItemTypeId'],
+                        'pickId'   => $pick->id,
                     ]
                 )
             );
@@ -126,9 +145,10 @@ class PickController extends Controller
 
         return response()->json(
             [
-                'message' => 'Pick Updated Successfully!',
-                'pickData' => $pick,
+                'message'      => 'Pick Updated Successfully!',
+                'pickData'     => $pick,
                 'pickItemData' => $pickItem,
+                'trackingInfo' => $trackingInfo ?? null,
             ],
             Response::HTTP_OK
         );
