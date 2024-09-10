@@ -22,9 +22,9 @@ return new class extends Migration
             $table->unsignedBigInteger('userId')->nullable();
 
             $table->unsignedBigInteger('locationGroupId');
-            $table->foreignId('statusId')->constrained('pickstatus');
-            $table->foreignId('typeId')->constrained('picktype');
-            $table->foreignId('priority')->constrained('priority');
+            $table->foreignId('statusId')->default(10)->constrained('pickstatus');
+            $table->foreignId('typeId')->default(10)->constrained('picktype');
+            $table->foreignId('priority')->default(30)->constrained('priority');
         });
     }
 

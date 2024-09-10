@@ -23,6 +23,7 @@ class PartController extends Controller
         $uom = UnitOfMeasure::where('name', $storePartRequest->uom)->firstOrFail();
         $partType = PartType::where('name', $storePartRequest->partType)->firstOrFail();
         $poItemType = PurchaseOrderItemType::where('name', $storePartRequest->poItemType)->firstOrFail();
+
         $partTrackingType = PartTrackingType::where('name', $storePartRequest->tracks)->firstOrFail();
 
         $part = Part::create(
@@ -72,7 +73,7 @@ class PartController extends Controller
             [
                 'message' => 'Product Created Successfully!',
                 'partData' => $part,
-                'partTrackingData' => $partToTracking,
+                'partTrackingData' => $partTracking,
                 'partToTrackingData' => $partToTracking,
             ],
             Response::HTTP_CREATED
@@ -148,6 +149,8 @@ class PartController extends Controller
             Response::HTTP_OK
         );
     }
+
+
 
     /**
      * Remove the specified resource from storage.

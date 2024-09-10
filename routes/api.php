@@ -22,23 +22,23 @@ Route::post('/login', [UserController::class, 'login']);
 Route::get('/permissions', [UserController::class, 'getUserPermissions']);
 
 Route::middleware('auth:api')->group(function () {
-    Route::apiResources(
-    [
-        'pick' => PickController::class,
-        'sales-order' => SalesOrderController::class,
-        'product' => ProductController::class,
-        'customer' => CustomerController::class,
-        'location' => LocationController::class,
-        'inventory' => InventoryLogController::class,
-        'part' => PartController::class,
-        'vendor' => VendorController::class,
-        'country-state' => CountryAndStateController::class,
-        'qbclass' => QuickBookClassController::class,
-        'taxrate' => TaxRateController::class,
-        'currency' => CurrencyController::class,
-        'payment-terms' => PaymentTermsController::class,
-    ]
-); 
+        Route::apiResources(
+        [
+            'pick' => PickController::class,
+            'sales-order' => SalesOrderController::class,
+            'product' => ProductController::class,
+            'customer' => CustomerController::class,
+            'location' => LocationController::class,
+            'inventory' => InventoryLogController::class,
+            'part' => PartController::class,
+            'vendor' => VendorController::class,
+            'country-state' => CountryAndStateController::class,
+            'qbclass' => QuickBookClassController::class,
+            'taxrate' => TaxRateController::class,
+            'currency' => CurrencyController::class,
+            'payment-terms' => PaymentTermsController::class,
+        ]
+    ); 
 });
 
 

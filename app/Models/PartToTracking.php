@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PartToTracking extends Model
 {
@@ -20,4 +21,14 @@ class PartToTracking extends Model
     ];
 
     public $timestamps = false;
+
+    public function partTracking(): BelongsTo
+    {
+        return $this->belongsTo(PartTracking::class, 'partTrackingId');
+    }
+
+    public function part()
+    {
+        return $this->belongsTo(Part::class, 'partId');
+    }
 }

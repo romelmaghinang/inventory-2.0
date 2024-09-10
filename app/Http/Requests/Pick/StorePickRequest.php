@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Pick;
 
+use App\Rules\PartTrackingTypeRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 use Illuminate\Contracts\Validation\Validator;
@@ -26,35 +27,11 @@ class StorePickRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'dateCreated' => ['nullable', 'date'],
-            'dateFinished' => ['nullable', 'date'],
-            'dateLastModified' => ['nullable', 'date'],
-            'dateScheduled' => ['nullable', 'date'],
-            'dateStarted' => ['nullable', 'date'],
-            'num' => ['required', 'string', 'max:35'],
-            'locationGroupId' => ['required', 'integer',], // 'exists:locationgroup,id'
-            'priority' => ['required', 'integer', 'exists:priority,id'],
-            'pickStatusId' => ['required', 'integer', 'exists:pickstatus,id'], // statusId
-            'pickTypeId' => ['required', 'integer', 'exists:picktype,id'], // typeId
-            'userId' => ['required', 'integer',], // 'exists:sysuser,id'
-
-            'items.*.destTagId' => ['nullable', 'integer'],  // bigint
-            'items.*.orderId' => ['required', 'integer'],
-            'items.*.orderTypeId' => ['required', 'integer', 'exists:ordertype,id'],
-            'items.*.partId' => ['required', 'integer', 'exists:part,id',],
-            'items.*.poItemId' => ['nullable', 'integer', 'exists:poitem,id'],
-            'items.*.qty' => ['nullable', 'numeric'],  // decimal(28,9)
-            'items.*.shipId' => ['nullable', 'integer'],
-            'items.*.slotNum' => ['nullable', 'integer'],
-            'items.*.soItemId' => ['nullable', 'integer', 'exists:soitem,id'],
-            'items.*.srcLocationId' => ['nullable', 'integer'],
-            'items.*.srcTagId' => ['nullable', 'integer'],  // bigint
-            'items.*.pickItemStatusId' => ['required', 'integer', 'exists:pickitemstatus,id'], // statusId
-            'items.*.tagId' => ['nullable', 'integer'],  // bigint
-            'items.*.pickItemTypeId' => ['required', 'integer', 'exists:pickitemtype,id'], // typeId
-            'items.*.uomId' => ['required', 'integer', 'exists:uom,id'],
-            'items.*.woItemId' => ['nullable', 'integer', 'exists:woitem,id'],
-            'items.*.xoItemId' => ['nullable', 'integer', 'exists:xoitem,id'],
+            '*.pickNum' => ['required', 'numeric'],
+            '*.locationName' => ['required', 'string', 'max:255', 'exists:location,name'],
+            '*.partNum' => ['required', 'string', 'max:255', 'exists:part,num'],
+            '*.partTrackingType' => ['required', 'string', 'exists:parttrackingtype,name'],
+            '*.trackingInfo' => ['nullable', 'date'],
         ];
     }
 
