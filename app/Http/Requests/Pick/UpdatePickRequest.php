@@ -26,35 +26,15 @@ class UpdatePickRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'dateCreated' => ['nullable', 'date'],
-            'dateFinished' => ['nullable', 'date'],
-            'dateLastModified' => ['nullable', 'date'],
-            'dateScheduled' => ['nullable', 'date'],
-            'dateStarted' => ['nullable', 'date'],
-            'num' => ['required', 'string', 'max:35'],
-            'locationGroupId' => ['required', 'integer',], // 'exists:locationgroup,id'
+            'pickNum' => ['required', 'numeric'],
+            'locationName' => ['required', 'string', 'max:255', 'exists:location,name'],
+            'partNum' => ['required', 'string', 'max:255', 'exists:part,num'],
+            'partTrackingType' => ['required', 'string', 'exists:parttracking,name'],
+            'trackingInfo' => ['nullable'],
             'priority' => ['required', 'integer', 'exists:priority,id'],
-            'pickStatusId' => ['required', 'integer', 'exists:pickstatus,id'], 
-            'pickTypeId' => ['required', 'integer', 'exists:picktype,id'], 
-            'userId' => ['required', 'integer',], // 'exists:sysuser,id'
+            'pickStatusId' => ['required', 'integer', 'exists:pickstatus,id'], // statusId
+            'pickTypeId' => ['required', 'integer', 'exists:picktype,id'], // typeId
 
-            'items.*.destTagId' => ['nullable', 'integer'], 
-            'items.*.orderId' => ['required', 'integer'],
-            'items.*.orderTypeId' => ['required', 'integer', 'exists:ordertype,id'],
-            'items.*.partId' => ['required', 'integer', 'exists:part,id'],
-            'items.*.poItemId' => ['nullable', 'integer', 'exists:poitem,id'],
-            'items.*.qty' => ['nullable', 'numeric'],  // decimal(28,9)
-            'items.*.shipId' => ['nullable', 'integer'],
-            'items.*.slotNum' => ['nullable', 'integer'],
-            'items.*.soItemId' => ['nullable', 'integer', 'exists:soitem,id'],
-            'items.*.srcLocationId' => ['nullable', 'integer'],
-            'items.*.srcTagId' => ['nullable', 'integer'],
-            'items.*.pickItemStatusId' => ['required', 'integer', 'exists:pickitemstatus,id'],
-            'items.*.tagId' => ['nullable', 'integer'],  
-            'items.*.pickItemTypeId' => ['required', 'integer', 'exists:pickitemtype,id'], 
-            'items.*.uomId' => ['required', 'integer', 'exists:uom,id'],
-            'items.*.woItemId' => ['nullable', 'integer', 'exists:woitem,id'],
-            'items.*.xoItemId' => ['nullable', 'integer', 'exists:xoitem,id'],
         ];
     }
 

@@ -32,8 +32,7 @@ class PickController extends Controller
 
             $partTrackingType = PartTrackingType::where('name', $item['partTrackingType'])->firstOrFail();
 
-            if ($partToTracking->partTracking->typeId !== $partTrackingType->id)
-            {
+            if ($partToTracking->partTracking->typeId !== $partTrackingType->id) {
                 return response()->json(
                     [
                         'message' => 'Part Tracking and Part Tracking Type is not the same'
@@ -57,6 +56,15 @@ class PickController extends Controller
                     [
                         'partTrackingId' => $partToTracking->partTrackingId,
                         'infoDate' => $item['trackingInfo'],
+                    ]
+                );
+            }
+
+            if ($item['partTrackingType'] === 'Revision Level' || $item['partTrackingType'] === 'Lot Number') {
+                $trackingInfo = TrackingInfo::create(
+                    [
+                        'partTrackingId' => $partToTracking->partTrackingId,
+                        'info' => $item['trackingInfo'],
                     ]
                 );
             }
@@ -93,86 +101,20 @@ class PickController extends Controller
      */
     public function update(UpdatePickRequest $updatePickRequest, Pick $pick): JsonResponse
     {
+        $location = Location::where('name', $updatePickRequest->locationName)->firstOrFail();
 
         $pick->update(
-            $updatePickRequest->only([
-                'dateCreated',
-                'dateFinished',
-                'dateLastModified',
-                'dateScheduled',
-                'dateStarted',
-                'locationGroupId',
-                'num',
-                'priority',
-                'userId',
-            ]) +
+            $updatePickRequest->validated() +
                 [
-                    'statusId' => $updatePickRequest->pickStatusId,
-                    'typeId' => $updatePickRequest->pickTypeId,
+                    'num' => $updatePickRequest->pickNum,
+                    'locationGroupId' => $location->locationGroupId,
                 ]
         );
-
-        foreach ($updatePickRequest->items as $item) {
-            $pickItem = PickItem::find($item['id']);
-
-            if ($pickItem) {
-                $pickItem->update(
-                    array_merge(
-                        $item,
-                        [
-                            'statusId' => $item['pickItemStatusId'],
-                            'typeId' => $item['pickItemTypeId'],
-                            'pickId' => $pick->id,
-                        ]
-                    )
-                );
-            } else {
-                PickItem::create(
-                    array_merge(
-                        $item,
-                        [
-                            'statusId' => $item['pickItemStatusId'],
-                            'typeId' => $item['pickItemTypeId'],
-                            'pickId' => $pick->id,
-                        ]
-                    )
-                );
-            }
-        }
-
-        foreach ($updatePickRequest->items as $item) {
-            $part = Part::find($item['partId']);
-            $tableReference = TableReference::find($updatePickRequest->recordId);
-
-            if ($part && $part->trackingFlag == true) {
-                $inventoryLog = InventoryLog::where('partId', $part->id)->firstOrFail();
-
-                $trackingInfo = TrackingInfo::updateOrCreate(
-                    [
-                        'partTrackingId' => $inventoryLog->partTrackingId,
-                    ],
-                    $updatePickRequest->only(
-                        [
-                            'info',
-                            'infoDate',
-                            'infoDouble',
-                            'infoInteger',
-                            'qty',
-                            'recordId',
-                        ]
-                    ) +
-                        [
-                            'tableId' => $tableReference->tableId,
-                        ]
-                );
-            }
-        }
 
         return response()->json(
             [
                 'message' => 'Pick Updated Successfully!',
-                'pickData' => $pick,
-                'trackingInfo' => isset($trackingInfo) ? $trackingInfo : null
+                'pick' => $pick
             ],
             Response::HTTP_OK
         );

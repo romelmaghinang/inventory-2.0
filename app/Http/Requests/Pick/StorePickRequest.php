@@ -30,8 +30,8 @@ class StorePickRequest extends FormRequest
             '*.pickNum' => ['required', 'numeric'],
             '*.locationName' => ['required', 'string', 'max:255', 'exists:location,name'],
             '*.partNum' => ['required', 'string', 'max:255', 'exists:part,num'],
-            '*.partTrackingType' => ['required', 'string', 'exists:parttrackingtype,name'],
-            '*.trackingInfo' => ['nullable', 'date'],
+            '*.partTrackingType' => ['required', 'string', 'exists:parttracking,name'],
+            '*.trackingInfo' => ['nullable'],
         ];
     }
 
