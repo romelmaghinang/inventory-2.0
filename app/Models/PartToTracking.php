@@ -27,7 +27,7 @@ class PartToTracking extends Model
         return $this->belongsTo(PartTracking::class, 'partTrackingId');
     }
 
-    public function part()
+    public function part(): BelongsTo
     {
         return $this->belongsTo(Part::class, 'partId');
     }

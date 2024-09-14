@@ -19,17 +19,17 @@ return new class extends Migration
             $table->bigInteger('srcTagId')->nullable();
             $table->bigInteger('tagId')->nullable();
 
-            $table->unsignedBigInteger('destTagId');
-            $table->unsignedBigInteger('orderId');
+            $table->unsignedBigInteger('destTagId')->nullable();
+            $table->unsignedBigInteger('orderId')->nullable();
             $table->unsignedBigInteger('shipId')->nullable();
 
-            $table->foreignId('orderTypeId')->constrained('ordertype');
+            $table->foreignId('orderTypeId')->nullable()->constrained('ordertype');
             $table->foreignId('partId')->constrained('part');
             $table->foreignId('pickId')->constrained('pick');
             $table->foreignId('poItemId')->nullable()->constrained('poitem');
             $table->foreignId('soItemId')->nullable()->constrained('soitem');
             $table->foreignId('statusId')->nullable()->constrained('pickitemstatus');
-            $table->foreignId('typeId')->constrained('pickitemtype');
+            $table->foreignId('typeId')->default(10)->constrained('pickitemtype');
             $table->foreignId('uomId')->constrained('uom');
             $table->foreignId('woItemId')->nullable()->constrained('woitem');
             $table->foreignId('xoItemId')->nullable()->constrained('xoitem');

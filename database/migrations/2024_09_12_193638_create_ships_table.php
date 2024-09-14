@@ -15,27 +15,38 @@ return new class extends Migration
             $table->id();
             $table->integer('FOBPointId')->nullable();
             $table->string('billOfLading', 20)->nullable();
-            $table->integer('carrierId');
-            $table->integer('carrierServiceId')->nullable();
             $table->integer('cartonCount')->nullable();
             $table->string('contact', 250)->nullable();
-            $table->dateTime('dateCreated')->nullable();
-            $table->dateTime('dateLastModified')->nullable();
             $table->dateTime('dateShipped')->nullable();
-            $table->integer('locationGroupId');
             $table->longText('note')->nullable();
             $table->string('num', 35)->nullable()->unique();
-            $table->integer('orderTypeId');
-            $table->boolean('ownerIsFrom');
+            $table->integer('orderTypeId')->nullable();
+            $table->boolean('ownerIsFrom')->nullable();
             $table->integer('poId')->nullable();
             $table->integer('shipToId')->nullable();
             $table->string('shipmentIdentificationNumber', 32)->nullable();
             $table->integer('shippedBy')->nullable();
-            $table->integer('soId')->nullable();
             $table->integer('statusId')->nullable();
             $table->integer('xoId')->nullable();
-            $table->index(['shippedBy', 'carrierId', 'locationGroupId', 'orderTypeId', 'statusId', 'FOBPointId', 'carrierServiceId', 'soId', 'xoId', 'poId', 'dateShipped'], 'Performance');
-            $table->timestamps();
+
+            $table->foreignId('carrierId')->constrained('carrier');
+            $table->foreignId('carrierServiceId')->nullable()->constrained('carrierservice');
+            $table->foreignId('locationGroupId')->constrained('locationgroup');
+            $table->foreignId('soId')->nullable()->constrained('so');
+
+            $table->index([
+                'shippedBy',
+                'carrierId',
+                'locationGroupId',
+                'orderTypeId',
+                'statusId',
+                'FOBPointId',
+                'carrierServiceId',
+                'soId',
+                'xoId',
+                'poId',
+                'dateShipped'
+            ], 'Performance');
         });
     }
 
@@ -44,6 +55,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('shippings');
+        Schema::dropIfExists('ship');
     }
 };

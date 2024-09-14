@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('pick', function (Blueprint $table) {
             $table->id();
-            $table->dateTime('dateCreated')->nullable();
+            $table->timestamp('dateCreated')->useCurrent();
             $table->dateTime('dateFinished')->nullable();
-            $table->dateTime('dateLastModified')->nullable();
+            $table->timestamp('dateLastModified')->useCurrent();
             $table->dateTime('dateScheduled')->nullable();
             $table->dateTime('dateStarted')->nullable();
             $table->string('num', 35)->nullable();

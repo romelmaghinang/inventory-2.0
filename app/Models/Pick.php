@@ -12,11 +12,11 @@ class Pick extends Model
     protected $table = 'pick';
 
     protected $fillable = [
-        'dateCreated',
+        'dateCreated' => 'datetime:Y-m-d',
         'dateFinished',
-        'dateLastModified',
+        'dateLastModified' => 'datetime:Y-m-d',
         'dateScheduled',
-        'dateStarted',
+        'dateStarted' => 'datetime:Y-m-d',
         'num',
         'userId',
         'locationGroupId',

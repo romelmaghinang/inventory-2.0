@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class SalesOrderItems extends Model
 {
@@ -47,4 +48,9 @@ class SalesOrderItems extends Model
     ];
 
     public $timestamps = false;
+
+    public function salesOrder(): HasOne
+    {
+        return $this->hasOne(SalesOrder::class, 'id', 'soId');
+    }
 }

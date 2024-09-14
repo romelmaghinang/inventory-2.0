@@ -5,23 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Shipping extends Model
+class Ship extends Model
 {
-    use HasFactory;
-
     protected $table = 'ship';
+
+    use HasFactory;
 
     protected $fillable = [
         'FOBPointId',
         'billOfLading',
-        'carrierId',
-        'carrierServiceId',
         'cartonCount',
         'contact',
-        'dateCreated',
-        'dateLastModified',
         'dateShipped',
-        'locationGroupId',
         'note',
         'num',
         'orderTypeId',
@@ -30,8 +25,13 @@ class Shipping extends Model
         'shipToId',
         'shipmentIdentificationNumber',
         'shippedBy',
-        'soId',
         'statusId',
-        'xoId'
+        'xoId',
+        'carrierId',
+        'carrierServiceId',
+        'locationGroupId',
+        'soId',
     ];
+
+    public $timestamps = false;
 }

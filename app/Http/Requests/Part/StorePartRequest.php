@@ -17,6 +17,7 @@ class StorePartRequest extends FormRequest
         return true;
     }
 
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -25,29 +26,29 @@ class StorePartRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'partNumber' => ['required', 'string', 'max:70', 'unique:part,num'], 
-            'partDescription' => ['required', 'string', 'max:252'], 
+            'partNumber' => ['required', 'string', 'max:70', 'unique:part,num'], // num
+            'partDescription' => ['required', 'string', 'max:252'], // description
             'partDetails' => ['required', 'string'],
-            'uom' => ['required', 'string', 'exists:uom,name'],
+            'uom' => ['required', 'string', 'exists:uom,name'], // uomId
             'upc' => ['required', 'string', 'max:31'],
-            'partType' => ['required', 'string', 'exists:parttype,name'],
-            'active' => ['required', 'boolean'],
+            'partType' => ['required', 'string', 'exists:parttype,name'], // typeId
+            'active' => ['required', 'boolean'], // active Flag
             'abcCode' => ['required', 'string', 'max:1'],
             'weight' => ['required', 'numeric'],
-            'weightUom' => ['required', 'integer'],
+            'weightUom' => ['required', 'integer'], // weightuomId
             'width' => ['required', 'numeric'],
-            'length' => ['required', 'numeric'], 
-            'sizeUom' => ['required', 'integer'],
+            'length' => ['required', 'numeric'], // length
+            'sizeUom' => ['required', 'integer'], // size Uom Id
             'consumptionRate' => ['required', 'numeric'],
             'alertNote' => ['required', 'string', 'max:256'],
-            'pictureUrl' => ['required', 'string', 'max:256', 'url'],
+            'pictureUrl' => ['required', 'string', 'max:256', 'url'], // url
             'revision' => ['required', 'string', 'max:15'],
-            'poItemType' => ['required', 'string', 'exists:poitemtype,name'], 
-            'defaultOutsourcedReturnItem' => ['required', 'integer'], 
-            'primaryTracking' => ['required', 'string'],
+            'poItemType' => ['required', 'string', 'exists:poitemtype,name'], // defualtPoItemTypeId
+            'defaultOutsourcedReturnItem' => ['required', 'integer'], // defaultOutsourcedReturnItemId
+            'primaryTracking' => ['required', 'string', 'exists:parttracking,name'],
             'tracks' => ['required', 'string', 'exists:parttrackingtype,name'],
             'nextValue' => ['required', 'string'],
-            'cf' => ['required', 'string'], 
+            'cf' => ['required', 'string'], // customFields
         ];
     }
 

@@ -33,4 +33,16 @@ class StoreInventoryLogRequest extends FormRequest
             'note' => ['nullable', 'string'],
         ];
     }
+
+    protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(response()->json(
+            [
+                'success' => false,
+                'message' => 'Validation errors',
+                'data' => $validator->errors()
+            ],
+            Response::HTTP_UNPROCESSABLE_ENTITY
+        ));
+    }
 }
