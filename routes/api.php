@@ -3,7 +3,7 @@
 use App\Http\Controllers\CountryAndStateController;
 use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\CustomerController;
-use App\Http\Controllers\InventoryLogController;
+use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\PartController;
 use App\Http\Controllers\PaymentTermsController;
@@ -47,7 +47,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('pick-start', StartController::class);
     Route::post('pack', PackController::class);
     Route::post('ship', ShipController::class);
-    Route::post('inventory', [InventoryLogController::class, 'store']);
+    Route::post('inventory', [InventoryController::class, 'store']);
 
 Route::middleware(['auth:sanctum', 'abilities:create-users,create-permission,create-role,assign-role,assign-permission'])->group(function () {
     Route::post('/create-user', [UserController::class, 'createUser']);

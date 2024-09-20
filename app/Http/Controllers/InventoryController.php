@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\InventoryLog\StoreInventoryLogRequest;
-use App\Http\Requests\InventoryLog\UpdateInventoryLogRequest;
 use App\Models\InventoryLog;
 use App\Models\Location;
 use App\Models\Part;
@@ -14,7 +13,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class InventoryLogController extends Controller
+class InventoryController extends Controller
 {
     public function store(StoreInventoryLogRequest $storeInventoryLogRequest): JsonResponse
     {

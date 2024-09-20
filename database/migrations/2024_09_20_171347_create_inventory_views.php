@@ -13,7 +13,7 @@ class CreateInventoryViews extends Migration
     public function up()
     {
         DB::statement("
-            CREATE VIEW qtyinventory AS
+            CREATE OR REPLACE  VIEW qtyinventory AS
             SELECT 
                 partId AS PARTID,
                 locationGroupId AS LOCATIONGROUPID,
@@ -23,7 +23,7 @@ class CreateInventoryViews extends Migration
         ");
 
         DB::statement("
-            CREATE VIEW qtyinventorytotals AS
+            CREATE OR REPLACE  VIEW qtyinventorytotals AS
             SELECT 
                 partId AS PARTID,
                 locationGroupId AS LOCATIONGROUPID,
@@ -35,7 +35,7 @@ class CreateInventoryViews extends Migration
         ");
 
         DB::statement("
-            CREATE VIEW qtynotavailabletopick AS
+            CREATE OR REPLACE  VIEW qtynotavailabletopick AS
             SELECT 
                 partId AS PARTID,
                 locationGroupId AS LOCATIONGROUPID,
@@ -49,7 +49,7 @@ class CreateInventoryViews extends Migration
         ");
 
         DB::statement("
-            CREATE VIEW qtyonhand AS
+            CREATE OR REPLACE  VIEW qtyonhand AS
             SELECT 
                 partId AS PARTID,
                 locationGroupId AS LOCATIONGROUPID,
