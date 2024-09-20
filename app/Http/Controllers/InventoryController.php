@@ -16,34 +16,34 @@ use Symfony\Component\HttpFoundation\Response;
 
 class InventoryController extends Controller
 {
-    public function store(StoreInventoryRequest $storeInventoryLogRequest): JsonResponse
+    public function store(StoreInventoryRequest $storeInventoryRequest): JsonResponse
     {
-        $part = Part::where('num', $storeInventoryLogRequest->PartNumber)->firstOrFail();
-        $location = Location::where('name', $storeInventoryLogRequest->Location)->firstOrFail();
+        $part = Part::where('num', $storeInventoryRequest->PartNumber)->firstOrFail();
+        $location = Location::where('name', $storeInventoryRequest->Location)->firstOrFail();
     
         $partToTracking = PartToTracking::where('partId', $part->id)->firstOrFail();
-        $trackingType = PartTrackingType::where('name', $storeInventoryLogRequest->TrackingType)->first();
+        $trackingType = PartTrackingType::where('name', $storeInventoryRequest->TrackingType)->first();
         $trackingTypeId = $trackingType ? $trackingType->id : null;
 
         $inventory = Inventory::create([
             'partId' => $part->id,
             'begLocationId' => $location->id,
             'endLocationId' => $location->id,
-            'changeQty' => $storeInventoryLogRequest->Qty,
-            'qtyOnHand' => $storeInventoryLogRequest->Qty,
-            'dateCreated' => $storeInventoryLogRequest->Date,
+            'changeQty' => $storeInventoryRequest->Qty,
+            'qtyOnHand' => $storeInventoryRequest->Qty,
+            'dateCreated' => $storeInventoryRequest->Date,
             'partTrackingId' => $partToTracking->partTrackingId,
             'locationGroupId' => $location->locationGroupId,
-            'cost' => $storeInventoryLogRequest->Cost,
+            'cost' => $storeInventoryRequest->Cost,
             'typeId' => $trackingTypeId,
         ]);
 
         PartCost::create([
-            'avgCost' => $storeInventoryLogRequest->Cost, 
-            'dateCreated' => $storeInventoryLogRequest->Date,
+            'avgCost' => $storeInventoryRequest->Cost, 
+            'dateCreated' => $storeInventoryRequest->Date,
             'dateLastModified' => now(),
-            'qty' => $storeInventoryLogRequest->Qty,
-            'totalCost' => $storeInventoryLogRequest->Cost * $storeInventoryLogRequest->Qty,
+            'qty' => $storeInventoryRequest->Qty,
+            'totalCost' => $storeInventoryRequest->Cost * $storeInventoryRequest->Qty,
             'partId' => $part->id,
         ]);
     
@@ -51,7 +51,7 @@ class InventoryController extends Controller
             [
                 'message' => 'Inventory Created Successfully!',
                 'inventory' => $inventory,
-                'input' => $storeInventoryLogRequest->validated(),
+                'input' => $storeInventoryRequest ->validated(),
             ],
             Response::HTTP_CREATED,
         );
