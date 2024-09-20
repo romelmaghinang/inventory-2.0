@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Requests\InventoryLog;
+namespace App\Http\Requests\Inventory;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException; 
 use Symfony\Component\HttpFoundation\Response; 
 
-class StoreInventoryLogRequest extends FormRequest
+class StoreInventoryRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

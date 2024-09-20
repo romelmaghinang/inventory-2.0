@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\InventoryLog\StoreInventoryLogRequest;
+use App\Http\Requests\Inventory\StoreInventoryRequest;
 use App\Models\InventoryLog;
 use App\Models\Location;
 use App\Models\Part;
@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class InventoryController extends Controller
 {
-    public function store(StoreInventoryLogRequest $storeInventoryLogRequest): JsonResponse
+    public function store(StoreInventoryRequest $storeInventoryLogRequest): JsonResponse
     {
         $part = Part::where('num', $storeInventoryLogRequest->PartNumber)->firstOrFail();
         $location = Location::where('name', $storeInventoryLogRequest->Location)->firstOrFail();
