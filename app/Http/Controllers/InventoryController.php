@@ -4,9 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Inventory\StoreInventoryRequest;
-use App\Models\InventoryLog;
+use App\Models\Inventory;
 use App\Models\Location;
 use App\Models\Part;
+use App\Models\PartCost; 
 use App\Models\PartToTracking;
 use App\Models\PartTrackingType;
 use Illuminate\Http\JsonResponse;
@@ -24,7 +25,7 @@ class InventoryController extends Controller
         $trackingType = PartTrackingType::where('name', $storeInventoryLogRequest->TrackingType)->first();
         $trackingTypeId = $trackingType ? $trackingType->id : null;
 
-        $inventory = InventoryLog::create([
+        $inventory = Inventory::create([
             'partId' => $part->id,
             'begLocationId' => $location->id,
             'endLocationId' => $location->id,
@@ -34,7 +35,16 @@ class InventoryController extends Controller
             'partTrackingId' => $partToTracking->partTrackingId,
             'locationGroupId' => $location->locationGroupId,
             'cost' => $storeInventoryLogRequest->Cost,
-            'trackingTypeId' => $trackingTypeId,
+            'typeId' => $trackingTypeId,
+        ]);
+
+        PartCost::create([
+            'avgCost' => $storeInventoryLogRequest->Cost, 
+            'dateCreated' => $storeInventoryLogRequest->Date,
+            'dateLastModified' => now(),
+            'qty' => $storeInventoryLogRequest->Qty,
+            'totalCost' => $storeInventoryLogRequest->Cost * $storeInventoryLogRequest->Qty,
+            'partId' => $part->id,
         ]);
     
         return response()->json(
@@ -46,8 +56,4 @@ class InventoryController extends Controller
             Response::HTTP_CREATED,
         );
     }
-    
-
-
-
 }
