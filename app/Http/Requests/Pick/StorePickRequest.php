@@ -4,6 +4,7 @@ namespace App\Http\Requests\Pick;
 
 use App\Rules\PartTrackingTypeRule;
 use Illuminate\Foundation\Http\FormRequest;
+
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Symfony\Component\HttpFoundation\Response;
@@ -26,11 +27,11 @@ class StorePickRequest extends FormRequest
     public function rules(): array
     {
         return [
-            '*.pickNum' => ['required', 'numeric', 'exists:so,num'],
-            '*.locationName' => ['required', 'string', 'max:255', 'exists:location,name'],
-            '*.partNum' => ['required', 'string', 'max:255', 'exists:part,num'],
-            '*.partTrackingType' => ['required', 'string', 'exists:parttracking,name'],
-            '*.trackingInfo' => ['nullable'],
+            'pickNum' => ['required', 'numeric', 'exists:so,num'],
+            'locationName' => ['required', 'string', 'max:255', 'exists:location,name'],
+            'partNum' => ['required', 'string', 'max:255', 'exists:part,num'],
+            'partTrackingType' => ['required', 'string', 'exists:parttracking,name'],
+            'trackingInfo' => ['required', 'array'],
         ];
     }
 

@@ -26,6 +26,7 @@ Route::post('/login', [UserController::class, 'login']);
 Route::get('/permissions', [UserController::class, 'getUserPermissions']);
 
 Route::middleware('auth:api')->group(function () {
+});
     Route::apiResources(
             [
                 'pick' => PickController::class,
@@ -33,7 +34,6 @@ Route::middleware('auth:api')->group(function () {
                 'product' => ProductController::class,
                 'customer' => CustomerController::class,
                 'location' => LocationController::class,
-                'inventory' => InventoryLogController::class,
                 'part' => PartController::class,
                 'vendor' => VendorController::class,
                 'country-state' => CountryAndStateController::class,
@@ -47,7 +47,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('pick-start', StartController::class);
     Route::post('pack', PackController::class);
     Route::post('ship', ShipController::class);
-});
+    Route::post('inventory', [InventoryLogController::class, 'store']);
 
 Route::middleware(['auth:sanctum', 'abilities:create-users,create-permission,create-role,assign-role,assign-permission'])->group(function () {
     Route::post('/create-user', [UserController::class, 'createUser']);

@@ -11,6 +11,8 @@ use App\Models\PartTracking;
 use App\Models\PartTrackingType;
 use App\Models\PartType;
 use App\Models\PurchaseOrderItemType;
+use App\Models\SerialNumber;
+use App\Models\TrackingInfo;
 use App\Models\UnitOfMeasure;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
@@ -18,7 +20,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class PartController extends Controller
 {
-    public function store(StorePartRequest $storePartRequest): JsonResponse
+     public function store(StorePartRequest $storePartRequest): JsonResponse
     {
         $uom = UnitOfMeasure::where('name', $storePartRequest->uom)->firstOrFail();
         $partType = PartType::where('name', $storePartRequest->partType)->firstOrFail();
@@ -59,13 +61,17 @@ class PartController extends Controller
                 ]
         );
 
+        if ($storePartRequest->primaryTracking === 'Serial Number') {
+            $serialNumber = SerialNumber::createUniqueSerialNumber($partToTracking->partTrackingId);
+        }
 
         return response()->json(
             [
-                'message' => 'Product Created Successfully!',
+                'message' => 'Part Created Successfully!',
                 'partData' => $part,
                 'partTrackingData' => $partTracking,
                 'partToTrackingData' => $partToTracking,
+                'serialNum' => $serialNumber ?? null,
             ],
             Response::HTTP_CREATED
         );

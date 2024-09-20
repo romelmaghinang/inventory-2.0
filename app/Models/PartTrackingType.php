@@ -12,4 +12,8 @@ class PartTrackingType extends Model
     protected $table = 'parttrackingtype';
 
     public $timestamps = false;
+
+    protected $fillable = [
+        'name',
+    ];
 }

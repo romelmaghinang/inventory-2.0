@@ -3,6 +3,9 @@
 namespace App\Http\Requests\InventoryLog;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException; 
+use Symfony\Component\HttpFoundation\Response; 
 
 class StoreInventoryLogRequest extends FormRequest
 {
@@ -22,18 +25,22 @@ class StoreInventoryLogRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'partNumber' => ['required', 'string', 'max:70', 'exists:part,num'],
-            'partDescription' => ['nullable', 'string', 'max:252',],
-            'location' => ['required', 'string', 'exists:location,name'],
-            'qty' => ['required', 'numeric'],
-            'uom' => ['required', 'string', 'exists:uom,name'],
-            'cost' => ['required', 'numeric', 'max:9999999999'],
-            'qbClass' => ['nullable', 'string', 'exists:qbclass,name'],
-            'date' => ['nullable', 'date'],
-            'note' => ['nullable', 'string'],
-        ];
+            'PartNumber' => ['required', 'string', 'max:70', 'exists:part,num'],
+            'PartDescription' => ['nullable', 'string', 'max:252'],
+            'Location' => ['required', 'string', 'exists:location,name'],
+            'Qty' => ['required', 'numeric'],
+            'UOM' => ['required', 'string', 'exists:uom,name'],
+            'Cost' => ['required', 'numeric', 'max:9999999999'],
+            'QbClass' => ['nullable', 'string', 'exists:qbclass,name'],
+            'Date' => ['nullable', 'date'],
+            'Note' => ['nullable', 'string'],
+            'TrackingType' => ['nullable', 'string', 'exists:parttrackingtype,name'], 
+      ];
     }
 
+    /**
+     * Handle a failed validation attempt.
+     */
     protected function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(response()->json(
