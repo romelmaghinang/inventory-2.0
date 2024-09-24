@@ -18,9 +18,9 @@ return new class extends Migration
             $table->dateTime('dateLastModified')->nullable();
             $table->integer('num')->nullable()->unique();
             $table->decimal('qty', 28, 9)->nullable();
-            $table->decimal('qtyCommitted', 28, 9)->nullable();
+            $table->decimal('qtyCommitted', 28, 9)->default(0.0000);
             $table->boolean('serializedFlag');
-            $table->string('trackingEncoding', 30);
+            $table->string('trackingEncoding', 30)->nullable();
             $table->boolean('usedFlag');
             
             $table->unsignedInteger('woItemId')->nullable();

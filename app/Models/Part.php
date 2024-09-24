@@ -60,4 +60,8 @@ class Part extends Model
     ];
 
     public $timestamps = false;
+    public function tags()
+    {
+        return $this->hasMany(Tag::class, 'partId');
+    }
 }
