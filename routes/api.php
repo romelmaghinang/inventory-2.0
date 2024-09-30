@@ -43,15 +43,15 @@ Route::middleware('auth:api')->group(function () {
                 'payment-terms' => PaymentTermsController::class,
             ]
         ); 
-
+ 
 
         Route::middleware(['auth:sanctum', 'abilities:create-users,create-permission,create-role,assign-role,assign-permission,pick-finish,pick-start,pack,ship,inventory'])->group(function () {
             Route::post('/create-role', [UserController::class, 'createRole']);
             Route::post('/assign-role', [UserController::class, 'assignRole']);
             Route::post('/assign-permission', [UserController::class, 'assignPermission']);
             Route::post('/create-permission', [UserController::class, 'createPermission']);
-            Route::post('pick-finish', FinishController::class);
             Route::post('pick-start', StartController::class);
+            Route::post('pick-finish', FinishController::class);
             Route::post('pack', PackController::class);
             Route::post('ship', ShipController::class);
             Route::post('inventory', [InventoryController::class, 'store']);
