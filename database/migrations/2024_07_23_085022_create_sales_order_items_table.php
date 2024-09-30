@@ -43,7 +43,7 @@ return new class extends Migration
             $table->foreignId('soId')->constrained('so');
             $table->foreignId('qbClassId')->nullable()->constrained('qbclass');
             $table->foreignId('productId')->nullable()->constrained('product');
-            $table->foreignId('statusId')->constrained('sostatus');
+            $table->foreignId('statusId')->constrained('soitemstatus');
             $table->foreignId('uomId')->nullable()->constrained('uom');
             $table->foreignId('typeId')->constrained('soitemtype');
             $table->foreignId('taxId')->nullable()->constrained('taxrate');

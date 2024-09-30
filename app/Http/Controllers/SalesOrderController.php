@@ -78,7 +78,7 @@ class SalesOrderController extends Controller
                 'shipToCountryId' => $shipToCountry->id,
                 'shipToStateId' => $shipToState->id,
                 'taxRateId' => $taxRate->id,
-                'statusId' => $storeSalesOrderRequest->status,
+                'statusId' => $storeSalesOrderRequest->status ?? 20,  
                 'currencyId' => $currency->id,
                 'customerId' => $customer->id,
                 'carrierId' => $carrier->id,
@@ -114,12 +114,11 @@ class SalesOrderController extends Controller
                 'customFieldItem' => $item['cfi'],
                 'soId' => $salesOrder->id,
                 'qbClassId' => $qbClass->id,
-                'statusId' => $storeSalesOrderRequest->status,
+                'statusId' => 10, 
             ];
 
             $salesOrderItems[] = SalesOrderItems::create($transformedItem);
         }
-
 
         $pick = Pick::create(
             [
@@ -164,7 +163,6 @@ class SalesOrderController extends Controller
 
         $customer = Customer::firstOrCreate(['name' => $updateSalesOrderRequest->customerName]);
 
-        // Update Sales Order
         $salesOrder->update(
             $updateSalesOrderRequest->only([
                 'customerContact',
@@ -209,12 +207,10 @@ class SalesOrderController extends Controller
             ]
         );
 
-        // Remove existing items
         $salesOrder->items()->delete();
 
         $salesOrderItems = [];
 
-        // Add new items
         foreach ($updateSalesOrderRequest->validated()['items'] as $item) {
             $product = Product::where('num', $item['productNumber'])->firstOrFail();
             $qbClass = qbClass::firstOrCreate(['name' => $item['itemQuickBooksClassName']]);
@@ -237,7 +233,7 @@ class SalesOrderController extends Controller
                 'customFieldItem' => $item['cfi'],
                 'soId' => $salesOrder->id,
                 'qbClassId' => $qbClass->id,
-                'statusId' => $updateSalesOrderRequest->status,
+                'statusId' => $storeSalesOrderRequest->status ?? 20,
             ];
 
             $salesOrderItems[] = SalesOrderItems::create($transformedItem);

@@ -3,7 +3,6 @@
 namespace App\Http\Requests\SalesOrder;
 
 use Illuminate\Foundation\Http\FormRequest;
-
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,6 +18,16 @@ class StoreSalesOrderRequest extends FormRequest
     }
 
     /**
+     * Modify the input data before validation.
+     */
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'status' => $this->input('status', 20), 
+        ]);
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
@@ -26,7 +35,6 @@ class StoreSalesOrderRequest extends FormRequest
     public function rules()
     {
         return [
-
             'soNum' => ['nullable', 'integer'],
             'status' => ['required', 'integer', 'exists:sostatus,id'], 
             'customerName' => ['required', 'string', 'max:100'], 
@@ -91,6 +99,12 @@ class StoreSalesOrderRequest extends FormRequest
         ];
     }
 
+    /**
+     * Handle a failed validation attempt.
+     *
+     * @param Validator $validator
+     * @throws HttpResponseException
+     */
     protected function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(response()->json(

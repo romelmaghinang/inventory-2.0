@@ -12,7 +12,9 @@ use App\Models\PartTracking;
 use App\Models\Pick;
 use App\Models\SerialNumber;
 use App\Models\TrackingInfo;
-use App\Models\TableReference; 
+use App\Models\TableReference;
+use App\Models\SalesOrder;
+use App\Models\SalesOrderItems;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
@@ -24,7 +26,7 @@ class PickController extends Controller
     {
         $part = Part::where('num', $storePickRequest->partNum)->firstOrFail();
         $partTracking = PartTracking::where('name', $storePickRequest->partTrackingType)->firstOrFail();
-
+    
         $tableReference = TableReference::where('tableRefName', 'PickItem')->first();
         if (!$tableReference) {
             return response()->json(
@@ -34,21 +36,44 @@ class PickController extends Controller
                 Response::HTTP_NOT_FOUND
             );
         }
-        $qty = $tableReference->tableId;
-
+        $tableId = $tableReference->tableId;
+    
+        $so = SalesOrder::where('num', $storePickRequest->pickNum)->first();
+        if (!$so) {
+            return response()->json(
+                [
+                    'message' => "Sales Order with pickNum {$storePickRequest->pickNum} not found.",
+                ],
+                Response::HTTP_NOT_FOUND
+            );
+        }
+    
+        $soItem = SalesOrderItems::where('soid', $so->id)->first();
+        if (!$soItem) {
+            return response()->json(
+                [
+                    'message' => "Sales Order Items for Sales Order ID {$so->id} not found.",
+                ],
+                Response::HTTP_NOT_FOUND
+            );
+        }
+    
+        $qty = $soItem->qtyOrdered;
+    
         if ($storePickRequest->partTrackingType === 'Serial Number') {
             $trackingInfos = [];
-
+    
             foreach ($storePickRequest->validated()['trackingInfo'] as $serialNumber) {
                 try {
                     SerialNumber::where('serialNum', $serialNumber)
                         ->where('partTrackingId', $partTracking->id)
                         ->firstOrFail();
-
+    
                     $trackingInfos[] = TrackingInfo::create([
                         'partTrackingId' => $partTracking->id,
                         'info' => $serialNumber,
                         'qty' => $qty,
+                        'tableId' => $tableId,
                     ]);
                 } catch (ModelNotFoundException $e) {
                     return response()->json(
@@ -65,19 +90,21 @@ class PickController extends Controller
                     $trackingInfo = TrackingInfo::create([
                         'partTrackingId' => $partTracking->id,
                         'infoDate' => $storePickRequest->trackingInfo[0],
-                        'qty' => $qty, 
+                        'qty' => $qty,
+                        'tableId' => $tableId,
                     ]);
                     break;
-
+    
                 case 'Revision Level':
                 case 'Lot Number':
                     $trackingInfo = TrackingInfo::create([
                         'partTrackingId' => $partTracking->id,
                         'info' => $storePickRequest->trackingInfo[0],
-                        'qty' => $qty, 
+                        'qty' => $qty,
+                        'tableId' => $tableId,
                     ]);
                     break;
-
+    
                 default:
                     return response()->json(
                         [
@@ -87,9 +114,9 @@ class PickController extends Controller
                     );
             }
         }
-
+    
         $location = Location::where('name', $storePickRequest->locationName)->firstOrFail();
-
+    
         $pick = Pick::create([
             'num' => $storePickRequest->pickNum,
             'locationGroupId' => $location->locationGroupId,
@@ -99,7 +126,11 @@ class PickController extends Controller
             'dateScheduled' => Carbon::now(),
             'dateStarted' => Carbon::now(),
         ]);
-
+    
+        $so->update(['statusId' => 25]);
+    
+        $soItem->update(['statusId' => 40]);
+    
         return response()->json(
             [
                 'message' => 'Pick Created Successfully!',
