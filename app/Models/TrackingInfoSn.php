@@ -10,6 +10,7 @@ class TrackingInfoSn extends Model
     use HasFactory;
 
     protected $table = 'trackinginfosn';
+    public $timestamps = false;
 
     protected $fillable = [
         'partTrackingId',
