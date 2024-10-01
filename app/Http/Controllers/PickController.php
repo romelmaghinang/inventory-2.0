@@ -125,6 +125,8 @@ class PickController extends Controller
 
         $location = Location::where('name', $storePickRequest->locationName)->firstOrFail();
 
+        /* 
+
         $pick = Pick::create([
             'num' => $storePickRequest->pickNum,
             'locationGroupId' => $location->locationGroupId,
@@ -134,6 +136,7 @@ class PickController extends Controller
             'dateScheduled' => Carbon::now(),
             'dateStarted' => Carbon::now(),
         ]);
+        */
 
         $so->update(['statusId' => 25]);
 
@@ -141,9 +144,9 @@ class PickController extends Controller
 
         return response()->json(
             [
-                'message' => 'Pick Created Successfully!',
+                'message' => 'Picked Successfully!',
                 'trackingInfos' => $trackingInfos ?? [],
-                'pick' => $pick,
+                //'pick' => $pick,
             ],
             Response::HTTP_CREATED
         );
