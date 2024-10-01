@@ -3,13 +3,9 @@
 namespace App\Http\Controllers\PickStatus;
 
 use App\Http\Controllers\Controller;
-use App\Models\PartToTracking;
 use App\Models\Pick;
-use App\Models\PickItem;
-use App\Models\Product;
+use App\Models\SalesOrder;
 use App\Models\SalesOrderItems;
-use App\Models\SerialNumber;
-use App\Models\TrackingInfo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -32,61 +28,32 @@ class StartController extends Controller
 
         foreach ($startItemRequest->validated() as $item) {
             $salesOrderItem = SalesOrderItems::findOrFail($item['soItemId']);
+            
+            $salesOrder = SalesOrder::findOrFail($salesOrderItem->soId);
 
-            $pick = Pick::where('num', $salesOrderItem->salesOrder->num)->firstOrFail();
+            $pick = Pick::where('num', $salesOrder->num)->firstOrFail();
 
-            $product = Product::findOrFail($salesOrderItem->productId);
+            $pick->update([
+                'statusId' => 20,
+            ]);
 
-            $partToTracking = PartToTracking::where('partId', $product->partId)->firstOrFail();
+            $salesOrder->update([
+                'statusId' => 25,
+            ]);
 
-            if ($partToTracking->partTracking->name === 'Serial Number') {
-                $serialNumber = SerialNumber::createUniqueSerialNumber($partToTracking->partTrackingId);
+            $salesOrderItem->update([
+                'statusId' => 20,
+            ]);
 
-                $trackingInfo = TrackingInfo::create(
-                    [
-                        'partTrackingId' => $partToTracking->partTrackingId
-                    ]
-                );
-            }
-
-            if ($partToTracking->partTracking->name === 'Expiration Date') {
-                $trackingInfo = TrackingInfo::create(
-                    [
-                        'partTrackingId' => $partToTracking->partTrackingId,
-                    ]
-                );
-            }
-
-            if ($partToTracking->partTracking->name === 'Revision Level' || $partToTracking->partTracking->name === 'Lot Number') {
-                $trackingInfo = TrackingInfo::create(
-                    [
-                        'partTrackingId' => $partToTracking->partTrackingId,
-                    ]
-                );
-            }
-
-            $pickItem = PickItem::create(
-                [
-                    'qty' => $salesOrderItem->qtyOrdered,
-                    'partId' => $product->partId,
-                    'pickId' => $pick->id,
-                    'soItemId' => $salesOrderItem->id,
-                    'statusId' => 20,
-                    'uomId' => $salesOrderItem->uomId,
-                ]
-            );
-
-            $pickItems[] = $pickItem;
+            $pickItems[] = $pick;
         }
 
         return response()->json(
             [
                 'message' => 'Pick Item Has Started',
-                'pickItem' => $pickItems,
-                'serialNum' => $serialNumber ?? null,
-                'trackingInfo' => $trackingInfo ?? null,
-
-            ]
+                'pickItems' => $pickItems,
+            ],
+            JsonResponse::HTTP_OK
         );
     }
 }
