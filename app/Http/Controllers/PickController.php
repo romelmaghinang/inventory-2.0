@@ -8,8 +8,10 @@ use App\Http\Requests\Pick\UpdatePickRequest;
 use App\Models\InventoryLog;
 use App\Models\Location;
 use App\Models\Part;
-use App\Models\PartTracking;
 use App\Models\Pick;
+use App\Models\PartTracking;
+use App\Models\PickItem;
+use App\Models\Product;
 use App\Models\SerialNumber;
 use App\Models\TrackingInfo;
 use App\Models\TableReference;
@@ -138,6 +140,26 @@ class PickController extends Controller
         ]);
         */
 
+        $salesOrderItem = $soItem; 
+
+        $pick = Pick::where('num', $salesOrderItem->salesOrder->num)->firstOrFail();
+
+        $product = Product::findOrFail($salesOrderItem->productId);
+
+        $pickItem = PickItem::create(
+            [
+                'qty' => $salesOrderItem->qtyOrdered,
+                'partId' => $product->partId,
+                'pickId' => $pick->id,
+                'soItemId' => $salesOrderItem->id,
+                'statusId' => 20,
+                'uomId' => $salesOrderItem->uomId,
+            ]
+        );
+
+        $pickItems[] = $pickItem;
+    
+
         $so->update(['statusId' => 25]);
 
         $soItem->update(['statusId' => 40]);
@@ -152,3 +174,5 @@ class PickController extends Controller
         );
     }
 }
+
+

@@ -7,9 +7,11 @@ use App\Models\PickItem;
 use App\Models\Ship;
 use App\Models\ShipCarton;
 use App\Models\ShipItem;
+use App\Models\Pick; 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon; 
 
 class FinishController extends Controller
 {
@@ -27,6 +29,14 @@ class FinishController extends Controller
 
         foreach ($finishItemRequest->validated() as $item) {
             $pickItem = PickItem::findOrFail($item['pickItemId']);
+
+            $pick = Pick::find($pickItem->pickId);
+            if ($pick) {
+                $pick->update([
+                    'dateFinished' => Carbon::now(),
+                    'dateLastModified' => Carbon::now(),
+                ]);
+            }
 
             $pickItem->update(
                 [
@@ -67,7 +77,7 @@ class FinishController extends Controller
             [
                 'message' => 'Pick Item is Finish',
                 'ship' => $ship,
-                'shipItem' =>$shipItem,
+                'shipItem' => $shipItem,
             ]
         );
     }
