@@ -37,6 +37,12 @@ class FinishController extends Controller
                     'dateLastModified' => Carbon::now(),
                 ]);
             }
+            $pick->update(
+                [
+                    'statusId' => 40
+                ]
+            );
+
 
             $pickItem->update(
                 [
