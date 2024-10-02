@@ -30,7 +30,7 @@ class PickController extends Controller
     {
         $part = Part::where('num', $storePickRequest->partNum)->firstOrFail();
         $partTracking = PartTracking::where('name', $storePickRequest->partTrackingType)->firstOrFail();
-
+    
         $tableReference = TableReference::where('tableRefName', 'PickItem')->first();
         if (!$tableReference) {
             return response()->json(
@@ -41,7 +41,7 @@ class PickController extends Controller
             );
         }
         $tableId = $tableReference->tableId;
-
+    
         $so = SalesOrder::where('num', $storePickRequest->pickNum)->first();
         if (!$so) {
             return response()->json(
@@ -51,7 +51,7 @@ class PickController extends Controller
                 Response::HTTP_NOT_FOUND
             );
         }
-
+    
         $soItem = SalesOrderItems::where('soid', $so->id)->first();
         if (!$soItem) {
             return response()->json(
@@ -61,20 +61,19 @@ class PickController extends Controller
                 Response::HTTP_NOT_FOUND
             );
         }
-
+    
         $qty = $soItem->qtyOrdered;
-
+        $trackingInfos = [];
+    
         if ($storePickRequest->partTrackingType === 'Serial Number') {
-            $trackingInfos = [];
-
             foreach ($storePickRequest->validated()['trackingInfo'] as $serialNumber) {
                 try {
                     SerialNumber::where('serialNum', $serialNumber)
                         ->where('partTrackingId', $partTracking->id)
                         ->firstOrFail();
-
+    
                     $locationGroupId = $so->locationGroupId;
-
+    
                     $tag = Tag::where('locationId', $locationGroupId)->first();
                     if ($tag) {
                         if ($tag->qty < $qty) {
@@ -85,7 +84,7 @@ class PickController extends Controller
                                 Response::HTTP_BAD_REQUEST
                             );
                         }
-
+    
                         $tag->qty -= $qty;
                         $tag->save();
                     } else {
@@ -96,7 +95,7 @@ class PickController extends Controller
                             Response::HTTP_NOT_FOUND
                         );
                     }
-
+    
                     $inventory = Inventory::where('locationGroupId', $locationGroupId)->first();
                     if ($inventory) {
                         if ($inventory->qtyOnHand < $qty) {
@@ -107,7 +106,7 @@ class PickController extends Controller
                                 Response::HTTP_BAD_REQUEST
                             );
                         }
-
+    
                         $inventory->qtyOnHand -= $qty;
                         $inventory->save();
                     } else {
@@ -118,19 +117,19 @@ class PickController extends Controller
                             Response::HTTP_NOT_FOUND
                         );
                     }
-
+    
                     $trackingInfo = TrackingInfo::create([
                         'partTrackingId' => $partTracking->id,
                         'qty' => $qty,
                         'tableId' => $tableId,
                     ]);
-
+    
                     TrackingInfoSn::create([
                         'partTrackingId' => $partTracking->id,
                         'serialNum' => $serialNumber,
                         'trackingInfoId' => $trackingInfo->id,
                     ]);
-
+    
                     $trackingInfos[] = $trackingInfo;
                 } catch (ModelNotFoundException $e) {
                     return response()->json(
@@ -142,46 +141,45 @@ class PickController extends Controller
                 }
             }
         } else {
-            switch ($storePickRequest->partTrackingType) {
-                case 'Expiration Date':
-                    $trackingInfo = TrackingInfo::create([
-                        'partTrackingId' => $partTracking->id,
-                        'infoDate' => $storePickRequest->trackingInfo[0],
-                        'qty' => $qty,
-                        'tableId' => $tableId,
-                    ]);
-                    break;
-
-                case 'Revision Level':
-                case 'Lot Number':
-                    $trackingInfo = TrackingInfo::create([
-                        'partTrackingId' => $partTracking->id,
-                        'info' => $storePickRequest->trackingInfo[0],
-                        'qty' => $qty,
-                        'tableId' => $tableId,
-                    ]);
-                    break;
-
-                default:
-                    return response()->json(
-                        [
-                            'message' => 'Invalid part tracking type.',
-                        ],
-                        Response::HTTP_BAD_REQUEST
-                    );
+            foreach ($storePickRequest->trackingInfo as $info) {
+                $trackingInfoData = [
+                    'partTrackingId' => $partTracking->id,
+                    'qty' => $qty,
+                    'tableId' => $tableId,
+                ];
+    
+                switch ($storePickRequest->partTrackingType) {
+                    case 'Expiration Date':
+                        $trackingInfoData['infoDate'] = $info;
+                        break;
+                    case 'Revision Level':
+                    case 'Lot Number':
+                        $trackingInfoData['info'] = $info;
+                        break;
+                    default:
+                        return response()->json(
+                            [
+                                'message' => 'Invalid part tracking type.',
+                            ],
+                            Response::HTTP_BAD_REQUEST
+                        );
+                }
+    
+                $trackingInfo = TrackingInfo::create($trackingInfoData);
+                $trackingInfos[] = $trackingInfo;
             }
         }
-
+    
         $location = Location::where('name', $storePickRequest->locationName)->firstOrFail();
-
+    
         $so->update(['statusId' => 25]);
-
+    
         $soItem->update(['statusId' => 40]);
-
+    
         return response()->json(
             [
                 'message' => 'Picked Successfully!',
-                'trackingInfos' => $trackingInfos ?? [],
+                'trackingInfos' => $trackingInfos,
             ],
             Response::HTTP_CREATED
         );
