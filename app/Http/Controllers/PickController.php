@@ -5,7 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Pick\StorePickRequest;
 use App\Http\Requests\Pick\UpdatePickRequest;
-use App\Models\InventoryLog;
+use App\Models\Inventory;
+use App\Models\Tag;
 use App\Models\Location;
 use App\Models\Part;
 use App\Models\Pick;
@@ -72,6 +73,52 @@ class PickController extends Controller
                         ->where('partTrackingId', $partTracking->id)
                         ->firstOrFail();
 
+                    $locationGroupId = $so->locationGroupId;
+
+                    $tag = Tag::where('locationId', $locationGroupId)->first();
+                    if ($tag) {
+                        if ($tag->qty < $qty) {
+                            return response()->json(
+                                [
+                                    'message' => 'Insufficient quantity.',
+                                ],
+                                Response::HTTP_BAD_REQUEST
+                            );
+                        }
+
+                        $tag->qty -= $qty;
+                        $tag->save();
+                    } else {
+                        return response()->json(
+                            [
+                                'message' => "Tag with locationGroupId {$locationGroupId} not found.",
+                            ],
+                            Response::HTTP_NOT_FOUND
+                        );
+                    }
+
+                    $inventory = Inventory::where('locationGroupId', $locationGroupId)->first();
+                    if ($inventory) {
+                        if ($inventory->qtyOnHand < $qty) {
+                            return response()->json(
+                                [
+                                    'message' => 'Insufficient quantity.',
+                                ],
+                                Response::HTTP_BAD_REQUEST
+                            );
+                        }
+
+                        $inventory->qtyOnHand -= $qty;
+                        $inventory->save();
+                    } else {
+                        return response()->json(
+                            [
+                                'message' => "Inventory with locationGroupId {$locationGroupId} not found.",
+                            ],
+                            Response::HTTP_NOT_FOUND
+                        );
+                    }
+
                     $trackingInfo = TrackingInfo::create([
                         'partTrackingId' => $partTracking->id,
                         'qty' => $qty,
@@ -127,39 +174,6 @@ class PickController extends Controller
 
         $location = Location::where('name', $storePickRequest->locationName)->firstOrFail();
 
-        /* 
-
-        $pick = Pick::create([
-            'num' => $storePickRequest->pickNum,
-            'locationGroupId' => $location->locationGroupId,
-            'dateCreated' => Carbon::now(),
-            'dateFinished' => Carbon::now(),
-            'dateLastModified' => Carbon::now(),
-            'dateScheduled' => Carbon::now(),
-            'dateStarted' => Carbon::now(),
-        ]);
-        */
-
-        $salesOrderItem = $soItem; 
-
-        $pick = Pick::where('num', $salesOrderItem->salesOrder->num)->firstOrFail();
-
-        $product = Product::findOrFail($salesOrderItem->productId);
-
-        $pickItem = PickItem::create(
-            [
-                'qty' => $salesOrderItem->qtyOrdered,
-                'partId' => $product->partId,
-                'pickId' => $pick->id,
-                'soItemId' => $salesOrderItem->id,
-                'statusId' => 20,
-                'uomId' => $salesOrderItem->uomId,
-            ]
-        );
-
-        $pickItems[] = $pickItem;
-    
-
         $so->update(['statusId' => 25]);
 
         $soItem->update(['statusId' => 40]);
@@ -168,11 +182,8 @@ class PickController extends Controller
             [
                 'message' => 'Picked Successfully!',
                 'trackingInfos' => $trackingInfos ?? [],
-                //'pick' => $pick,
             ],
             Response::HTTP_CREATED
         );
     }
 }
-
-

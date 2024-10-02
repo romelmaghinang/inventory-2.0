@@ -33,36 +33,37 @@ class StorePickRequest extends FormRequest
             'locationName' => ['required', 'string', 'max:255', 'exists:location,name'],
             'partNum' => ['required', 'string', 'max:255', 'exists:part,num'],
             'partTrackingType' => ['required', 'string', 'exists:parttracking,name'],
-            'trackingInfo' => ['required', 'array', 'bail', function ($attribute, $value, $fail) {
-                $partNum = $this->input('partNum');
+            'trackingInfo' => ['required_if:partTrackingType,Serial Number', 'array', 'bail', function ($attribute, $value, $fail) {
+                if ($this->input('partTrackingType') === 'Serial Number') {
+                    $partNum = $this->input('partNum');
+                    
+                    $part = Part::where('num', $partNum)->first();
+                    if (!$part) {
+                        $fail("Invalid part number.");
+                        return;
+                    }
 
-                $part = Part::where('num', $partNum)->first();
-                if (!$part) {
-                    $fail("Invalid part number.");
-                    return;
-                }
+                    $tags = Tag::where('partId', $part->id)->pluck('id');
+                    if ($tags->isEmpty()) {
+                        $fail("No tags found for the specified part.");
+                        return;
+                    }
 
-                $tags = Tag::where('partId', $part->id)->pluck('id');
-                if ($tags->isEmpty()) {
-                    $fail("No tags found for the specified part.");
-                    return;
-                }
+                    $serials = Serial::whereIn('tagId', $tags)->pluck('id');
+                    if ($serials->isEmpty()) {
+                        $fail("No serials found for the specified part.");
+                        return;
+                    }
 
-                $serials = Serial::whereIn('tagId', $tags)->pluck('id');
-                if ($serials->isEmpty()) {
-                    $fail("No serials found for the specified part.");
-                    return;
-                }
+                    $serialNums = SerialNum::whereIn('serialId', $serials)->pluck('serialNum')->toArray();
+                    $invalidSerials = array_diff($value, $serialNums);
+                    if (!empty($invalidSerials)) {
+                        $fail("Invalid tracking serial numbers: " . implode(", ", $invalidSerials));
+                    }
 
-                $serialNums = SerialNum::whereIn('serialId', $serials)->pluck('serialNum')->toArray();
-
-                $invalidSerials = array_diff($value, $serialNums);
-                if (!empty($invalidSerials)) {
-                    $fail("Invalid tracking serial numbers: " . implode(", ", $invalidSerials));
-                }
-
-                if (count($value) !== count($serialNums)) {
-                    $fail("The number of tracking serials does not match the required count.");
+                    if (count($value) !== count($serialNums)) {
+                        $fail("The number of tracking serials does not match the required count.");
+                    }
                 }
             }],
         ];
