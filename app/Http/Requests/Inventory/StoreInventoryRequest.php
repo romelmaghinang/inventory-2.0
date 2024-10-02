@@ -25,7 +25,8 @@ class StoreInventoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'PartNumber' => ['required', 'string', 'max:70', 'exists:part,num'],
+            'PartNumber' => ['required', 'string', 'max:70', 'exists:part,num',
+            'unique:part,num' ],
             'PartDescription' => ['nullable', 'string', 'max:252'],
             'Location' => ['required', 'string', 'exists:location,name'],
             'Qty' => ['required', 'numeric'],
