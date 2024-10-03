@@ -31,9 +31,9 @@ return new class extends Migration
 
             $table->unsignedInteger('accountId')->nullable();
             $table->foreignId('currencyId')->nullable()->constrained('currency');
-            $table->foreignId('defaultCarrierId')->constrained('carrier')->nullable();
+            $table->foreignId('defaultCarrierId')->nullable()->constrained('carrier');
             $table->foreignId('defaultPaymentTermsId')->nullable()->constrained('paymentterms');
-            $table->foreignId('defaultShipTermsId')->constrained('shipterms')->nullable();
+            $table->foreignId('defaultShipTermsId')->nullable()->constrained('shipterms');
             $table->foreignId('statusId')->constrained('vendorstatus');
             $table->unsignedInteger('sysUserId')->nullable();
             $table->foreignId('taxRateId')->nullable()->constrained('taxrate');
