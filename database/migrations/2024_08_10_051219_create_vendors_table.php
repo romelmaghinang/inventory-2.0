@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('accountNum', 30)->nullable();
             $table->string('accountingHash', 30)->nullable();
             $table->string('accountingId', 30)->nullable();
-            $table->boolean('activeFlag');
+            $table->boolean('activeFlag')->nullable();
             $table->decimal('creditLimit', 28, 9)->nullable();
             $table->double('currencyRate')->nullable();
             $table->dateTime('dateEntered')->nullable();
@@ -31,9 +31,9 @@ return new class extends Migration
 
             $table->unsignedInteger('accountId')->nullable();
             $table->foreignId('currencyId')->nullable()->constrained('currency');
-            $table->foreignId('defaultCarrierId')->constrained('carrier');
+            $table->foreignId('defaultCarrierId')->constrained('carrier')->nullable();
             $table->foreignId('defaultPaymentTermsId')->nullable()->constrained('paymentterms');
-            $table->foreignId('defaultShipTermsId')->constrained('shipterms');
+            $table->foreignId('defaultShipTermsId')->constrained('shipterms')->nullable();
             $table->foreignId('statusId')->constrained('vendorstatus');
             $table->unsignedInteger('sysUserId')->nullable();
             $table->foreignId('taxRateId')->nullable()->constrained('taxrate');

@@ -16,6 +16,7 @@ use App\Models\ShipTerms;
 use App\Models\State;
 use App\Models\TaxRate;
 use App\Models\UnitOfMeasure;
+use App\Models\Vendor;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -35,6 +36,18 @@ class PurchaseOrderController extends Controller
     {
         $models = [];
     
+        try {
+            $models['VendorName'] = Vendor::where('name', $request->VendorName)->firstOrFail();
+        } catch (ModelNotFoundException $e) {
+            $newVendor = Vendor::create([
+                'name' => $request->VendorName,
+                'statusId' => '1'
+
+            ]);
+        
+        }
+        
+
         try {
             $models['remitCountry'] = Country::where('name', $request->RemitToCountry)->firstOrFail();
         } catch (ModelNotFoundException $e) {
@@ -149,6 +162,7 @@ class PurchaseOrderController extends Controller
                 return response()->json(['error' => 'QuickBooks Class not found: ' . $item['QuickBooksClassName']], 404);
             }
             
+
 
             return PurchaseOrderItem::create([
                 'description' => '',
