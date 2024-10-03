@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('po', function (Blueprint $table) {
             $table->id();
             $table->string('buyer', 30)->nullable();
-            $table->unsignedInteger('buyerId');
+            $table->unsignedInteger('buyerId')->nullable();
             $table->unsignedInteger('carrierId');
             $table->unsignedInteger('currencyId')->nullable();
             $table->double('currencyRate')->nullable();
@@ -50,7 +50,7 @@ return new class extends Migration
             $table->unsignedInteger('shipToStateId')->nullable();
             $table->string('shipToZip', 10)->nullable();
             $table->unsignedInteger('statusId')->nullable();
-            $table->unsignedInteger('taxRateId');
+            $table->unsignedInteger('taxRateId')->nullable();
             $table->string('taxRateName', 31)->nullable();
             $table->boolean('totalIncludesTax')->nullable();
             $table->decimal('totalTax', 28, 9)->nullable();
@@ -58,7 +58,7 @@ return new class extends Migration
             $table->string('url', 256)->nullable();
             $table->string('username', 30)->nullable();
             $table->string('vendorContact', 30)->nullable();
-            $table->unsignedInteger('vendorId');
+            $table->unsignedInteger('vendorId')->nullable();
             $table->string('vendorSO', 25)->nullable();
 
             $table->unique('num', 'u_num');

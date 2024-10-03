@@ -13,6 +13,7 @@ use App\Http\Controllers\PickStatus\StartController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\QuickBookClassController;
 use App\Http\Controllers\SalesOrderController;
+use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\ShipStatus\PackController;
 use App\Http\Controllers\ShipStatus\ShipController;
 use App\Http\Controllers\TaxRateController;
@@ -31,6 +32,7 @@ Route::middleware('auth:api')->group(function () {
             [
                 'pick' => PickController::class,
                 'sales-order' => SalesOrderController::class,
+                'purchase-order' => PurchaseOrderController::class,
                 'product' => ProductController::class,
                 'customer' => CustomerController::class,
                 'location' => LocationController::class,
