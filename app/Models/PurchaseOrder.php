@@ -52,6 +52,8 @@ class PurchaseOrder extends Model
         'carrierServiceId',
         'qbClassId',
         'num',
+        'dateCreated',
+        'dateLastModified',
     ];
 
 

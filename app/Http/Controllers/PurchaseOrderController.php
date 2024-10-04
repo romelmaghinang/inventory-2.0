@@ -20,6 +20,7 @@ use App\Models\Vendor;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Carbon\Carbon;
 
 class PurchaseOrderController extends Controller
 {
@@ -142,6 +143,8 @@ class PurchaseOrderController extends Controller
                 'totalIncludesTax' => $request->totalIncludesTax,
                 'totalTax' => $request->totalTax,
                 'typeId' => $request->typeId,
+                'dateCreated' => Carbon::now(),  
+                'dateLastModified' => Carbon::now(), 
             ]
         ));
 
@@ -182,6 +185,9 @@ class PurchaseOrderController extends Controller
                 'statusId' => '',
                 'repairFlag' => '',
                 'tbdCostFlag' => '',
+                'dateCreated' => Carbon::now(),
+                'dateLastModified' => Carbon::now(),
+                
             ]);
         });
 
@@ -229,6 +235,8 @@ class PurchaseOrderController extends Controller
                 'totalIncludesTax' => $request->totalIncludesTax,
                 'totalTax' => $request->totalTax,
                 'typeId' => $request->typeId,
+                'dateLastModified' => Carbon::now(), 
+
             ]
         ));
 
@@ -256,6 +264,9 @@ class PurchaseOrderController extends Controller
                 'statusId' => $item['statusId'] ?? 10,
                 'repairFlag' => $item['repairFlag'],
                 'tbdCostFlag' => $item['tbdCostFlag'],
+                'dateCreated' => Carbon::now(),  
+                'dateLastModified' => Carbon::now(), 
+                
             ]);
         });
 

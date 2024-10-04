@@ -14,7 +14,7 @@ class StorePurchaseOrderRequest extends FormRequest
     public function rules()
     {
         return [
-            'Flag' => 'required|boolean',
+            'Flag' => 'required|string|in:PO',
             'PONum' => 'nullable|string|max:255',
             'Status' => 'required|integer',
             'VendorName' => 'nullable|string|max:255',
@@ -51,13 +51,12 @@ class StorePurchaseOrderRequest extends FormRequest
             'URL' => 'nullable|url|max:255',
             'CurrencyName' => 'nullable|string|max:255',
             'CurrencyRate' => 'required|numeric|min:0',
-            'taxRateName' => 'nullable|email|max:255',
             'Phone' => 'nullable|string|max:20',
             'Email' => 'nullable|email|max:255',
             'CF' => 'nullable|string|max:255',
             
             'items' => 'required|array|min:1',
-            'items.*.Flag' => 'required|boolean',
+            'items.*.Flag' => 'required|string|in:Item',
             'items.*.POItemTypeID' => 'required|integer',
             'items.*.PartNumber' => 'nullable|string|max:255',
             'items.*.VendorPartNumber' => 'nullable|string|max:255',
@@ -74,4 +73,5 @@ class StorePurchaseOrderRequest extends FormRequest
             'items.*.CFI' => 'nullable|string|max:255',
         ];
     }
+    
 }
