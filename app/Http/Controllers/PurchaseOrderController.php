@@ -15,6 +15,8 @@ use App\Models\qbClass;
 use App\Models\ShipTerms;
 use App\Models\State;
 use App\Models\TaxRate;
+use App\Models\Receipt;
+use App\Models\ReceiptItem;
 use App\Models\UnitOfMeasure;
 use App\Models\Vendor;
 use Illuminate\Http\JsonResponse;
@@ -112,11 +114,23 @@ class PurchaseOrderController extends Controller
     {
         $models = $this->handleFindModels($request);
         if ($models instanceof JsonResponse) return $models; 
-
+    
         $taxRateId = optional(TaxRate::where('name', $request->taxRateName)->first())->id;
-
-        $newNum = (string)((optional(PurchaseOrder::latest('id')->first())->num ?? 1000) + 1);
-
+    
+        $poNum = $request->PONum; 
+    
+        if ($poNum) {
+            $existingOrder = PurchaseOrder::where('num', $poNum)->first();
+            if ($existingOrder) {
+                return response()->json(['error' => 'The Purchase Order number must be unique.'], Response::HTTP_CONFLICT);
+            }
+        }
+    
+        $prefix = '5';
+        $lastOrder = PurchaseOrder::where('num', 'like', $prefix . '%')->orderBy('num', 'desc')->first();
+        $newNum = $lastOrder ? intval(substr($lastOrder->num, 1)) + 1 : 10000;
+        $finalNum = $poNum ?: $prefix . str_pad($newNum, 4, '0', STR_PAD_LEFT);
+    
         $purchaseOrder = PurchaseOrder::create(array_merge(
             $request->only([
                 'buyer', 'dateIssued', 'dateConfirmed', 'dateCompleted', 'dateFirstShip',
@@ -127,7 +141,7 @@ class PurchaseOrderController extends Controller
             ]),
             [
                 'buyerId' => $request->buyerId ?? 0,
-                'num' => $request->poNum ?? $newNum,
+                'num' => $finalNum, 
                 'locationGroupId' => $models['locationGroup']->id,
                 'carrierId' => $models['carrier']->id,
                 'currencyId' => $models['currency']->id,
@@ -143,30 +157,15 @@ class PurchaseOrderController extends Controller
                 'totalIncludesTax' => $request->totalIncludesTax,
                 'totalTax' => $request->totalTax,
                 'typeId' => $request->typeId,
-                'dateCreated' => Carbon::now(),  
-                'dateLastModified' => Carbon::now(), 
+                'dateCreated' => Carbon::now(),
+                'dateLastModified' => Carbon::now(),
             ]
         ));
-
+    
         $purchaseOrderItems = collect($request->validated()['items'])->map(function ($item) use ($purchaseOrder) {
-            if (!isset($item['UOM'])) {
-                return response()->json(['error' => 'UOM is required for each item.'], 422);
-            }
-            try {
-                $uom = UnitOfMeasure::where('name', $item['UOM'])->firstOrFail();
-            } catch (ModelNotFoundException $e) {
-                
-                return response()->json(['error' => 'Unit of Measure not found: ' . $item['UOM']], 404);
-            }
-            
-            try {
-                $qbClass = qbClass::where('name', $item['QuickBooksClassName'])->firstOrFail();
-            } catch (ModelNotFoundException $e) {
-                return response()->json(['error' => 'QuickBooks Class not found: ' . $item['QuickBooksClassName']], 404);
-            }
-            
-
-
+            $uom = UnitOfMeasure::where('name', $item['UOM'])->firstOrFail();
+            $qbClass = qbClass::where('name', $item['QuickBooksClassName'])->firstOrFail();
+    
             return PurchaseOrderItem::create([
                 'description' => '',
                 'note' => $item['Note'],
@@ -187,16 +186,44 @@ class PurchaseOrderController extends Controller
                 'tbdCostFlag' => '',
                 'dateCreated' => Carbon::now(),
                 'dateLastModified' => Carbon::now(),
-                
             ]);
         });
-
+    
+        $receipt = Receipt::create([
+            'locationGroupId' => $models['locationGroup']->id,
+            'purchaseOrderId' => $purchaseOrder->id,
+            'orderTypeId' => 10,
+            'statusId' => 10,
+            'typeId' => 10,
+            'userId' => 0,
+            'dateCreated' => Carbon::now(),
+            'dateLastModified' => Carbon::now(),
+        ]);
+    
+        $receiptItems = $purchaseOrderItems->map(function ($poItem) use ($receipt) {
+            return ReceiptItem::create([
+                'receiptId' => $receipt->id,
+                'poItemId' => $poItem->id,
+                'billVendorFlag' => 0,
+                'orderTypeId' => 10,
+                'statusId' => 10,
+                'partTypeId' => 0,
+                'typeId' => 10,
+                'uomId' => 0,
+                'dateCreated' => Carbon::now(),
+                'dateLastModified' => Carbon::now(),
+            ]);
+        });
+    
         return response()->json([
-            'message' => 'Purchase Order created successfully',
+            'message' => 'Purchase Order successfully created',
             'purchaseOrderData' => $purchaseOrder,
             'purchaseOrderItemData' => $purchaseOrderItems,
+            'receiptData' => $receipt,
+            'receiptItemData' => $receiptItems,
         ], Response::HTTP_CREATED);
     }
+    
 
     public function show(PurchaseOrder $purchaseOrder): JsonResponse
     {

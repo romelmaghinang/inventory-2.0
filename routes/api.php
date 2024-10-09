@@ -18,6 +18,7 @@ use App\Http\Controllers\ShipStatus\PackController;
 use App\Http\Controllers\ShipStatus\ShipController;
 use App\Http\Controllers\TaxRateController;
 use App\Http\Controllers\UnitOfMeasureController;
+use App\Http\Controllers\ReceivingController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VendorController;
 use Illuminate\Http\Request;
@@ -54,6 +55,7 @@ Route::middleware('auth:api')->group(function () {
             Route::post('pack', PackController::class);
             Route::post('ship', ShipController::class);
             Route::post('inventory', [InventoryController::class, 'store']);
+            Route::post('/receiving', [ReceivingController::class, 'receiving']);
 
 
         Route::middleware(['auth:sanctum', 'abilities:create-users,create-permission,create-role,assign-role,assign-permission,pick-finish,pick-start,pack,ship,inventory'])->group(function () {

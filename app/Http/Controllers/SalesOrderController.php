@@ -37,13 +37,33 @@ class SalesOrderController extends Controller
         $carrierService = CarrierService::where('name', $storeSalesOrderRequest->carrierService)->firstOrFail();
         $taxRate = TaxRate::where('name', $storeSalesOrderRequest->taxRateName)->firstOrFail();
         $shipterms = ShipTerms::where('name', $storeSalesOrderRequest->shippingTerms)->firstOrFail();
-
+    
         $customer = Customer::firstOrCreate(['name' => $storeSalesOrderRequest->customerName]);
-
-        $newNum = (string)((optional(SalesOrder::latest('id')->first())->num ?? 1000) + 1);
-
+    
+        // Check soNum from request
+        $soNum = $storeSalesOrderRequest->soNum;
+    
+        if (!empty($soNum)) {
+            // If soNum is provided, check if it's unique
+            if (SalesOrder::where('num', $soNum)->exists()) {
+                return response()->json(['message' => 'The Sales Order number must be unique.'], Response::HTTP_CONFLICT);
+            }
+            // Use the provided soNum as the value for num
+            $newNum = $soNum;
+        } else {
+            // Generate newNum based on the latest Sales Order number
+            $lastSalesOrder = SalesOrder::orderBy('num', 'desc')->first();
+            $nextNum = (string)((optional($lastSalesOrder)->num ?? 10000) + 1); // Start from 10001 if no sales order exists
+    
+            // Ensure newNum is unique
+            while (SalesOrder::where('num', $nextNum)->exists()) {
+                $nextNum = (string)(intval($nextNum) + 1); // Increment until a unique number is found
+            }
+            $newNum = $nextNum; // Set num to the unique number
+        }
+    
         $locationGroup = LocationGroup::where('name', $storeSalesOrderRequest->locationGroupName)->firstOrFail();
-
+    
         $salesOrder = SalesOrder::create(
             $storeSalesOrderRequest->only([
                 'customerContact',
@@ -78,24 +98,24 @@ class SalesOrderController extends Controller
                 'shipToCountryId' => $shipToCountry->id,
                 'shipToStateId' => $shipToState->id,
                 'taxRateId' => $taxRate->id,
-                'statusId' => $storeSalesOrderRequest->status ?? 20,  
+                'statusId' => $storeSalesOrderRequest->status ?? 20,
                 'currencyId' => $currency->id,
                 'customerId' => $customer->id,
                 'carrierId' => $carrier->id,
                 'carrierServiceId' => $carrierService->id,
                 'residentialFlag' => $storeSalesOrderRequest->shipToResidential,
                 'qbClassId' => $qbclass->id,
-                'num' =>  $storeSalesOrderRequest->soNum ?? $newNum,
+                'num' => $newNum,
             ]
         );
-
+    
         $salesOrderItems = [];
-
+    
         foreach ($storeSalesOrderRequest->validated()['items'] as $item) {
             $product = Product::where('num', $item['productNumber'])->firstOrFail();
             $qbClass = qbClass::where('name', $item['itemQuickBooksClassName'])->firstOrFail();
             $uom = UnitOfMeasure::where('name', $item['uom'])->firstOrFail();
-
+    
             $transformedItem = [
                 'note' => $item['note'],
                 'typeId' => $item['soItemTypeId'],
@@ -114,19 +134,19 @@ class SalesOrderController extends Controller
                 'customFieldItem' => $item['cfi'],
                 'soId' => $salesOrder->id,
                 'qbClassId' => $qbClass->id,
-                'statusId' => 10, 
+                'statusId' => 10,
             ];
-
+    
             $salesOrderItems[] = SalesOrderItems::create($transformedItem);
         }
-
+    
         $pick = Pick::create(
             [
-                'num' =>  $salesOrder->num,
+                'num' => $salesOrder->num,
                 'locationGroupId' => $locationGroup->id,
             ]
         );
-
+    
         return response()->json(
             [
                 'message' => 'Sales Order created successfully',
@@ -137,6 +157,8 @@ class SalesOrderController extends Controller
             Response::HTTP_CREATED
         );
     }
+    
+    
     /**
      * Display the specified resource.
      */
