@@ -40,26 +40,21 @@ class SalesOrderController extends Controller
     
         $customer = Customer::firstOrCreate(['name' => $storeSalesOrderRequest->customerName]);
     
-        // Check soNum from request
         $soNum = $storeSalesOrderRequest->soNum;
     
         if (!empty($soNum)) {
-            // If soNum is provided, check if it's unique
             if (SalesOrder::where('num', $soNum)->exists()) {
                 return response()->json(['message' => 'The Sales Order number must be unique.'], Response::HTTP_CONFLICT);
             }
-            // Use the provided soNum as the value for num
             $newNum = $soNum;
         } else {
-            // Generate newNum based on the latest Sales Order number
             $lastSalesOrder = SalesOrder::orderBy('num', 'desc')->first();
-            $nextNum = (string)((optional($lastSalesOrder)->num ?? 10000) + 1); // Start from 10001 if no sales order exists
+            $nextNum = (string)((optional($lastSalesOrder)->num ?? 10000) + 1); 
     
-            // Ensure newNum is unique
             while (SalesOrder::where('num', $nextNum)->exists()) {
-                $nextNum = (string)(intval($nextNum) + 1); // Increment until a unique number is found
+                $nextNum = (string)(intval($nextNum) + 1); 
             }
-            $newNum = $nextNum; // Set num to the unique number
+            $newNum = $nextNum;
         }
     
         $locationGroup = LocationGroup::where('name', $storeSalesOrderRequest->locationGroupName)->firstOrFail();

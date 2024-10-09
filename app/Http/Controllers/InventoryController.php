@@ -23,7 +23,20 @@ class InventoryController extends Controller
     {
         $part = Part::where('num', $storeInventoryRequest->PartNumber)->firstOrFail();
         $location = Location::where('name', $storeInventoryRequest->Location)->firstOrFail();
-        
+    
+        $existingInventory = Inventory::where('partId', $part->id)
+            ->where('locationGroupId', $location->locationGroupId)
+            ->first();
+    
+        if ($existingInventory) {
+            return response()->json(
+                [
+                    'message' => 'Inventory already exists',
+                ],
+                Response::HTTP_CONFLICT
+            );
+        }
+    
         $trackingType = PartTrackingType::where('name', $storeInventoryRequest->TrackingType)->first();
         $trackingTypeId = $trackingType ? $trackingType->id : null;
     
@@ -97,7 +110,7 @@ class InventoryController extends Controller
                 'inventory' => $inventory,
                 'input' => $storeInventoryRequest->validated(),
             ],
-            Response::HTTP_CREATED,
+            Response::HTTP_CREATED
         );
     }
     
