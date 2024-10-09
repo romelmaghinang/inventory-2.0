@@ -13,6 +13,7 @@ class PurchaseOrder extends Model
 
     protected $fillable = [
         'vendorContact',
+        'poId',
         'remitToName',
         'remitToAddress',
         'remitToCity',

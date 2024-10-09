@@ -13,6 +13,7 @@ class Receipt extends Model
     public $timestamps = false;
 
     protected $fillable = [
+        'poId',
         'locationGroupId',
         'orderTypeId',  
         'statusId',

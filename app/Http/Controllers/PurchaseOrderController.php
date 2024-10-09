@@ -113,11 +113,11 @@ class PurchaseOrderController extends Controller
     public function store(StorePurchaseOrderRequest $request): JsonResponse
     {
         $models = $this->handleFindModels($request);
-        if ($models instanceof JsonResponse) return $models; 
+        if ($models instanceof JsonResponse) return $models;
     
         $taxRateId = optional(TaxRate::where('name', $request->taxRateName)->first())->id;
     
-        $poNum = $request->PONum; 
+        $poNum = $request->PONum;
     
         if ($poNum) {
             $existingOrder = PurchaseOrder::where('num', $poNum)->first();
@@ -162,7 +162,9 @@ class PurchaseOrderController extends Controller
             ]
         ));
     
-        $purchaseOrderItems = collect($request->validated()['items'])->map(function ($item) use ($purchaseOrder) {
+        $poId = $purchaseOrder->id;
+    
+        $purchaseOrderItems = collect($request->validated()['items'])->map(function ($item) use ($poId) {
             $uom = UnitOfMeasure::where('name', $item['UOM'])->firstOrFail();
             $qbClass = qbClass::where('name', $item['QuickBooksClassName'])->firstOrFail();
     
@@ -177,7 +179,7 @@ class PurchaseOrderController extends Controller
                 'revLevel' => $item['RevisionLevel'],
                 'vendorPartNum' => $item['VendorPartNumber'],
                 'uomId' => $uom->id,
-                'poId' => $purchaseOrder->id,
+                'poId' => $poId,
                 'qbClassId' => $qbClass->id,
                 'taxId' => '',
                 'taxRate' => '',
@@ -191,7 +193,7 @@ class PurchaseOrderController extends Controller
     
         $receipt = Receipt::create([
             'locationGroupId' => $models['locationGroup']->id,
-            'purchaseOrderId' => $purchaseOrder->id,
+            'poId' => $poId,
             'orderTypeId' => 10,
             'statusId' => 10,
             'typeId' => 10,
@@ -202,7 +204,7 @@ class PurchaseOrderController extends Controller
     
         $receiptItems = $purchaseOrderItems->map(function ($poItem) use ($receipt) {
             return ReceiptItem::create([
-                'receiptId' => $receipt->id,
+                'receiptId' => $receipt->id, 
                 'poItemId' => $poItem->id,
                 'billVendorFlag' => 0,
                 'orderTypeId' => 10,
