@@ -11,6 +11,7 @@ use App\Models\PartCost;
 use App\Models\PartTracking;
 use App\Models\PartTrackingType;
 use App\Models\Tag; 
+use App\Models\UnitOfMeasure; 
 use App\Models\Serial; 
 use App\Models\SerialNum;
 use Illuminate\Http\JsonResponse;
@@ -21,7 +22,34 @@ class InventoryController extends Controller
 {
     public function store(StoreInventoryRequest $storeInventoryRequest): JsonResponse
     {
-        $part = Part::where('num', $storeInventoryRequest->PartNumber)->firstOrFail();
+        $uom = UnitOfMeasure::where('name', $storeInventoryRequest->UOM)->first();
+    
+        if (!$uom) {
+            return response()->json(['message' => 'UOM not found'], Response::HTTP_BAD_REQUEST);
+        }
+    
+        $trackingType = PartTrackingType::where('name', $storeInventoryRequest->TrackingType)->first();
+    
+        if (!$trackingType) {
+            return response()->json(['message' => 'Tracking Type not found'], Response::HTTP_BAD_REQUEST);
+        }
+    
+        $part = Part::where('num', $storeInventoryRequest->PartNumber)->first();
+    
+        if (!$part) {
+            $part = Part::create([
+                'num' => $storeInventoryRequest->PartNumber,
+                'activeFlag' => 1,
+                'uomId' => $uom->id,  
+                'typeId' => $trackingType->id,  
+            ]);
+        } else {
+            $part->update([
+                'uomId' => $uom->id,
+                'typeId' => $trackingType->id,
+            ]);
+        }
+    
         $location = Location::where('name', $storeInventoryRequest->Location)->firstOrFail();
     
         $existingInventory = Inventory::where('partId', $part->id)
@@ -29,16 +57,31 @@ class InventoryController extends Controller
             ->first();
     
         if ($existingInventory) {
+            $partCost = PartCost::where('partId', $part->id)->first();
+            $partCost->update([
+                'avgCost' => $storeInventoryRequest->Cost,
+                'dateLastModified' => now(),
+                'qty' => $partCost->qty + $storeInventoryRequest->Qty,
+                'totalCost' => $partCost->totalCost + ($storeInventoryRequest->Cost * $storeInventoryRequest->Qty),
+            ]);
+    
+            $tag = Tag::where('partId', $part->id)
+                ->where('locationId', $location->id)
+                ->first();
+    
+            $tag->update([
+                'qty' => $tag->qty + $storeInventoryRequest->Qty,
+                'dateLastModified' => now(),
+            ]);
+    
             return response()->json(
                 [
-                    'message' => 'Inventory already exists',
+                    'message' => 'Inventory has been updated',
+                    'inventory' => $existingInventory,
                 ],
-                Response::HTTP_CONFLICT
+                Response::HTTP_OK
             );
         }
-    
-        $trackingType = PartTrackingType::where('name', $storeInventoryRequest->TrackingType)->first();
-        $trackingTypeId = $trackingType ? $trackingType->id : null;
     
         $partTracking = PartTracking::where('name', $storeInventoryRequest->TrackingType)->firstOrFail();
     
@@ -52,7 +95,7 @@ class InventoryController extends Controller
             'partTrackingId' => $partTracking->id,
             'locationGroupId' => $location->locationGroupId,
             'cost' => $storeInventoryRequest->Cost,
-            'typeId' => $trackingTypeId,
+            'typeId' => $trackingType->id,  
         ]);
     
         PartCost::create([
@@ -113,5 +156,4 @@ class InventoryController extends Controller
             Response::HTTP_CREATED
         );
     }
-    
-}
+}    
