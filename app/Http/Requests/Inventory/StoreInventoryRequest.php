@@ -34,7 +34,7 @@ class StoreInventoryRequest extends FormRequest
             'QbClass' => ['nullable', 'string', 'exists:qbclass,name'],
             'Date' => ['nullable', 'date'],
             'Note' => ['nullable', 'string'],
-            'TrackingType' => ['nullable', 'string', 'exists:parttrackingtype,name'], 
+            'TrackingType' => ['nullable', 'string', 'exists:parttracking,name'], 
       ];
     }
 
