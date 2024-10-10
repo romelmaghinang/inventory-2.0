@@ -44,6 +44,8 @@ return new class extends Migration
             $table->integer('typeId');
             $table->integer('uomId');
             $table->integer('xoItemId')->nullable();
+            $table->decimal('outsourcedCost', 28, 9)->nullable(); 
+            $table->integer('carrierServiceId')->nullable();
 
             $table->index(['uomId', 'statusId', 'taxId', 'customerId', 'typeId', 'poItemId', 'carrierId', 'receiptId', 'partId', 'soItemId', 'orderTypeId', 'xoItemId', 'partTypeId', 'dateBilled', 'dateReceived', 'dateReconciled'], 'performance');
         });

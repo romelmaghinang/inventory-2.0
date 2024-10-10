@@ -29,7 +29,7 @@ class ReceivingRequest extends FormRequest
             'Fulfill' => 'required|boolean',
             'VendorPartNum' => 'nullable|string|max:50',
             'Qty' => 'nullable|numeric',
-            'Location' => 'nullable|string|max:255',
+            'Location' => 'required|string|max:255',
             'Date' => 'nullable|date_format:m/d/Y',
             'ShippingTrackingNumber' => 'nullable|string|max:50',
             'ShippingPackageCount' => 'nullable|numeric',

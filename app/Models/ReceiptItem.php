@@ -9,34 +9,46 @@ class ReceiptItem extends Model
 {
     use HasFactory;
 
-    protected $table = 'receiptitem';  
+    protected $table = 'receiptitem';
     public $timestamps = false;
 
     protected $fillable = [
         'receiptId',
-        'poItemId', 
-        'billVendorFlag',
-        'orderTypeId',  
-        'statusId',
-        'typeId',
-        'uomId',
-        'partTypeId'
-
-      
+        'poItemId',
+        'qty',
+        'locationId',
+        'dateReceived',
+        'trackingNum',
+        'packageCount',
+        'carrierId',
+        'carrierServiceId',
+        'dateLastModified',
     ];
+
 
     public function receipt()
     {
         return $this->belongsTo(Receipt::class, 'receiptId');
     }
 
-    public function uom()
-    {
-        return $this->belongsTo(UnitOfMeasure::class, 'uomId');
-    }
-
     public function purchaseOrderItem()
     {
         return $this->belongsTo(PurchaseOrderItem::class, 'poItemId');
     }
+
+    public function location()
+    {
+        return $this->belongsTo(Location::class, 'locationId');
+    }
+
+    public function carrier()
+    {
+        return $this->belongsTo(Carrier::class, 'carrierId');
+    }
+
+    public function carrierService()
+    {
+        return $this->belongsTo(CarrierService::class, 'carrierServiceId');
+    }
+
 }
