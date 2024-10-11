@@ -49,6 +49,7 @@ class ReceivingController extends Controller
 
             $receiptItem->update([
                 'qty' => $validatedData['Qty'] ?? $receiptItem->qtyReceived,
+                'statusId' => 30,
                 'dateReceived' => !empty($validatedData['Date']) ? Carbon::parse($validatedData['Date'])->toDateTimeString() : $receiptItem->dateReceived,
                 'trackingNum' => $validatedData['ShippingTrackingNumber'] ?? $receiptItem->trackingNumber,
                 'packageCount' => $validatedData['ShippingPackageCount'] ?? $receiptItem->packageCount,
