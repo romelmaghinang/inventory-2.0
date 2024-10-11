@@ -205,7 +205,6 @@ class PurchaseOrderController extends Controller
             'typeId' => 10,
             'userId' => 0,
             'dateCreated' => Carbon::now(),
-            'dateLastModified' => Carbon::now(),
         ]);
     
         $receiptItems = $purchaseOrderItems->map(function ($poItem) use ($receipt) {
