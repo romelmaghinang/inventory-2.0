@@ -33,7 +33,7 @@ class ReceivingController extends Controller
             }
 
             foreach ($purchaseOrderItems as $poItem) {
-                $inventory = Inventory::where('partid', $poItem->partid)->first();
+                $inventory = Inventory::where('partId', $poItem->partId)->first();
 
                 if ($inventory) {
                     $inventory->qtyOnHand += $validatedData['Qty'];
