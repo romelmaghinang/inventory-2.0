@@ -37,6 +37,7 @@ class ReceivingController extends Controller
 
                 if ($inventory) {
                     $inventory->qtyOnHand += $validatedData['Qty'];
+                    $inventory->changeQty += $validatedData['Qty'];
                     $inventory->save();
                 } else {
                     return response()->json(['error' => 'Inventory item not found for partid ' . $poItem->partid], Response::HTTP_NOT_FOUND);
