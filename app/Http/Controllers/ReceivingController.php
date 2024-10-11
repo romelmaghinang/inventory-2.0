@@ -16,6 +16,7 @@ use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Validator;
 
 class ReceivingController extends Controller
 {
@@ -93,5 +94,32 @@ class ReceivingController extends Controller
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'Purchase Order, Receipt, or Receipt Item not found.'], Response::HTTP_NOT_FOUND);
         }
+    }
+
+    public function delete (Request $request): JsonResponse
+    {
+        $deleteRequest = Validator::make(
+            $request->all(),
+            [
+                'receiptItemId' => ['required', 'numeric', 'exists:receiptitem,id']
+            ]
+        );
+
+        if ($deleteRequest->fails()) {
+            return response()->json(['errors' => $deleteRequest->errors()], JsonResponse::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        $validatedData = $deleteRequest->validated();
+
+        $receiptItem = ReceiptItem::findOrFail($validatedData['receiptItemId']);
+
+        $receiptItem->delete();
+
+        return response()->json(
+            [
+                'message' => 'Receipt Item Void successfully',
+            ],
+            JsonResponse::HTTP_OK
+        );
     }
 }

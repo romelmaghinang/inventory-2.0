@@ -23,6 +23,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\VendorController;
 use App\Http\Controllers\ReceiptStatus\ReconciledController;
 use App\Http\Controllers\ReceiptStatus\FulfilledController;
+use App\Http\Controllers\ReceiptStatus\VoidController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -62,8 +63,10 @@ Route::middleware('auth:api')->group(function () {
             Route::post('ship', ShipController::class);
             Route::post('inventory', [InventoryController::class, 'store']);
             Route::post('/receiving', [ReceivingController::class, 'receiving']);
+            Route::delete('receipt-void',  [ReceivingController::class, 'delete']);
 
 
+           
         Route::middleware(['auth:sanctum', 'abilities:create-users,create-permission,create-role,assign-role,assign-permission,pick-finish,pick-start,pack,ship,inventory'])->group(function () {
      
         });
