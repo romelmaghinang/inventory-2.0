@@ -11,24 +11,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasTable('receipt')) {
             Schema::create('receipt', function (Blueprint $table) {
             $table->integer('id', true);
             $table->integer('locationGroupId');
             $table->integer('orderTypeId');
             $table->integer('poId')->nullable();
             $table->integer('soId')->nullable();
-            $table->unsignedBigInteger('statusId');
+            $table->integer('statusId')->unsigned();
             $table->integer('typeId');
             $table->integer('userId');
             $table->integer('xoId')->nullable();
 
             $table->index(['xoId', 'locationGroupId', 'typeId', 'orderTypeId', 'soId', 'statusId', 'userId', 'poId'], 'performance');
-
-            $table->foreign('statusId')->references('id')->on('receiptstatus')->onDelete('cascade');
+            
         });
     }
-}
+    
     /**
      * Reverse the migrations.
      */
