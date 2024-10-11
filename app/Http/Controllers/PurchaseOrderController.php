@@ -141,7 +141,7 @@ class PurchaseOrderController extends Controller
             ]),
             [
                 'buyerId' => $request->buyerId ?? 0,
-                'num' => $finalNum, 
+                'num' => $finalNum,
                 'locationGroupId' => $models['locationGroup']->id,
                 'carrierId' => $models['carrier']->id,
                 'currencyId' => $models['currency']->id,
@@ -168,10 +168,15 @@ class PurchaseOrderController extends Controller
             $uom = UnitOfMeasure::where('name', $item['UOM'])->firstOrFail();
             $qbClass = qbClass::where('name', $item['QuickBooksClassName'])->firstOrFail();
     
+            $part = \App\Models\Part::where('num', $item['PartNumber'])->first();
+            if (!$part) {
+                throw new ModelNotFoundException("Part not found for PartNumber: {$item['PartNumber']}");
+            }
+    
             return PurchaseOrderItem::create([
                 'description' => '',
                 'note' => $item['Note'],
-                'partNum' => $item['PartNumber'],
+                'partNum' => $item['PartNumber'], 
                 'unitCost' => '',
                 'totalCost' => '',
                 'qtyToFulfill' => '',
@@ -181,6 +186,7 @@ class PurchaseOrderController extends Controller
                 'uomId' => $uom->id,
                 'poId' => $poId,
                 'qbClassId' => $qbClass->id,
+                'partId' => $part->id, 
                 'taxId' => '',
                 'taxRate' => '',
                 'statusId' => '',
@@ -204,9 +210,10 @@ class PurchaseOrderController extends Controller
     
         $receiptItems = $purchaseOrderItems->map(function ($poItem) use ($receipt) {
             return ReceiptItem::create([
-                'receiptId' => $receipt->id, 
+                'receiptId' => $receipt->id,
                 'poItemId' => $poItem->id,
-                'billVendorFlag' => 0,
+                'partId' => $poItem->partId,
+                'billVendorFlag' => 1,
                 'orderTypeId' => 10,
                 'statusId' => 10,
                 'partTypeId' => 0,
@@ -225,6 +232,8 @@ class PurchaseOrderController extends Controller
             'receiptItemData' => $receiptItems,
         ], Response::HTTP_CREATED);
     }
+    
+    
     
 
     public function show(PurchaseOrder $purchaseOrder): JsonResponse

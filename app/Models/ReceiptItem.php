@@ -21,8 +21,15 @@ class ReceiptItem extends Model
         'trackingNum',
         'packageCount',
         'carrierId',
+        'billVendorFlag',
         'carrierServiceId',
         'dateLastModified',
+        'partTypeId',
+        'statusId',
+        'typeId',
+        'uomId',
+        'partId',
+        'orderTypeId'
     ];
 
 

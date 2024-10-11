@@ -58,7 +58,7 @@ class StorePurchaseOrderRequest extends FormRequest
             'items' => 'required|array|min:1',
             'items.*.Flag' => 'required|string|in:Item',
             'items.*.POItemTypeID' => 'required|integer',
-            'items.*.PartNumber' => 'nullable|string|max:255',
+            'items.*.PartNumber' => 'nullable|string|max:255|exists:part,num',
             'items.*.VendorPartNumber' => 'nullable|string|max:255',
             'items.*.PartQuantity' => 'required|integer|min:0',
             'items.*.FulfilledQuantity' => 'nullable|integer|min:0',

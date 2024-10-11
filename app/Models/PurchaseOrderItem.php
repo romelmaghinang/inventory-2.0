@@ -22,6 +22,8 @@ class PurchaseOrderItem extends Model
         'taxableFlag',
         'vendorPartNum',
         'description',
+        'partId',
+        'partNum',
         'qtyOrdered',
         'unitPrice',
         'fulfilledQuantity',

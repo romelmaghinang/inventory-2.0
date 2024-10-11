@@ -8,7 +8,8 @@ use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
 use App\Models\Carrier;
 use App\Models\CarrierService;
-use App\Models\Location; 
+use App\Models\Location;
+use App\Models\Inventory;
 use Illuminate\Http\Request;
 use App\Http\Requests\Receiving\ReceivingRequest;
 use Illuminate\Http\JsonResponse;
@@ -25,8 +26,24 @@ class ReceivingController extends Controller
         try {
             $purchaseOrder = PurchaseOrder::where('num', $validatedData['PONum'])->firstOrFail();
 
-            $receipt = Receipt::where('poId', $purchaseOrder->id)->firstOrFail();
+            $purchaseOrderItems = PurchaseOrderItem::where('poId', $purchaseOrder->id)->get();
 
+            if ($purchaseOrderItems->isEmpty()) {
+                return response()->json(['error' => 'No Purchase Order Items found.'], Response::HTTP_NOT_FOUND);
+            }
+
+            foreach ($purchaseOrderItems as $poItem) {
+                $inventory = Inventory::where('partid', $poItem->partid)->first();
+
+                if ($inventory) {
+                    $inventory->qtyOnHand += $validatedData['Qty'];
+                    $inventory->save();
+                } else {
+                    return response()->json(['error' => 'Inventory item not found for partid ' . $poItem->partid], Response::HTTP_NOT_FOUND);
+                }
+            }
+
+            $receipt = Receipt::where('poId', $purchaseOrder->id)->firstOrFail();
             $receiptItem = ReceiptItem::where('receiptId', $receipt->id)->firstOrFail();
 
             $receiptItem->update([
@@ -68,7 +85,7 @@ class ReceivingController extends Controller
             return response()->json([
                 'message' => 'Receiving successfully',
                 'receiptData' => $receipt,
-                'updatedReceiptItem' => $receiptItem->fresh(), 
+                'updatedReceiptItem' => $receiptItem->fresh(),
             ], Response::HTTP_OK);
 
         } catch (ModelNotFoundException $e) {
