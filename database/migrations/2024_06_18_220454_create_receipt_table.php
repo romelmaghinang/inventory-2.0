@@ -11,13 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('receipt', function (Blueprint $table) {
+        if (!Schema::hasTable('receipt')) {
+            Schema::create('receipt', function (Blueprint $table) {
             $table->integer('id', true);
             $table->integer('locationGroupId');
             $table->integer('orderTypeId');
             $table->integer('poId')->nullable();
             $table->integer('soId')->nullable();
-            $table->integer('statusId'); 
+            $table->unsignedBigInteger('statusId');
             $table->integer('typeId');
             $table->integer('userId');
             $table->integer('xoId')->nullable();
@@ -27,7 +28,7 @@ return new class extends Migration
             $table->foreign('statusId')->references('id')->on('receiptstatus')->onDelete('cascade');
         });
     }
-
+}
     /**
      * Reverse the migrations.
      */

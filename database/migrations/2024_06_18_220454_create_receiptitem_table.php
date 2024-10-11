@@ -10,7 +10,8 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-    {
+    {    
+        if (!Schema::hasTable('receipt')) {
         Schema::create('receiptitem', function (Blueprint $table) {
             $table->integer('id', true);
             $table->boolean('billVendorFlag');
@@ -36,13 +37,13 @@ return new class extends Migration
             $table->integer('responsibilityId')->nullable();
             $table->integer('shipItemId')->nullable();
             $table->integer('soItemId')->nullable();
-            $table->integer('statusId');
             $table->bigInteger('tagId')->nullable();
             $table->integer('taxId')->nullable();
             $table->double('taxRate')->nullable();
             $table->string('trackingNum', 30)->nullable();
             $table->integer('typeId');
             $table->integer('uomId');
+            $table->unsignedBigInteger('statusId');
             $table->integer('xoItemId')->nullable();
             $table->decimal('outsourcedCost', 28, 9)->nullable(); 
             $table->integer('carrierServiceId')->nullable();
@@ -52,7 +53,7 @@ return new class extends Migration
             $table->foreign('statusId')->references('id')->on('receiptitemstatus')->onDelete('cascade');
         });
     }
-
+}
     /**
      * Reverse the migrations.
      */
