@@ -8,6 +8,7 @@ use App\Models\Receipt;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
 
 class ReconciledController extends Controller
 {
@@ -33,6 +34,9 @@ class ReconciledController extends Controller
         $receipt = Receipt::findOrFail($receiptItem->receiptId);
 
         $receiptItem->update(['statusId' => 20]);
+        $receiptItem->update([ 'dateReconciled' => Carbon::now(),]);
+        $receiptItem->update([ 'dateLastModified' => Carbon::now(),]);
+
         $receipt->update(['statusId' => 20]);
 
         return response()->json(

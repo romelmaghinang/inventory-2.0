@@ -18,7 +18,8 @@ class Receipt extends Model
         'orderTypeId',  
         'statusId',
         'typeId',
-        'userId'
+        'userId',
+        'dateLastModified'
     ];
 
     public function items()
