@@ -21,8 +21,12 @@ use App\Http\Controllers\UnitOfMeasureController;
 use App\Http\Controllers\ReceivingController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VendorController;
+use App\Http\Controllers\ReceiptItemStatus\ReconciledController;
+use App\Http\Controllers\ReceiptItemStatus\FulfilledController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
+
 
 Route::post('/login', [UserController::class, 'login']);
 Route::get('/permissions', [UserController::class, 'getUserPermissions']);
@@ -52,6 +56,8 @@ Route::middleware('auth:api')->group(function () {
             Route::post('/create-permission', [UserController::class, 'createPermission']);
             Route::post('pick-start', StartController::class);
             Route::post('pick-finish', FinishController::class);
+            Route::post('receipt-reconciled', ReconciledController::class);
+            Route::post('receipt-fulfilled', FulfilledController::class);
             Route::post('pack', PackController::class);
             Route::post('ship', ShipController::class);
             Route::post('inventory', [InventoryController::class, 'store']);
