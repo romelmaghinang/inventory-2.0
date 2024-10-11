@@ -57,9 +57,7 @@ class ReceivingController extends Controller
                 'dateLastModified' => Carbon::now(),
             ]);
 
-            $receipt->update([
-                'dateLastModified' => Carbon::now(),
-            ]);
+          
 
             if (!empty($validatedData['Location'])) {
                 $location = Location::where('name', $validatedData['Location'])->first();
