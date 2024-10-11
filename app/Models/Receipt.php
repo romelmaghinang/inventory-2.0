@@ -35,4 +35,8 @@ class Receipt extends Model
     {
         return $this->belongsTo(Vendor::class, 'vendorId');
     }
+    public function status()
+    {
+        return $this->belongsTo(ReceiptStatus::class, 'statusId');
+    }
 }

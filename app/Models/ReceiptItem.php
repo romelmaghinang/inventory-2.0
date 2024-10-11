@@ -30,6 +30,7 @@ class ReceiptItem extends Model
         'uomId',
         'partId',
         'orderTypeId'
+        
     ];
 
 
@@ -56,6 +57,11 @@ class ReceiptItem extends Model
     public function carrierService()
     {
         return $this->belongsTo(CarrierService::class, 'carrierServiceId');
+    }
+    
+    public function status()
+    {
+        return $this->belongsTo(ReceiptItemsStatus::class, 'statusId');
     }
 
 }

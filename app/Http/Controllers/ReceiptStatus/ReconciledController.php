@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\ReceiptItemStatus;
+namespace App\Http\Controllers\ReceiptStatus;
 
 use App\Http\Controllers\Controller;
 use App\Models\ReceiptItem;
@@ -9,35 +9,35 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class FulfilledController extends Controller
+class ReconciledController extends Controller
 {
     /**
      * Handle the incoming request.
      */
     public function __invoke(Request $request): JsonResponse
     {
-        $fulfillRequest = Validator::make(
+        $reconcileRequest = Validator::make(
             $request->all(),
             [
                 'receiptItemId' => ['required', 'numeric', 'exists:receiptitem,id']
             ]
         );
 
-        if ($fulfillRequest->fails()) {
-            return response()->json(['errors' => $fulfillRequest->errors()], JsonResponse::HTTP_UNPROCESSABLE_ENTITY);
+        if ($reconcileRequest->fails()) {
+            return response()->json(['errors' => $reconcileRequest->errors()], JsonResponse::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        $validatedData = $fulfillRequest->validated();
+        $validatedData = $reconcileRequest->validated();
 
         $receiptItem = ReceiptItem::findOrFail($validatedData['receiptItemId']);
         $receipt = Receipt::findOrFail($receiptItem->receiptId);
 
-        $receiptItem->update(['statusId' => 40]);
-        $receipt->update(['statusId' => 40]);
+        $receiptItem->update(['statusId' => 20]);
+        $receipt->update(['statusId' => 20]);
 
         return response()->json(
             [
-                'message' => 'Receipt Item fulfilled',
+                'message' => 'Receipt Item reconciled',
                 'receiptItem' => $receiptItem,
                 'receipt' => $receipt,
             ],

@@ -21,8 +21,8 @@ use App\Http\Controllers\UnitOfMeasureController;
 use App\Http\Controllers\ReceivingController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VendorController;
-use App\Http\Controllers\ReceiptItemStatus\ReconciledController;
-use App\Http\Controllers\ReceiptItemStatus\FulfilledController;
+use App\Http\Controllers\ReceiptStatus\ReconciledController;
+use App\Http\Controllers\ReceiptStatus\FulfilledController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 

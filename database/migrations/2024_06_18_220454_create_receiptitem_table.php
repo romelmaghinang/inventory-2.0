@@ -31,7 +31,7 @@ return new class extends Migration
             $table->integer('poItemId')->nullable();
             $table->decimal('qty', 28, 9)->nullable();
             $table->string('reason', 90)->nullable();
-            $table->integer('receiptId');
+            $table->integer('receiptId'); 
             $table->string('refNo', 20)->nullable();
             $table->integer('responsibilityId')->nullable();
             $table->integer('shipItemId')->nullable();
@@ -48,6 +48,8 @@ return new class extends Migration
             $table->integer('carrierServiceId')->nullable();
 
             $table->index(['uomId', 'statusId', 'taxId', 'customerId', 'typeId', 'poItemId', 'carrierId', 'receiptId', 'partId', 'soItemId', 'orderTypeId', 'xoItemId', 'partTypeId', 'dateBilled', 'dateReceived', 'dateReconciled'], 'performance');
+
+            $table->foreign('statusId')->references('id')->on('receiptitemstatus')->onDelete('cascade');
         });
     }
 
