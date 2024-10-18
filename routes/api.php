@@ -103,7 +103,10 @@ Route::middleware(['auth:sanctum', 'abilities:create-users,create-permission,cre
         Route::put('/', [CustomerController::class, 'update'])->middleware('abilities:update-customer');
         Route::delete('/', [CustomerController::class, 'destroy'])->middleware('abilities:delete-customer');
     });
-
+    Route::post('/create-role', [UserController::class, 'createRole']);
+    Route::post('/assign-role', [UserController::class, 'assignRole']);
+    Route::post('/assign-permission', [UserController::class, 'assignPermission']);
+    Route::post('/create-permission', [UserController::class, 'createPermission']);
     Route::post('pick-start', [StartController::class, 'store'])->middleware('abilities:pick-start');
     Route::post('pick-finish', [FinishController::class, 'store'])->middleware('abilities:pick-finish');
     Route::post('receipt-reconciled', [ReconciledController::class, 'store'])->middleware('abilities:receipt-reconciled');
