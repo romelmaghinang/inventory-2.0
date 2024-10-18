@@ -27,47 +27,90 @@ use App\Http\Controllers\ReceiptStatus\VoidController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-
-
 Route::post('/login', [UserController::class, 'login']);
 Route::get('/permissions', [UserController::class, 'getUserPermissions']);
 
-Route::middleware('auth:api')->group(function () {
+Route::middleware(['auth:sanctum', 'abilities:create-users,create-permission,create-role,assign-role,assign-permission,pick-finish,pick-start,pack,ship,inventory'])->group(function () {
+    Route::apiResources([
+        'qbclass' => QuickBookClassController::class,
+        'taxrate' => TaxRateController::class,
+        'currency' => CurrencyController::class,
+        'payment-terms' => PaymentTermsController::class,
+    ]);
+
+    Route::prefix('vendor')->group(function () {
+        Route::post('/', [VendorController::class, 'store'])->middleware('abilities:create-vendor');
+        Route::put('/', [VendorController::class, 'update'])->middleware('abilities:update-vendor');
+        Route::get('/', [VendorController::class, 'show'])->middleware('abilities:view-vendor');
+        Route::delete('/', [VendorController::class, 'destroy'])->middleware('abilities:delete-vendor');
+    });
+
+    Route::prefix('part')->group(function () {
+        Route::post('/', [PartController::class, 'store'])->middleware('abilities:create-part');
+        Route::put('/', [PartController::class, 'update'])->middleware('abilities:update-part');
+        Route::get('/', [PartController::class, 'show'])->middleware('abilities:view-part');
+        Route::delete('/', [PartController::class, 'destroy'])->middleware('abilities:delete-part');
+    });
+
+    Route::prefix('purchase-order')->group(function () {
+        Route::post('/', [PurchaseOrderController::class, 'store'])->middleware('abilities:create-purchase-order');
+        Route::put('/', [PurchaseOrderController::class, 'update'])->middleware('abilities:update-purchase-order');
+        Route::get('/', [PurchaseOrderController::class, 'show'])->middleware('abilities:view-purchase-order');
+        Route::delete('/', [PurchaseOrderController::class, 'destroy'])->middleware('abilities:delete-purchase-order');
+    });
+
+    Route::prefix('product')->group(function () {
+        Route::post('/', [ProductController::class, 'store'])->middleware('abilities:create-product');
+        Route::put('/', [ProductController::class, 'update'])->middleware('abilities:update-product');
+        Route::get('/', [ProductController::class, 'show'])->middleware('abilities:view-product');
+        Route::delete('/', [ProductController::class, 'destroy'])->middleware('abilities:delete-product');
+    });
+
+    Route::prefix('sales-order')->group(function () {
+        Route::post('/', [SalesOrderController::class, 'store'])->middleware('abilities:create-sales-order');
+        Route::put('/', [SalesOrderController::class, 'update'])->middleware('abilities:update-sales-order');
+        Route::get('/', [SalesOrderController::class, 'show'])->middleware('abilities:view-sales-order');
+        Route::delete('/', [SalesOrderController::class, 'destroy'])->middleware('abilities:delete-sales-order');
+    });
+
+    Route::prefix('pick')->group(function () {
+        Route::post('/', [PickController::class, 'store'])->middleware('abilities:create-pick');
+        Route::put('/', [PickController::class, 'update'])->middleware('abilities:update-pick');
+        Route::get('/', [PickController::class, 'show'])->middleware('abilities:view-pick');
+        Route::delete('/', [PickController::class, 'destroy'])->middleware('abilities:delete-pick');
+    });
+
+    Route::prefix('location')->group(function () {
+        Route::post('/', [LocationController::class, 'store'])->middleware('abilities:create-location');
+        Route::put('/', [LocationController::class, 'update'])->middleware('abilities:update-location');
+        Route::get('/', [LocationController::class, 'showAll'])->middleware('abilities:view-location');
+        Route::delete('/', [LocationController::class, 'destroy'])->middleware('abilities:delete-location');
+    });
+
+    Route::prefix('country-state')->group(function () {
+        Route::post('/state', [CountryAndStateController::class, 'storeState'])->middleware('abilities:create-state');
+        Route::get('/countries', [CountryAndStateController::class, 'getAllCountries'])->middleware('abilities:view-countries');
+        Route::get('/states', [CountryAndStateController::class, 'getAllStates'])->middleware('abilities:view-states');
+        Route::post('/country', [CountryAndStateController::class, 'showCountryById'])->middleware('abilities:view-country');
+        Route::post('/state', [CountryAndStateController::class, 'showStateById'])->middleware('abilities:view-state');
+        Route::put('/state', [CountryAndStateController::class, 'updateState'])->middleware('abilities:update-state');
+        Route::delete('/state', [CountryAndStateController::class, 'deleteState'])->middleware('abilities:delete-state');
+    });
+
+    Route::prefix('customer')->group(function () {
+        Route::post('/', [CustomerController::class, 'store'])->middleware('abilities:create-customer');
+        Route::get('/', [CustomerController::class, 'showAll'])->middleware('abilities:view-customer');
+        Route::put('/', [CustomerController::class, 'update'])->middleware('abilities:update-customer');
+        Route::delete('/', [CustomerController::class, 'destroy'])->middleware('abilities:delete-customer');
+    });
+
+    Route::post('pick-start', [StartController::class, 'store'])->middleware('abilities:pick-start');
+    Route::post('pick-finish', [FinishController::class, 'store'])->middleware('abilities:pick-finish');
+    Route::post('receipt-reconciled', [ReconciledController::class, 'store'])->middleware('abilities:receipt-reconciled');
+    Route::post('receipt-fulfilled', [FulfilledController::class, 'store'])->middleware('abilities:receipt-fulfilled');
+    Route::post('pack', [PackController::class, 'store'])->middleware('abilities:pack');
+    Route::post('ship', [ShipController::class, 'store'])->middleware('abilities:ship');
+    Route::post('inventory', [InventoryController::class, 'store'])->middleware('abilities:inventory');
+    Route::post('/receiving', [ReceivingController::class, 'receiving'])->middleware('abilities:receiving');
+    Route::delete('receipt-void', [ReceivingController::class, 'delete'])->middleware('abilities:receipt-void');
 });
-    Route::apiResources(
-            [
-                'pick' => PickController::class,
-                'sales-order' => SalesOrderController::class,
-                'purchase-order' => PurchaseOrderController::class,
-                'product' => ProductController::class,
-                'customer' => CustomerController::class,
-                'location' => LocationController::class,
-                'part' => PartController::class,
-                'vendor' => VendorController::class,
-                'country-state' => CountryAndStateController::class,
-                'qbclass' => QuickBookClassController::class,
-                'taxrate' => TaxRateController::class,
-                'currency' => CurrencyController::class,
-                'payment-terms' => PaymentTermsController::class,
-            ]
-        ); 
-        Route::post('/create-role', [UserController::class, 'createRole']);
-            Route::post('/assign-role', [UserController::class, 'assignRole']);
-            Route::post('/assign-permission', [UserController::class, 'assignPermission']);
-            Route::post('/create-permission', [UserController::class, 'createPermission']);
-            Route::post('pick-start', StartController::class);
-            Route::post('pick-finish', FinishController::class);
-            Route::post('receipt-reconciled', ReconciledController::class);
-            Route::post('receipt-fulfilled', FulfilledController::class);
-            Route::post('pack', PackController::class);
-            Route::post('ship', ShipController::class);
-            Route::post('inventory', [InventoryController::class, 'store']);
-            Route::post('/receiving', [ReceivingController::class, 'receiving']);
-            Route::delete('receipt-void',  [ReceivingController::class, 'delete']);
-
-
-           
-        Route::middleware(['auth:sanctum', 'abilities:create-users,create-permission,create-role,assign-role,assign-permission,pick-finish,pick-start,pack,ship,inventory'])->group(function () {
-     
-        });
-        

@@ -12,6 +12,33 @@ use Symfony\Component\HttpFoundation\Response;
 
 class QuickBookClassController extends Controller
 {
+    /**
+ * @OA\Post(
+ *     path="/api/qbclass",
+ *     summary="Create a new QuickBook class",
+ *     tags={"QuickBookClass"},
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="name", type="string", example="Sales"),
+ *             @OA\Property(property="active", type="boolean", example=true)
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=201,
+ *         description="Quick Book Class Created Successfully!",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="message", type="string", example="Quick Book Class Created Successfully!"),
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="Not Found"
+ *     )
+ * )
+ */
    public function store(StoreQuickBookClassRequest $storeQuickBookClassRequest): JsonResponse
     {
         $quickBook = qbClass::create($storeQuickBookClassRequest->only('name') + ['active' => $storeQuickBookClassRequest->active]);

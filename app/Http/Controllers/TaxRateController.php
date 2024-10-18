@@ -14,6 +14,41 @@ use Symfony\Component\HttpFoundation\Response;
 
 class TaxRateController extends Controller
 {
+    
+    /**
+ * @OA\Post(
+ *     path="/tax-rate",
+ *     summary="Create a new tax rate",
+ *     tags={"TaxRate"},
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="taxName", type="string", example="Standard Tax"),
+ *             @OA\Property(property="taxCode", type="string", example="STX"),
+ *             @OA\Property(property="taxType", type="string", example="Percentage"),
+ *             @OA\Property(property="description", type="string", example="Standard sales tax rate"),
+ *             @OA\Property(property="rate", type="number", format="float", example=0.07),
+ *             @OA\Property(property="amount", type="number", format="float", example=100.0),
+ *             @OA\Property(property="taxAgencyName", type="string", example="IRS"),
+ *             @OA\Property(property="defaultFlag", type="boolean", example=true),
+ *             @OA\Property(property="activeFlag", type="boolean", example=true)
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=201,
+ *         description="Tax Rate Created Successfully!",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="message", type="string", example="Tax Rate Created Successfully!"),
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="Not Found"
+ *     )
+ * )
+ */
     public function store(StoreTaxRateRequest $storeTaxRateRequest): JsonResponse
     {
         $taxRateType = TaxRateType::where(['name' => $storeTaxRateRequest->taxType])->firstOrFail();

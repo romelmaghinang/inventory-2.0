@@ -18,6 +18,58 @@ use Symfony\Component\HttpFoundation\Response;
 
 class InventoryController extends Controller
 {
+    /**
+ * @OA\Post(
+ *     path="/api/inventory",
+ *     tags={"Inventory"},
+ *     summary="Store a new inventory item",
+ *     description="This endpoint allows the user to create a new inventory item or update an existing one based on the part number and location.",
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *             @OA\Property(property="PartNumber", type="string", example="10010", description="The unique number of the part."),
+ *             @OA\Property(property="PartDescription", type="string", example="High-quality widget", description="A brief description of the part."),
+ *             @OA\Property(property="Location", type="string", example="Main", description="The location where the part is stored."),
+ *             @OA\Property(property="Qty", type="integer", example=5, description="The quantity of the part being added to inventory."),
+ *             @OA\Property(property="UOM", type="string", example="Kilogram", description="The unit of measure for the part."),
+ *             @OA\Property(property="Cost", type="number", format="float", example=25.50, description="The cost of the part."),
+ *             @OA\Property(property="QbClass", type="string", example="Sales", description="The QuickBooks class for the part."),
+ *             @OA\Property(property="Date", type="string", format="date", example="2024-09-17", description="The date when the inventory entry is created."),
+ *             @OA\Property(property="Note", type="string", example="New shipment received", description="Any additional notes regarding the inventory."),
+ *             @OA\Property(property="TrackingType", type="string", example="Lot Number", description="The type of tracking used for the part.")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=201,
+ *         description="Inventory Created Successfully",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="Inventory Created Successfully!", description="Success message indicating the inventory was created."),
+
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Inventory has been updated",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="Inventory has been updated", description="Success message indicating the inventory was updated."),
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=400,
+ *         description="Bad Request",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="UOM not found", description="Error message indicating a validation issue.")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="Not Found",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="Part Tracking not found", description="Error message indicating the requested resource was not found.")
+ *         )
+ *     )
+ * )
+ */
     public function store(StoreInventoryRequest $storeInventoryRequest): JsonResponse
     {
         $uom = UnitOfMeasure::where('name', $storeInventoryRequest->UOM)->first();

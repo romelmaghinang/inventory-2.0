@@ -23,9 +23,49 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Http\Request;
 
 class PickController extends Controller
 {
+    /**
+ * @OA\Post(
+ *     path="/api/pick",
+ *     tags={"Pick"},
+ *     summary="Store a new pick",
+ *     description="This endpoint allows the user to create a new pick entry based on the sales order and tracking information.",
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *             @OA\Property(property="pickNum", type="integer", example=10001, description="The Sales Order number for the pick."),
+ *             @OA\Property(property="locationName", type="string", example="Main", description="The name of the location from which the pick is made."),
+ *             @OA\Property(property="partNum", type="string", example="10002", description="The part number being picked."),
+ *             @OA\Property(property="partTrackingType", type="string", example="Lot Number", description="The type of tracking for the part."),
+ *             @OA\Property(property="trackingInfo", type="array", @OA\Items(type="string", example="LT0001"), description="An array of tracking information related to the pick.")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=201,
+ *         description="Picked Successfully",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="Picked Successfully!", description="Success message indicating the pick was created."),
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="Not Found",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="Sales Order with pickNum 10001 not found.", description="Error message indicating the requested resource was not found.")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=400,
+ *         description="Bad Request",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="Insufficient quantity.", description="Error message indicating a validation issue.")
+ *         )
+ *     )
+ * )
+ */
     public function store(StorePickRequest $storePickRequest): JsonResponse
     {
         $part = Part::where('num', $storePickRequest->partNum)->firstOrFail();
@@ -184,4 +224,135 @@ class PickController extends Controller
             Response::HTTP_CREATED
         );
     }
+     /**
+     * @OA\Put(
+     *     path="/api/pick",
+     *     tags={"Pick"},
+     *     summary="Update a specific pick",
+     *     description="Update an existing pick by ID using a JSON request body.",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"pickId"},
+     *             @OA\Property(property="pickId", type="integer", example=1, description="The ID of the pick to update."),
+     *             @OA\Property(property="locationName", type="string", example="Main Updated", description="Updated location name."),
+     *             @OA\Property(property="partNum", type="string", example="10002", description="Updated part number."),
+     *             @OA\Property(property="trackingInfo", type="array", @OA\Items(type="string", example="LT0001"), description="Updated tracking information.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Pick updated successfully.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Pick updated successfully!", description="Success message indicating the pick was updated.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Pick not found.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Not Found.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Bad request.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Validation error message.")
+     *         )
+     *     )
+     * )
+     */
+    public function update(Request $request): JsonResponse
+    {
+        $request->validate([
+            'pickId' => 'required|integer|exists:pick,id',
+            'locationName' => 'required|string',
+            'partNum' => 'required|string',
+            'trackingInfo' => 'nullable|array',
+        ]);
+
+        $pick = Pick::findOrFail($request->pickId);
+        $pick->update($request->only(['locationName', 'partNum', 'trackingInfo']));
+
+        return response()->json(['message' => 'Pick updated successfully!', 'pick' => $pick], Response::HTTP_OK);
+    }
+      /**
+     * @OA\Get(
+     *     path="/api/pick",
+     *     tags={"Pick"},
+     *     summary="Show all picks or a specific pick",
+     *     description="Retrieve all picks or a specific pick by ID using a JSON request body.",
+     *     @OA\RequestBody(
+     *         required=false,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="pickId", type="integer", example=1, description="The ID of the pick to retrieve.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Picks retrieved successfully.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="picks", type="array", @OA\Items(type="object"), description="Array of all pick objects or a single pick object.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Pick not found.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Not Found.")
+     *         )
+     *     )
+     * )
+     */
+    public function show(Request $request): JsonResponse
+    {
+        if ($request->has('pickId')) {
+            $request->validate(['pickId' => 'required|integer|exists:pick,id']);
+            $pick = Pick::findOrFail($request->pickId);
+            return response()->json($pick, Response::HTTP_OK);
+        }
+
+        $picks = Pick::all();
+        return response()->json($picks, Response::HTTP_OK);
+    }
+     /**
+     * @OA\Delete(
+     *     path="/api/pick",
+     *     tags={"Pick"},
+     *     summary="Delete a specific pick",
+     *     description="Delete a specific pick by ID using a JSON request body.",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"pickId"},
+     *             @OA\Property(property="pickId", type="integer", example=1, description="The ID of the pick to delete.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Pick deleted successfully.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Pick deleted successfully!")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Pick not found.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Not Found.")
+     *         )
+     *     )
+     * )
+     */
+    public function destroy(Request $request): JsonResponse
+    {
+        $request->validate(['pickId' => 'required|integer|exists:pick,id']);
+
+        $pick = Pick::findOrFail($request->pickId);
+        $pick->delete();
+
+        return response()->json(['message' => 'Pick deleted successfully!'], Response::HTTP_OK);
+    }
+
 }

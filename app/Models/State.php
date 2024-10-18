@@ -13,7 +13,9 @@ class State extends Model
 
     protected $fillable =
     [
-        'name'
+        'name',
+        'abbreviation'
+
     ];
 
     public $timestamps = false;

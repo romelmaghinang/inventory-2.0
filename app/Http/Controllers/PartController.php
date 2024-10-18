@@ -17,9 +17,61 @@ use App\Models\UnitOfMeasure;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Http\Request;
 
 class PartController extends Controller
 {
+    /**
+ * @OA\Post(
+ *     path="/api/part",
+ *     tags={"Part"},
+ *     summary="Create a new part",
+ *     description="Store a new part in the database.",
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *             required={"partNumber", "partDescription", "partDetails", "uom", "upc", "partType", "active"},
+ *             @OA\Property(property="partNumber", type="string", example="10001"),
+ *             @OA\Property(property="partDescription", type="string", example="High-quality widget"),
+ *             @OA\Property(property="partDetails", type="string", example="Used in various applications, including XYZ"),
+ *             @OA\Property(property="uom", type="string", example="Kilogram"),
+ *             @OA\Property(property="upc", type="string", example="012345678912"),
+ *             @OA\Property(property="partType", type="string", example="Overhead"),
+ *             @OA\Property(property="active", type="boolean", example=true),
+ *             @OA\Property(property="abcCode", type="string", example="A"),
+ *             @OA\Property(property="weight", type="number", format="float", example=1.5),
+ *             @OA\Property(property="weightUom", type="integer", example=1),
+ *             @OA\Property(property="width", type="number", format="float", example=10.0),
+ *             @OA\Property(property="length", type="number", format="float", example=20.0),
+ *             @OA\Property(property="sizeUom", type="integer", example=2),
+ *             @OA\Property(property="consumptionRate", type="number", format="float", example=0.5),
+ *             @OA\Property(property="alertNote", type="string", example="Handle with care; fragile"),
+ *             @OA\Property(property="pictureUrl", type="string", example="https://www.example.com/images/part123456.jpg"),
+ *             @OA\Property(property="revision", type="string", example="Rev1"),
+ *             @OA\Property(property="poItemType", type="string", example="Purchase"),
+ *             @OA\Property(property="defaultOutsourcedReturnItem", type="integer", example=123),
+ *             @OA\Property(property="primaryTracking", type="string", example="Expiration Date"),
+ *             @OA\Property(property="tracks", type="string", example="Expiration Date"),
+ *             @OA\Property(property="nextValue", type="string", example="Next123"),
+ *             @OA\Property(property="cf", type="string", example="CustomFieldValue")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=201,
+ *         description="Part created successfully.",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="Part Created Successfully!"),
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=400,
+ *         description="Bad request.",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="Validation error message.")
+ *         )
+ *     )
+ * )
+ */
      public function store(StorePartRequest $storePartRequest): JsonResponse
     {
         $uom = UnitOfMeasure::where('name', $storePartRequest->uom)->firstOrFail();
@@ -78,26 +130,113 @@ class PartController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * @OA\Get(
+     *     path="/api/part",
+     *     tags={"Part"},
+     *     summary="Display a specified part",
+     *     description="Retrieve a part by its ID.",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"partId"},
+     *             @OA\Property(property="partId", type="integer", example=1)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Part retrieved successfully.",
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Part not found.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Part not found.")
+     *         )
+     *     )
+     * )
      */
-    public function show(Part $part): JsonResponse
+    public function show(Request $request): JsonResponse
     {
+        $part = Part::findOrFail($request->partId);
         return response()->json($part, Response::HTTP_OK);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdatePartRequest $updatePartRequest, Part $part): JsonResponse
+    /**
+     * @OA\Put(
+     *     path="/api/part",
+     *     tags={"Part"},
+     *     summary="Update a specific part",
+     *     description="Updates the details of a specific part by `partId` from the JSON request.",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"partId", "partNumber", "partDescription", "partDetails", "uom", "upc", "partType", "active"},
+     *             @OA\Property(property="partId", type="integer", description="Part ID"),
+     *             @OA\Property(property="partNumber", type="string", example="10001"),
+     *             @OA\Property(property="partDescription", type="string", example="High-quality widget"),
+     *             @OA\Property(property="partDetails", type="string", example="Used in various applications, including XYZ"),
+     *             @OA\Property(property="uom", type="string", example="Kilogram"),
+     *             @OA\Property(property="upc", type="string", example="012345678912"),
+     *             @OA\Property(property="partType", type="string", example="Overhead"),
+     *             @OA\Property(property="active", type="boolean", example=true),
+     *             @OA\Property(property="abcCode", type="string", example="A"),
+     *             @OA\Property(property="weight", type="number", format="float", example=1.5),
+     *             @OA\Property(property="weightUom", type="integer", example=1),
+     *             @OA\Property(property="width", type="number", format="float", example=10.0),
+     *             @OA\Property(property="length", type="number", format="float", example=20.0),
+     *             @OA\Property(property="sizeUom", type="integer", example=2),
+     *             @OA\Property(property="consumptionRate", type="number", format="float", example=0.5),
+     *             @OA\Property(property="alertNote", type="string", example="Handle with care; fragile"),
+     *             @OA\Property(property="pictureUrl", type="string", example="https://www.example.com/images/part123456.jpg"),
+     *             @OA\Property(property="revision", type="string", example="Rev1"),
+     *             @OA\Property(property="poItemType", type="string", example="Purchase"),
+     *             @OA\Property(property="primaryTracking", type="string", example="Expiration Date"),
+     *             @OA\Property(property="nextValue", type="string", example="Next123"),
+     *             @OA\Property(property="cf", type="string", example="CustomFieldValue")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Part updated successfully.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Product Updated Successfully!"),
+     *             @OA\Property(property="partData", type="object", description="Updated part details"),
+     *             @OA\Property(property="partTrackingData", type="object", description="Part tracking details"),
+     *             @OA\Property(property="partToTrackingData", type="object", description="Part to tracking details")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Part not found.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Part not found.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Bad request.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Validation error message.")
+     *         )
+     *     )
+     * )
+     */
+    public function update(UpdatePartRequest $request): JsonResponse
     {
-        $uom = UnitOfMeasure::where('name', $updatePartRequest->uom)->firstOrFail();
-        $partType = PartType::where('name', $updatePartRequest->partType)->firstOrFail();
-        $poItemType = PurchaseOrderItemType::where('name', $updatePartRequest->poItemType)->firstOrFail();
+        $partId = $request->partId;
 
-        $partTrackingType = PartTrackingType::where('name', $updatePartRequest->tracks)->firstOrFail();
+        $part = Part::findOrFail($partId);
+
+        $uom = UnitOfMeasure::where('name', $request->uom)->firstOrFail();
+        $partType = PartType::where('name', $request->partType)->firstOrFail();
+        $poItemType = PurchaseOrderItemType::where('name', $request->poItemType)->firstOrFail();
+        $partTrackingType = PartTrackingType::where('name', $request->tracks)->firstOrFail();
 
         $part->update(
-            $updatePartRequest->only(
+            $request->only(
                 [
                     'partDetails',
                     'upc',
@@ -108,32 +247,32 @@ class PartController extends Controller
                     'length'
                 ]
             ) +
-                [
-                    'num' => $updatePartRequest->partNumber,
-                    'description' => $updatePartRequest->partDescription,
-                    'uomId' => $uom->id,
-                    'typeId' => $partType->id,
-                    'activeFlag' => $updatePartRequest->active,
-                    'weightUomId' => $updatePartRequest->weightUom,
-                    'sizeUomId' => $updatePartRequest->sizeUom,
-                    'url' => $updatePartRequest->pictureUrl,
-                    'defaultPoItemTypeId' => $poItemType->id,
-                ]
+            [
+                'num' => $request->partNumber,
+                'description' => $request->partDescription,
+                'uomId' => $uom->id,
+                'typeId' => $partType->id,
+                'activeFlag' => $request->active,
+                'weightUomId' => $request->weightUom,
+                'sizeUomId' => $request->sizeUom,
+                'url' => $request->pictureUrl,
+                'defaultPoItemTypeId' => $poItemType->id,
+            ]
         );
 
         $partTracking = PartTracking::updateOrCreate(
             ['part_id' => $part->id],
-            $updatePartRequest->only('description') +
-                [
-                    'name' => $updatePartRequest->primaryTracking,
-                    'typeId' => $partTrackingType->id,
-                    'abbr' => $updatePartRequest->uom,
-                ]
+            $request->only('description') +
+            [
+                'name' => $request->primaryTracking,
+                'typeId' => $partTrackingType->id,
+                'abbr' => $request->uom,
+            ]
         );
 
         $partToTracking = PartToTracking::updateOrCreate(
             ['partTrackingId' => $partTracking->id, 'partId' => $part->id],
-            $updatePartRequest->only('nextValue')
+            $request->only('nextValue')
         );
 
         return response()->json(
@@ -148,19 +287,51 @@ class PartController extends Controller
     }
 
 
-
     /**
-     * Remove the specified resource from storage.
+     * @OA\Delete(
+     *     path="/api/part",
+     *     tags={"Part"},
+     *     summary="Delete a specific part",
+     *     description="Deletes a specific part by part ID provided in the JSON request body.",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="partId", type="integer", description="ID of the part to delete")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Part deleted successfully.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Part deleted successfully!")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Part not found.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Part not found.")
+     *         )
+     *     )
+     * )
      */
-    public function destroy(Part $part): JsonResponse
+    public function destroy(Request $request): JsonResponse
     {
+        $partId = $request->input('partId');
+
+        $part = Part::find($partId);
+
+        if (!$part) {
+            return response()->json([
+                'message' => 'Part not found.'
+            ], Response::HTTP_NOT_FOUND);
+        }
+
         $part->delete();
 
-        return response()->json(
-            [
-                'message' => 'Part Deleted Successfully!'
-            ],
-            Response::HTTP_OK
-        );
+        return response()->json([
+            'message' => 'Part deleted successfully!'
+        ], Response::HTTP_OK);
     }
+
 }

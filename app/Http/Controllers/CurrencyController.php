@@ -11,6 +11,40 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CurrencyController extends Controller
 {
+    /**
+ * @OA\Post(
+ *     path="/api/currency",
+ *     tags={"Currency"},
+ *     summary="Create a new currency",
+ *     description="Creates a new currency with details such as name, code, active flag, and currency rates.",
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="name", type="string", example="US Dollar", description="Name of the currency"),
+ *             @OA\Property(property="code", type="string", example="USD", description="Currency code"),
+ *             @OA\Property(property="active", type="boolean", example=true, description="Active status of the currency"),
+ *             @OA\Property(property="quickBookCurrencyRate", type="number", format="float", example=1.0, description="QuickBooks currency rate"),
+ *             @OA\Property(property="globalCurrencyRate", type="number", format="float", example=1.0, description="Global currency rate")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=201,
+ *         description="Currency Created Successfully",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="Currency Created Successfully!"),
+ *             @OA\Property(property="data", type="object", description="Created currency object")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=422,
+ *         description="Unprocessable Entity",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="errors", type="object", description="Validation errors")
+ *         )
+ *     )
+ * )
+ */
    public function store(StoreCurrencyRequest $storeCurrencyRequest): JsonResponse
     {
         $currency = Currency::create($storeCurrencyRequest->only(

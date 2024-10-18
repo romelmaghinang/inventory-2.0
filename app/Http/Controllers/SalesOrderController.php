@@ -22,9 +22,104 @@ use App\Models\TaxRate;
 use App\Models\UnitOfMeasure;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Http\Request;
 
 class SalesOrderController extends Controller
 {
+    /**
+ * @OA\Post(
+ *     path="/api/sales-order",
+ *     summary="Create a new Sales Order",
+ *     tags={"Sales Order"},
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="flag", type="boolean", example=true),
+ *             @OA\Property(property="soNum", type="integer", example=10001),
+ *             @OA\Property(property="customerName", type="string", example="John Doe"),
+ *             @OA\Property(property="customerContact", type="string", example="Jane Smith"),
+ *             @OA\Property(property="billToName", type="string", example="John Doe"),
+ *             @OA\Property(property="billToAddress", type="string", example="123 Main St"),
+ *             @OA\Property(property="billToCity", type="string", example="Springfield"),
+ *             @OA\Property(property="billToState", type="string", example="California"),
+ *             @OA\Property(property="billToZip", type="string", example="62701"),
+ *             @OA\Property(property="billToCountry", type="string", example="United States"),
+ *             @OA\Property(property="shipToName", type="string", example="John Doe"),
+ *             @OA\Property(property="shipToAddress", type="string", example="123 Main St"),
+ *             @OA\Property(property="shipToCity", type="string", example="Springfield"),
+ *             @OA\Property(property="shipToState", type="string", example="California"),
+ *             @OA\Property(property="shipToZip", type="string", example="62701"),
+ *             @OA\Property(property="shipToCountry", type="string", example="United States"),
+ *             @OA\Property(property="shipToResidential", type="boolean", example=true),
+ *             @OA\Property(property="carrierName", type="string", example="Delivery"),
+ *             @OA\Property(property="carrierService", type="string", example="Ground"),
+ *             @OA\Property(property="taxRateName", type="string", example="Standard Tax"),
+ *             @OA\Property(property="priorityId", type="integer", example=10),
+ *             @OA\Property(property="poNum", type="string", example="PO123456"),
+ *             @OA\Property(property="vendorPONum", type="string", example="VendorPO123"),
+ *             @OA\Property(property="date", type="string", format="date", example="2024-08-23"),
+ *             @OA\Property(property="orderDateScheduled", type="string", format="date", example="2024-08-25"),
+ *             @OA\Property(property="dateExpired", type="string", format="date", example="2024-09-01"),
+ *             @OA\Property(property="salesman", type="string", example="Salesperson A"),
+ *             @OA\Property(property="shippingTerms", type="string", example="Prepaid"),
+ *             @OA\Property(property="paymentTerms", type="string", example="Net 30"),
+ *             @OA\Property(property="fob", type="string", example="FOB Destination"),
+ *             @OA\Property(property="note", type="string", example="This is a note"),
+ *             @OA\Property(property="quickBookClassName", type="string", example="Sales"),
+ *             @OA\Property(property="locationGroupName", type="string", example="Main"),
+ *             @OA\Property(property="phone", type="string", example="+1-555-555-5555"),
+ *             @OA\Property(property="email", type="string", example="john.doe@example.com"),
+ *             @OA\Property(property="url", type="string", example="http://example.com"),
+ *             @OA\Property(property="category", type="string", example="Electronics"),
+ *             @OA\Property(property="customField", type="string", example="CustomValue"),
+ *             @OA\Property(property="currencyName", type="string", example="US Dollar"),
+ *             @OA\Property(property="currencyRate", type="number", format="float", example=1.0),
+ *             @OA\Property(property="priceIsHomeCurrency", type="number", format="float", example=100.0),
+ *             @OA\Property(
+ *                 property="items",
+ *                 type="array",
+ *                 @OA\Items(
+ *                     @OA\Property(property="flag", type="boolean", example=true),
+ *                     @OA\Property(property="soItemTypeId", type="integer", example=10),
+ *                     @OA\Property(property="productNumber", type="string", example="CK100"),
+ *                     @OA\Property(property="productDescription", type="string", example="Product Description"),
+ *                     @OA\Property(property="productQuantity", type="integer", example=10),
+ *                     @OA\Property(property="uom", type="string", example="Foot"),
+ *                     @OA\Property(property="productPrice", type="number", format="float", example=50.0),
+ *                     @OA\Property(property="taxable", type="boolean", example=true),
+ *                     @OA\Property(property="taxCode", type="integer", example=1),
+ *                     @OA\Property(property="note", type="string", example="Item Note"),
+ *                     @OA\Property(property="itemQuickBooksClassName", type="string", example="Sales"),
+ *                     @OA\Property(property="itemDateScheduled", type="string", format="date", example="2024-08-30"),
+ *                     @OA\Property(property="showItem", type="boolean", example=true),
+ *                     @OA\Property(property="revisionLevel", type="string", example="Rev1"),
+ *                     @OA\Property(property="customerPartNumber", type="string", example="CustPart123"),
+ *                     @OA\Property(property="kitItem", type="boolean", example=false),
+ *                     @OA\Property(property="cfi", type="string", example="CFIValue")
+ *                 )
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=201,
+ *         description="Sales Order created successfully",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="message", type="string", example="Sales Order created successfully"),
+
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=409,
+ *         description="The Sales Order number must be unique",
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="Not Found"
+ *     )
+ * )
+ */
     public function store(StoreSalesOrderRequest $storeSalesOrderRequest): JsonResponse
     {
         $billToCountry = Country::where('name', $storeSalesOrderRequest->billToCountry)->firstOrFail();
@@ -155,17 +250,141 @@ class SalesOrderController extends Controller
     
     
     /**
-     * Display the specified resource.
+     * @OA\Get(
+     *     path="/api/sales-order",
+     *     tags={"Sales Order"},
+     *     summary="Retrieve sales orders",
+     *     description="Fetches a single sales order by ID or retrieves all sales orders if no ID is provided.",
+     *     @OA\Parameter(
+     *         name="soId",
+     *         in="query",
+     *         required=false,
+     *         description="The ID of the sales order to retrieve",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful retrieval of sales orders.",
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Sales Order not found.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Sales Order not found.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Bad request.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Invalid request.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Internal server error.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="An error occurred.")
+     *         )
+     *     )
+     * )
      */
-    public function show(SalesOrder $salesOrder): JsonResponse
+    public function show(Request $request): JsonResponse
     {
-        return response()->json($salesOrder, Response::HTTP_OK);
-    }
+        if ($request->has('soId')) {
+            $salesOrder = SalesOrder::find($request->soId);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateSalesOrderRequest $updateSalesOrderRequest, SalesOrder $salesOrder): JsonResponse
+            if (!$salesOrder) {
+                return response()->json(['message' => 'Sales Order not found.'], Response::HTTP_NOT_FOUND);
+            }
+
+            return response()->json($salesOrder, Response::HTTP_OK);
+        }
+
+        $salesOrders = SalesOrder::all();
+
+        return response()->json($salesOrders, Response::HTTP_OK);
+    }
+/**
+ * @OA\Put(
+ *     path="/api/sales-order",
+ *     summary="Update a sales order",
+ *     tags={"Sales Order"},
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="soId", type="integer", example=1),
+ *             @OA\Property(property="customerContact", type="string", nullable=true),
+ *             @OA\Property(property="billToName", type="string", nullable=true),
+ *             @OA\Property(property="billToAddress", type="string", nullable=true),
+ *             @OA\Property(property="billToCity", type="string", nullable=true),
+ *             @OA\Property(property="billToZip", type="string", nullable=true),
+ *             @OA\Property(property="shipToName", type="string", nullable=true),
+ *             @OA\Property(property="shipToAddress", type="string", nullable=true),
+ *             @OA\Property(property="shipToCity", type="string", nullable=true),
+ *             @OA\Property(property="shipToZip", type="string", nullable=true),
+ *             @OA\Property(property="vendorPONum", type="string", nullable=true),
+ *             @OA\Property(property="date", type="string", format="date", nullable=true),
+ *             @OA\Property(property="dateExpired", type="string", format="date", nullable=true),
+ *             @OA\Property(property="salesman", type="string", nullable=true),
+ *             @OA\Property(property="priorityId", type="integer", nullable=true),
+ *             @OA\Property(property="paymentTerms", type="string", nullable=true),
+ *             @OA\Property(property="fob", type="string", nullable=true),
+ *             @OA\Property(property="note", type="string", nullable=true),
+ *             @OA\Property(property="locationGroupName", type="string", nullable=true),
+ *             @OA\Property(property="phone", type="string", nullable=true),
+ *             @OA\Property(property="email", type="string", format="email", nullable=true),
+ *             @OA\Property(property="url", type="string", format="url", nullable=true),
+ *             @OA\Property(property="category", type="string", nullable=true),
+ *             @OA\Property(property="customField", type="string", nullable=true),
+ *             @OA\Property(property="currencyRate", type="number", format="float", nullable=true),
+ *             @OA\Property(property="flag", type="boolean", nullable=true),
+ *             @OA\Property(property="status", type="integer", nullable=true),
+ *             @OA\Property(property="items", type="array", @OA\Items(
+ *                 @OA\Property(property="note", type="string", nullable=true),
+ *                 @OA\Property(property="soItemTypeId", type="integer", nullable=true),
+ *                 @OA\Property(property="uom", type="integer", nullable=true),
+ *                 @OA\Property(property="productNumber", type="string", nullable=false),
+ *                 @OA\Property(property="showItem", type="boolean", nullable=true),
+ *                 @OA\Property(property="taxCode", type="string", nullable=true),
+ *                 @OA\Property(property="taxable", type="boolean", nullable=true),
+ *                 @OA\Property(property="customerPartNumber", type="string", nullable=true),
+ *                 @OA\Property(property="productDescription", type="string", nullable=true),
+ *                 @OA\Property(property="productQuantity", type="number", format="float", nullable=false),
+ *                 @OA\Property(property="productPrice", type="number", format="float", nullable=false),
+ *                 @OA\Property(property="itemDateScheduled", type="string", format="date", nullable=true),
+ *                 @OA\Property(property="revisionLevel", type="integer", nullable=true),
+ *                 @OA\Property(property="cfi", type="string", nullable=true),
+ *                 @OA\Property(property="itemQuickBooksClassName", type="string", nullable=true)
+ *             )),
+ *             @OA\Property(property="billToCountry", type="string", nullable=false),
+ *             @OA\Property(property="billToState", type="string", nullable=false),
+ *             @OA\Property(property="shipToCountry", type="string", nullable=false),
+ *             @OA\Property(property="shipToState", type="string", nullable=false),
+ *             @OA\Property(property="quickBookClassName", type="string", nullable=false),
+ *             @OA\Property(property="currencyName", type="string", nullable=false),
+ *             @OA\Property(property="carrierName", type="string", nullable=false),
+ *             @OA\Property(property="carrierService", type="string", nullable=false),
+ *             @OA\Property(property="taxRateName", type="string", nullable=false),
+ *             @OA\Property(property="shippingTerms", type="string", nullable=false),
+ *             @OA\Property(property="shipToResidential", type="boolean", nullable=false)
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Sales order updated successfully.",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="Sales Order updated successfully"),
+ *             @OA\Property(property="salesOrderData", type="object"),
+ *             @OA\Property(property="salesOrderItemData", type="array", @OA\Items(type="object"))
+ *         )
+ *     ),
+ *     @OA\Response(response=404, description="Sales order not found"),
+ *     @OA\Response(response=422, description="Validation errors")
+ * )
+ */
+    public function update(UpdateSalesOrderRequest $updateSalesOrderRequest): JsonResponse
     {
         $billToCountry = Country::where('name', $updateSalesOrderRequest->billToCountry)->firstOrFail();
         $billToState = State::where('name', $updateSalesOrderRequest->billToState)->firstOrFail();
@@ -179,6 +398,8 @@ class SalesOrderController extends Controller
         $shipterms = ShipTerms::where('name', $updateSalesOrderRequest->shippingTerms)->firstOrFail();
 
         $customer = Customer::firstOrCreate(['name' => $updateSalesOrderRequest->customerName]);
+
+        $salesOrder = SalesOrder::findOrFail($updateSalesOrderRequest->soId); 
 
         $salesOrder->update(
             $updateSalesOrderRequest->only([
@@ -227,7 +448,6 @@ class SalesOrderController extends Controller
         $salesOrder->items()->delete();
 
         $salesOrderItems = [];
-
         foreach ($updateSalesOrderRequest->validated()['items'] as $item) {
             $product = Product::where('num', $item['productNumber'])->firstOrFail();
             $qbClass = qbClass::firstOrCreate(['name' => $item['itemQuickBooksClassName']]);
@@ -250,7 +470,7 @@ class SalesOrderController extends Controller
                 'customFieldItem' => $item['cfi'],
                 'soId' => $salesOrder->id,
                 'qbClassId' => $qbClass->id,
-                'statusId' => $storeSalesOrderRequest->status ?? 20,
+                'statusId' => $updateSalesOrderRequest->status ?? 20,
             ];
 
             $salesOrderItems[] = SalesOrderItems::create($transformedItem);
@@ -267,10 +487,48 @@ class SalesOrderController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * @OA\Delete(
+     *     path="/api/sales-order",
+     *     tags={"Sales Order"},
+     *     summary="Delete a sales order",
+     *     description="Delete an existing sales order from the database.",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"soId"},
+     *             @OA\Property(property="soId", type="integer", example=1)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Sales Order deleted successfully.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Sales Order Deleted Successfully!")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Sales Order not found.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Sales Order not found.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Bad request.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Validation error message.")
+     *         )
+     *     )
+     * )
      */
-    public function destroy(SalesOrder $salesOrder): JsonResponse
+    public function destroy(Request $request): JsonResponse
     {
+        $request->validate([
+            'soId' => 'required|integer|exists:so,id',
+        ]);
+
+        $salesOrder = SalesOrder::findOrFail($request->soId);
         $salesOrder->delete();
 
         return response()->json(

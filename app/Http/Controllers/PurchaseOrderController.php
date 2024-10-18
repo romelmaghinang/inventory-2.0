@@ -23,6 +23,7 @@ use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class PurchaseOrderController extends Controller
 {
@@ -108,7 +109,70 @@ class PurchaseOrderController extends Controller
     
         return $models; 
     }
-    
+    /**
+ * @OA\Post(
+ *     path="api/purchase-order",
+ *     summary="Create a new Purchase Order",
+ *     description="Creates a new Purchase Order with items and returns the created data.",
+ *     tags={"Purchase Order"},
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="PONum", type="string", description="Purchase Order Number"),
+ *             @OA\Property(property="buyerId", type="integer", description="ID of the buyer"),
+ *             @OA\Property(property="dateIssued", type="string", format="date", description="Issued date of the Purchase Order"),
+ *             @OA\Property(property="taxRateName", type="string", description="Tax rate associated with the Purchase Order"),
+ *             @OA\Property(property="items", type="array",
+ *                 @OA\Items(
+ *                     @OA\Property(property="PartNumber", type="string", description="Part number"),
+ *                     @OA\Property(property="UOM", type="string", description="Unit of Measure"),
+ *                     @OA\Property(property="VendorPartNumber", type="string", description="Vendor part number"),
+ *                     @OA\Property(property="FulfillmentDate", type="string", format="date", description="Scheduled fulfillment date")
+ *                 )
+ *             ),
+ *             @OA\Property(property="currencyRate", type="number", format="float", description="Currency rate"),
+ *             @OA\Property(property="statusId", type="integer", description="Purchase Order status")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=201,
+ *         description="Purchase Order successfully created",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="message", type="string", description="Response message"),
+ *             @OA\Property(property="purchaseOrderData", type="object", description="Created Purchase Order data"),
+ *             @OA\Property(property="purchaseOrderItemData", type="array", description="Items associated with the Purchase Order",
+ *                 @OA\Items(
+ *                     @OA\Property(property="partNum", type="string", description="Part number"),
+ *                     @OA\Property(property="qtyToFulfill", type="integer", description="Quantity to fulfill")
+ *                 )
+ *             ),
+ *             @OA\Property(property="receiptData", type="object", description="Receipt data"),
+ *             @OA\Property(property="receiptItemData", type="array", description="Receipt items",
+ *                 @OA\Items(
+ *                     @OA\Property(property="receiptId", type="integer", description="Receipt ID")
+ *                 )
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=409,
+ *         description="Conflict: Purchase Order number must be unique",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="error", type="string", description="Error message")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=422,
+ *         description="Validation error",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", description="Validation error message")
+ *         )
+ *     )
+ * )
+ */
+
 
     public function store(StorePurchaseOrderRequest $request): JsonResponse
     {
@@ -231,91 +295,128 @@ class PurchaseOrderController extends Controller
         ], Response::HTTP_CREATED);
     }
     
-    
-    
-
-    public function show(PurchaseOrder $purchaseOrder): JsonResponse
+   /**
+     * @OA\Get(
+     *     path="/api/purchase-order",
+     *     summary="Retrieve Purchase Orders",
+     *     description="Fetches the details of a specific Purchase Order by `poId` from the JSON request body. If no `poId` is provided, it fetches all Purchase Orders.",
+     *     tags={"Purchase Order"},
+     *     @OA\RequestBody(
+     *         required=false,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="poId", type="integer", description="Purchase Order ID")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful retrieval",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="data", type="object", description="Purchase order details or list of all purchase orders")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Purchase Order not found"
+     *     )
+     * )
+     */
+    public function show(Request $request): JsonResponse
     {
-        return response()->json($purchaseOrder, Response::HTTP_OK);
+        $poId = $request->input('poId');
+
+        if ($poId) {
+            $purchaseOrder = PurchaseOrder::find($poId);
+
+            if (!$purchaseOrder) {
+                return response()->json(['message' => 'Purchase Order not found'], Response::HTTP_NOT_FOUND);
+            }
+
+            return response()->json(['success' => true, 'data' => $purchaseOrder], Response::HTTP_OK);
+        }
+
+        $purchaseOrders = PurchaseOrder::all();
+        return response()->json(['success' => true, 'data' => $purchaseOrders], Response::HTTP_OK);
+    }
+    /**
+     * @OA\Put(
+     *     path="/api/purchase-order",
+     *     summary="Update a specific Purchase Order",
+     *     description="Updates the details of a specific Purchase Order by `poId` from the JSON request.",
+     *     tags={"Purchase Order"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="poId", type="integer", description="Purchase Order ID"),
+     *             @OA\Property(property="status", type="string", description="New status of the purchase order")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful update",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="message", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Purchase Order not found"
+     *     )
+     * )
+     */
+    public function update(UpdatePurchaseOrderRequest $request): JsonResponse
+    {
+        $poId = $request->input('poId');
+        $purchaseOrder = PurchaseOrder::find($poId);
+
+        if (!$purchaseOrder) {
+            return response()->json(['message' => 'Purchase Order not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        $purchaseOrder->status = $request->input('status');
+        $purchaseOrder->save();
+
+        return response()->json(['success' => true, 'message' => 'Purchase Order updated successfully'], Response::HTTP_OK);
     }
 
-    public function update(UpdatePurchaseOrderRequest $request, PurchaseOrder $purchaseOrder): JsonResponse
+    /**
+     * @OA\Delete(
+     *     path="/api/purchase-order",
+     *     summary="Delete a specific Purchase Order",
+     *     description="Deletes a specific Purchase Order by `poId` from the JSON request.",
+     *     tags={"Purchase Order"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="poId", type="integer", description="Purchase Order ID")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful deletion",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="message", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Purchase Order not found"
+     *     )
+     * )
+     */
+    public function destroy(Request $request): JsonResponse
     {
-        $models = $this->handleFindModels($request);
-        if ($models instanceof JsonResponse) return $models; 
+        $poId = $request->input('poId');
+        $purchaseOrder = PurchaseOrder::find($poId);
 
-        $taxRateId = optional(TaxRate::where('name', $request->taxRateName)->first())->id;
+        if (!$purchaseOrder) {
+            return response()->json(['message' => 'Purchase Order not found'], Response::HTTP_NOT_FOUND);
+        }
 
-        $purchaseOrder->update(array_merge(
-            $request->only([
-                'buyer', 'dateIssued', 'dateConfirmed', 'dateCompleted', 'dateFirstShip',
-                'dateRevision', 'vendorSO', 'customerSO', 'phone', 'email', 'url', 'note',
-                'deliverTo', 'paymentTermsId', 'fobPointId', 'remitToName', 'remitAddress',
-                'remitCity', 'remitZip', 'shipToName', 'shipToAddress', 'shipToCity', 'shipToZip',
-                'username',
-            ]),
-            [
-                'buyerId' => $request->buyerId ?? 0,
-                'locationGroupId' => $request->locationGroupId,
-                'carrierId' => $models['carrier']->id,
-                'currencyId' => $models['currency']->id,
-                'currencyRate' => $request->currencyRate,
-                'shipTermsId' => $models['shipTerms']->id,
-                'remitCountryId' => $models['remitCountry']->id,
-                'remitStateId' => $models['remitState']->id,
-                'shipToCountryId' => $models['shipToCountry']->id,
-                'shipToStateId' => $models['shipToState']->id,
-                'qbClassId' => $models['qbClass']->id,
-                'statusId' => $request->statusId,
-                'taxRateId' => $taxRateId,
-                'totalIncludesTax' => $request->totalIncludesTax,
-                'totalTax' => $request->totalTax,
-                'typeId' => $request->typeId,
-                'dateLastModified' => Carbon::now(), 
-
-            ]
-        ));
-
-        $purchaseOrder->items()->delete();
-
-        $purchaseOrderItems = collect($request->validated()['items'])->map(function ($item) use ($purchaseOrder) {
-            $uom = UnitOfMeasure::where('name', $item['UOM'])->firstOrFail();
-            $qbClass = qbClass::where('name', $item['QuickBooksClassName'])->firstOrFail();
-
-            return PurchaseOrderItem::create([
-                'description' => $item['description'],
-                'note' => $item['note'],
-                'partNum' => $item['partNum'],
-                'unitCost' => $item['unitCost'],
-                'totalCost' => $item['totalCost'],
-                'qtyToFulfill' => $item['qtyToFulfill'],
-                'dateScheduledFulfillment' => $item['dateScheduledFulfillment'],
-                'revLevel' => $item['revLevel'],
-                'vendorPartNum' => $item['vendorPartNum'],
-                'uomId' => $uom->id,
-                'poId' => $purchaseOrder->id,
-                'qbClassId' => $qbClass->id,
-                'taxId' => $item['taxId'],
-                'taxRate' => $item['taxRate'],
-                'statusId' => $item['statusId'] ?? 10,
-                'repairFlag' => $item['repairFlag'],
-                'tbdCostFlag' => $item['tbdCostFlag'],
-                'dateCreated' => Carbon::now(),  
-                'dateLastModified' => Carbon::now(), 
-                
-            ]);
-        });
-
-        return response()->json([
-            'message' => 'Purchase Order updated successfully',
-            'purchaseOrderData' => $purchaseOrder,
-            'purchaseOrderItemData' => $purchaseOrderItems,
-        ], Response::HTTP_OK);
-    }
-
-    public function destroy(PurchaseOrder $purchaseOrder): JsonResponse
-    {
         $purchaseOrder->delete();
-        return response()->json(['message' => 'Purchase Order deleted successfully'], Response::HTTP_OK);
+
+        return response()->json(['success' => true, 'message' => 'Purchase Order deleted successfully'], Response::HTTP_OK);
     }
 }
