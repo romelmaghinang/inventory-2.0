@@ -8,6 +8,7 @@ use App\Http\Requests\Currency\UpdateCurrencyRequest;
 use App\Models\Currency;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Http\Request;
 
 class CurrencyController extends Controller
 {
@@ -69,11 +70,84 @@ class CurrencyController extends Controller
 
     /**
      * Display the specified resource.
-     */
+ 
     public function show(Currency $currency): JsonResponse
     {
         return response()->json($currency, Response::HTTP_OK);
-    }
+    }    */
+        /**
+         * @OA\Get(
+         *     path="/api/currency",
+         *     tags={"Currency"},
+         *     summary="Get currencies or filter by name",
+         *     description="Retrieves all currencies if no query parameters or JSON body is provided. Filters by name using either query parameters or JSON body.",
+         *     @OA\Parameter(
+         *         name="name",
+         *         in="query",
+         *         required=false,
+         *         @OA\Schema(type="string"),
+         *         description="Name of the currency to filter by",
+         *         example="USD"
+         *     ),
+         *     @OA\RequestBody(
+         *         required=false,
+         *         @OA\JsonContent(
+         *             type="object",
+         *             @OA\Property(property="name", type="string", example="USD", description="Name of the currency to filter by")
+         *         )
+         *     ),
+         *     @OA\Response(
+         *         response=200,
+         *         description="Currency retrieved successfully",
+         *         @OA\JsonContent(
+         *             @OA\Property(property="data", type="object", description="Currency object or list of currencies"),
+         *             @OA\Property(property="message", type="string", example="Currency retrieved successfully!")
+         *         )
+         *     ),
+         *     @OA\Response(
+         *         response=404,
+         *         description="Currency not found",
+         *         @OA\JsonContent(
+         *             @OA\Property(property="message", type="string", example="Currency not found.")
+         *         )
+         *     )
+         * )
+         */
+        public function show(Request $request): JsonResponse
+        {
+            $name = $request->query('name') ?? $request->input('name');
+            
+            if (empty($name)) {
+                $currencies = Currency::all();
+                return response()->json(
+                    [
+                        'message' => 'All currencies retrieved successfully!',
+                        'data' => $currencies,
+                    ],
+                    Response::HTTP_OK
+                );
+            }
+
+            $request->validate([
+                'name' => 'string|exists:currency,name',
+            ]);
+
+            $currency = Currency::where('name', $name)->first();
+
+            if (!$currency) {
+                return response()->json([
+                    'message' => 'Currency not found.'
+                ], Response::HTTP_NOT_FOUND);
+            }
+
+            return response()->json(
+                [
+                    'message' => 'Currency retrieved successfully!',
+                    'data' => $currency,
+                ],
+                Response::HTTP_OK
+            );
+        }
 
     /**
      * Update the specified resource in storage.

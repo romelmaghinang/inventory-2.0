@@ -15,6 +15,7 @@ use App\Models\Serial;
 use App\Models\SerialNum;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Http\Request;
 
 class InventoryController extends Controller
 {
@@ -213,4 +214,94 @@ class InventoryController extends Controller
             );
         }
     }
-}    
+
+/**
+ * @OA\Get(
+ *     path="/api/inventory",
+ *     tags={"Inventory"},
+ *     summary="Get inventory items by Part Number or Location Group",
+ *     description="This endpoint retrieves inventory items associated with a specific part number, location group, or all inventory items if no filters are specified.",
+ *     @OA\RequestBody(
+ *         required=false,
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="num", type="string", example="PN-12345", description="The number of the part."),
+ *             @OA\Property(property="name", type="string", example="Group A", description="The name of the location group.")
+ *         )
+ *     ),
+ *     @OA\Parameter(
+ *         name="num",
+ *         in="query",
+ *         required=false,
+ *         @OA\Schema(type="string", example="PN-12345")
+ *     ),
+ *     @OA\Parameter(
+ *         name="name",
+ *         in="query",
+ *         required=false,
+ *         @OA\Schema(type="string", example="Group A")
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Inventory items retrieved successfully",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="Inventory items retrieved successfully!", description="Success message."),
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=400,
+ *         description="Bad Request",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="Invalid parameters. Only one filter is allowed.", description="Error message.")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="Not Found",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="No inventory found for the specified filters.", description="Error message.")
+ *         )
+ *     )
+ * )
+ */
+public function showInventories(Request $request): JsonResponse
+{
+    $num = $request->input('num') ?? $request->json('num');
+    $name = $request->input('name') ?? $request->json('name');
+
+    if ($num && $name) {
+        return response()->json(['message' => 'Invalid parameters. Only one filter is allowed.'], Response::HTTP_BAD_REQUEST);
+    }
+
+    $query = Inventory::query();
+
+    if ($num) {
+        $request->validate([
+            'num' => 'string|exists:part,number',
+        ]);
+        $query->whereHas('part', function($subQuery) use ($num) {
+            $subQuery->where('number', $num);
+        });
+    } elseif ($name) {
+        $request->validate([
+            'name' => 'string|exists:locationgroup,name',
+        ]);
+        $query->whereHas('locationGroup', function($subQuery) use ($name) {
+            $subQuery->where('name', $name);
+        });
+    }
+
+    $inventories = $query->get();
+
+    if ($inventories->isEmpty()) {
+        return response()->json(['message' => 'No inventory found for the specified filters.'], Response::HTTP_NOT_FOUND);
+    }
+
+    return response()->json([
+        'message' => 'Inventory items retrieved successfully!',
+        'data' => $inventories,
+    ], Response::HTTP_OK);
+}
+
+    }
+    

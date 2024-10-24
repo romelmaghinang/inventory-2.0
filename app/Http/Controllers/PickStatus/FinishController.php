@@ -15,50 +15,7 @@ use Carbon\Carbon;
 
 class FinishController extends Controller
 {
-    /**
-     * Handle the incoming request.
-     */
-    /**
- * @OA\Post(
- *     path="/api/pick-finish",
- *     tags={"Pick"},
- *     summary="Finish pick items",
- *     description="Mark specified pick items as finished and create corresponding shipments.",
- *     @OA\RequestBody(
- *         required=true,
- *         @OA\JsonContent(
- *             type="array",
- *             @OA\Items(
- *                 type="object",
- *                 @OA\Property(property="pickItemId", type="integer", example=1, description="The ID of the pick item to be finished"),
- *             )
- *         )
- *     ),
- *     @OA\Response(
- *         response=200,
- *         description="Pick item finished successfully",
- *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="Pick Item is Finish"),
- *             @OA\Property(property="ship", type="object"),
- *             @OA\Property(property="shipItem", type="object"),
- *         )
- *     ),
- *     @OA\Response(
- *         response=400,
- *         description="Invalid input",
- *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="Invalid input data")
- *         )
- *     ),
- *     @OA\Response(
- *         response=404,
- *         description="Not Found",
- *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="Resource not found")
- *         )
- *     ),
- * )
- */
+
     public function __invoke(Request $request): JsonResponse
     {
         $finishItemRequest = Validator::make(

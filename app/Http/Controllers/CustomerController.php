@@ -168,51 +168,72 @@ class CustomerController extends Controller
     }
     /**
      * @OA\Get(
-     *     path="/customer",
-     *     summary="Get all customer",
-     *     tags={"Customer"},
-     *     @OA\Response(
-     *         response=200,
-     *         description="Successful response",
-     *     ),
-     *     @OA\Response(response=401, description="Unauthorized"),
-     *     @OA\Response(response=403, description="Forbidden")
-     * )
-     */
-    public function showAll(): JsonResponse
-    {
-        $customers = Customer::all();
-        return response()->json($customers, Response::HTTP_OK);
-    }
-
-    /**
-     * @OA\Get(
      *     path="/api/customer",
-     *     summary="Get a specific customer by ID",
+     *     summary="Retrieve all customers or filter by name",
      *     tags={"Customer"},
+     *     description="Retrieve all customers or filter by name using query parameters or request body.",
+     *     @OA\Parameter(
+     *         name="name",
+     *         in="query",
+     *         required=false,
+     *         @OA\Schema(type="string"),
+     *         description="The name of the customer to filter by",
+     *         example="John Doe"
+     *     ),
      *     @OA\RequestBody(
-     *         required=true,
+     *         required=false,
      *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="customerId", type="integer", example=1)
+     *             @OA\Property(property="name", type="string", example="John Doe", description="Name of the customer to filter by")
      *         )
      *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Successful response",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array", description="Array of customers", 
+     *                 @OA\Items(
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="name", type="string", example="John Doe")
+     *                 )
+     *             ),
+     *             @OA\Property(property="message", type="string", example="Customer(s) retrieved successfully!")
+     *         )
      *     ),
      *     @OA\Response(response=404, description="Customer not found"),
      *     @OA\Response(response=401, description="Unauthorized"),
      *     @OA\Response(response=403, description="Forbidden")
      * )
      */
-    public function show(Request $request): JsonResponse
+    public function showCustomers(Request $request): JsonResponse
     {
-        $customerId = $request->input('customerId');  
-        $customer = Customer::findOrFail($customerId);
-        
-        return response()->json($customer, Response::HTTP_OK);
+        $name = $request->query('name') ?? $request->input('name');
+
+        if (empty($name)) {
+            $customers = Customer::all();
+            return response()->json([
+                'message' => 'All customers retrieved successfully!',
+                'data' => $customers,
+            ], Response::HTTP_OK);
+        }
+
+        $request->validate([
+            'name' => 'string|exists:customer,name',
+        ]);
+
+        $customer = Customer::where('name', $name)->first();
+
+        if (!$customer) {
+            return response()->json([
+                'message' => 'Customer not found.'
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        return response()->json([
+            'message' => 'Customer retrieved successfully!',
+            'data' => $customer,
+        ], Response::HTTP_OK);
     }
+
 
     /**
      * @OA\Put(
@@ -361,30 +382,6 @@ class CustomerController extends Controller
     }
 
 
-/**
- * @OA\Delete(
- *     path="/api/customer",
- *     summary="Delete a customer",
- *     tags={"Customer"},
- *     @OA\RequestBody(
- *         required=true,
- *         @OA\JsonContent(
- *             type="object",
- *             @OA\Property(property="customerId", type="integer", example=1)
- *         )
- *     ),
- *     @OA\Response(
- *         response=200,
- *         description="Customer deleted successfully.",
- *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="Customer Deleted Successfully!")
- *         )
- *     ),
- *     @OA\Response(response=404, description="Customer not found"),
- *     @OA\Response(response=401, description="Unauthorized"),
- *     @OA\Response(response=403, description="Forbidden")
- * )
- */
     public function destroy(Request $request): JsonResponse
     {
         $customerId = $request->input('customerId'); 

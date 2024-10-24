@@ -31,12 +31,34 @@ Route::post('/login', [UserController::class, 'login']);
 Route::get('/permissions', [UserController::class, 'getUserPermissions']);
 
 Route::middleware(['auth:sanctum', 'abilities:create-users,create-permission,create-role,assign-role,assign-permission,pick-finish,pick-start,pack,ship,inventory'])->group(function () {
-    Route::apiResources([
-        'qbclass' => QuickBookClassController::class,
-        'taxrate' => TaxRateController::class,
-        'currency' => CurrencyController::class,
-        'payment-terms' => PaymentTermsController::class,
-    ]);
+
+    Route::prefix('qbclass')->group(function () {
+        Route::post('/', [QuickBookClassController::class, 'store'])->middleware('abilities:create-qbclass]');
+        Route::put('/', [QuickBookClassController::class, 'update'])->middleware('abilities:update-qbclass');
+        Route::get('/', [QuickBookClassController::class, 'show'])->middleware('abilities:view-qbclass');
+        Route::delete('/', [QuickBookClassController::class, 'destroy'])->middleware('abilities:delete-qbclass');
+    });
+
+    Route::prefix('taxrate')->group(function () {
+        Route::post('/', [TaxRateController::class, 'store'])->middleware('abilities:create-taxrate]');
+        Route::put('/', [TaxRateController::class, 'update'])->middleware('abilities:update-taxrate');
+        Route::get('/', [TaxRateController::class, 'show'])->middleware('abilities:view-taxrate');
+        Route::delete('/', [TaxRateController::class, 'destroy'])->middleware('abilities:delete-taxrate');
+    });
+
+    Route::prefix('payment-terms')->group(function () {
+        Route::post('/', [PaymentTermsController::class, 'store'])->middleware('abilities:create-payment-terms]');
+        Route::put('/', [PaymentTermsController::class, 'update'])->middleware('abilities:update-payment-terms');
+        Route::get('/', [PaymentTermsController::class, 'show'])->middleware('abilities:view-payment-terms');
+        Route::delete('/', [PaymentTermsController::class, 'destroy'])->middleware('abilities:delete-payment-terms');
+    });
+
+    Route::prefix('currency')->group(function () {
+        Route::post('/', [CurrencyController::class, 'store'])->middleware('abilities:create-currency');
+        Route::put('/', [CurrencyController::class, 'update'])->middleware('abilities:update-currency');
+        Route::get('/', [CurrencyController::class, 'show'])->middleware('abilities:view-currency');
+        Route::delete('/', [CurrencyController::class, 'destroy'])->middleware('abilities:delete-currency');
+     });
 
     Route::prefix('vendor')->group(function () {
         Route::post('/', [VendorController::class, 'store'])->middleware('abilities:create-vendor');
@@ -83,16 +105,14 @@ Route::middleware(['auth:sanctum', 'abilities:create-users,create-permission,cre
     Route::prefix('location')->group(function () {
         Route::post('/', [LocationController::class, 'store'])->middleware('abilities:create-location');
         Route::put('/', [LocationController::class, 'update'])->middleware('abilities:update-location');
-        Route::get('/', [LocationController::class, 'showAll'])->middleware('abilities:view-location');
+        Route::get('/', [LocationController::class, 'show'])->middleware('abilities:view-location');
         Route::delete('/', [LocationController::class, 'destroy'])->middleware('abilities:delete-location');
     });
 
     Route::prefix('country-state')->group(function () {
         Route::post('/state', [CountryAndStateController::class, 'storeState'])->middleware('abilities:create-state');
-        Route::get('/countries', [CountryAndStateController::class, 'getAllCountries'])->middleware('abilities:view-countries');
-        Route::get('/states', [CountryAndStateController::class, 'getAllStates'])->middleware('abilities:view-states');
-        Route::post('/country', [CountryAndStateController::class, 'showCountryById'])->middleware('abilities:view-country');
-        Route::post('/state', [CountryAndStateController::class, 'showStateById'])->middleware('abilities:view-state');
+        Route::post('/country', [CountryAndStateController::class, 'showCountry'])->middleware('abilities:view-country');
+        Route::post('/state', [CountryAndStateController::class, 'showState'])->middleware('abilities:view-state');
         Route::put('/state', [CountryAndStateController::class, 'updateState'])->middleware('abilities:update-state');
         Route::delete('/state', [CountryAndStateController::class, 'deleteState'])->middleware('abilities:delete-state');
     });
@@ -100,6 +120,8 @@ Route::middleware(['auth:sanctum', 'abilities:create-users,create-permission,cre
     Route::prefix('customer')->group(function () {
         Route::post('/', [CustomerController::class, 'store'])->middleware('abilities:create-customer');
         Route::get('/', [CustomerController::class, 'showAll'])->middleware('abilities:view-customer');
+        Route::get('/', [CustomerController::class, 'show'])->middleware('abilities:view-customer');
+        Route::get('/', [CustomerController::class, 'showFilter'])->middleware('abilities:view-customer');
         Route::put('/', [CustomerController::class, 'update'])->middleware('abilities:update-customer');
         Route::delete('/', [CustomerController::class, 'destroy'])->middleware('abilities:delete-customer');
     });
@@ -114,6 +136,8 @@ Route::middleware(['auth:sanctum', 'abilities:create-users,create-permission,cre
     Route::post('pack', [PackController::class, 'store'])->middleware('abilities:pack');
     Route::post('ship', [ShipController::class, 'store'])->middleware('abilities:ship');
     Route::post('inventory', [InventoryController::class, 'store'])->middleware('abilities:inventory');
+    Route::get('inventor', [InventoryController::class, 'showInventories'])->middleware('abilities:inventory');
     Route::post('/receiving', [ReceivingController::class, 'receiving'])->middleware('abilities:receiving');
+    Route::get('/receiving', [ReceivingController::class, 'show'])->middleware('abilities:receiving');
     Route::delete('receipt-void', [ReceivingController::class, 'delete'])->middleware('abilities:receipt-void');
 });

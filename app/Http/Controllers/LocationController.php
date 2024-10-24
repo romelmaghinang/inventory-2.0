@@ -179,20 +179,26 @@ class LocationController extends Controller
  *     path="/api/location",
  *     tags={"Location"},
  *     summary="Get location details",
- *     description="Retrieve a specific location by ID or all locations.",
+ *     description="Retrieve a specific location by name or all locations if no name is provided.",
  *     @OA\Parameter(
- *         name="locationId",
+ *         name="name",
  *         in="query",
  *         required=false,
- *         @OA\Schema(type="integer"),
- *         description="ID of the location to retrieve"
+ *         @OA\Schema(type="string", example="Main"),
+ *         description="Name of the location to retrieve"
+ *     ),
+ *     @OA\RequestBody(
+ *         required=false,
+ *         @OA\JsonContent(
+ *             @OA\Property(property="name", type="string", example="Main", description="Name of the location to retrieve")
+ *         )
  *     ),
  *     @OA\Response(
  *         response=200,
  *         description="Location details retrieved successfully.",
  *         @OA\JsonContent(
  *             @OA\Property(property="id", type="integer", example=1),
- *             @OA\Property(property="location", type="string", example="Main"),
+ *             @OA\Property(property="name", type="string", example="Main"),
  *             @OA\Property(property="description", type="string", example="Primary storage location for all parts and materials."),
  *             @OA\Property(property="typeId", type="integer", example=1),
  *             @OA\Property(property="locationGroupId", type="integer", example=1),
@@ -212,49 +218,28 @@ class LocationController extends Controller
  *     )
  * )
  */
-    public function show(Request $request): JsonResponse
-    {
-        if ($request->has('locationId')) {
-            $request->validate(['locationId' => 'required|integer|exists:locations,id']);
-            
-            $location = Location::findOrFail($request->locationId);
-            return response()->json($location, Response::HTTP_OK);
-        }
+public function show(Request $request): JsonResponse
+{
+    $name = $request->query('name') ?? $request->input('name');
 
-        $locations = Location::all();
-        return response()->json($locations, Response::HTTP_OK);
+    if (!empty($name)) {
+        $request->validate(['name' => 'string|exists:location,name']);
+        
+        $location = Location::where('name', $name)->firstOrFail();
+        return response()->json([
+            'message' => 'Location retrieved successfully!',
+            'data' => $location,
+        ], Response::HTTP_OK);
     }
 
+    $locations = Location::all();
+    return response()->json([
+        'message' => 'All locations retrieved successfully!',
+        'data' => $locations,
+    ], Response::HTTP_OK);
+}
 
-   /**
-     * @OA\Delete(
-     *     path="/api/location",
-     *     tags={"Location"},
-     *     summary="Delete a specific location",
-     *     description="Delete a specific location by ID using a JSON request body.",
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"locationId"},
-     *             @OA\Property(property="locationId", type="integer", example=1)
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Location deleted successfully.",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Location deleted successfully!")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Location not found.",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Not Found.")
-     *         )
-     *     )
-     * )
-     */
+
     public function destroy(Request $request): JsonResponse
     {
         $request->validate(['locationId' => 'required|integer|exists:location,id']);

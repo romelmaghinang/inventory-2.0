@@ -133,36 +133,116 @@ class ReceivingController extends Controller
             return response()->json(['error' => 'Purchase Order, Receipt, or Receipt Item not found.'], Response::HTTP_NOT_FOUND);
         }
     }
-/**
- * @OA\Delete(
- *     path="/api/receipt-void/{receiptItemId}",
- *     tags={"Receipt"},
- *     summary="Void a receipt item",
- *     description="Deletes (voids) a receipt item by its ID.",
+
+  /**
+ * @OA\Get(
+ *     path="/api/receiving",
+ *     tags={"Receiving"},
+ *     summary="Get receipt items by tracking number",
+ *     description="Retrieves receipt items associated with a specific tracking number (now called `num`). If no tracking number is provided, it retrieves all receipt items. Additionally, you can filter by creation date using `createdBefore` and `createdAfter`.",
  *     @OA\Parameter(
- *         name="receiptItemId",
- *         in="path",
- *         required=true,
- *         @OA\Schema(type="integer"),
- *         description="ID of the receipt item to be voided",
- *         example=1
+ *         name="num",
+ *         in="query",
+ *         description="Tracking number of the receipt to retrieve items for",
+ *         required=false,
+ *         @OA\Schema(type="string")
  *     ),
- *     @OA\Response(
- *         response=200,
- *         description="Receipt Item Void successfully",
+ *     @OA\Parameter(
+ *         name="createdBefore",
+ *         in="query",
+ *         description="Retrieve receipt items created before this date (YYYY-MM-DD)",
+ *         required=false,
+ *         @OA\Schema(type="string", format="date", example="2024-12-31")
+ *     ),
+ *     @OA\Parameter(
+ *         name="createdAfter",
+ *         in="query",
+ *         description="Retrieve receipt items created after this date (YYYY-MM-DD)",
+ *         required=false,
+ *         @OA\Schema(type="string", format="date", example="2024-01-01")
+ *     ),
+ *     @OA\RequestBody(
+ *         required=false,
  *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="Receipt Item Void successfully")
+ *             type="object",
+ *             @OA\Property(property="num", type="string", example="TN-12345", description="Tracking number of the receipt")
  *         )
  *     ),
  *     @OA\Response(
- *         response=422,
- *         description="Unprocessable Entity",
+ *         response=200,
+ *         description="Receipt items retrieved successfully.",
  *         @OA\JsonContent(
- *             @OA\Property(property="errors", type="object", description="Validation errors")
+ *             type="object",
+ *             @OA\Property(property="message", type="string", example="Receipt items retrieved successfully."),
+ *             @OA\Property(property="data", type="array", @OA\Items(type="object"))
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="Receipt not found.",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="Receipt not found.")
  *         )
  *     )
  * )
  */
+
+    public function getReceiptItemsByTrackingNum(Request $request): JsonResponse
+    {
+        $numFromQuery = $request->query('num');
+        $numFromBody = $request->input('num');
+
+        $createdBefore = $request->query('createdBefore');
+        $createdAfter = $request->query('createdAfter');
+
+        $num = $numFromQuery ?? $numFromBody;
+
+        if ($num) {
+            $request->validate([
+                'num' => 'required|string|exists:receipt,num',
+            ]);
+
+            $receipt = Receipt::where('num', $num)->first();
+
+            if (!$receipt) {
+                return response()->json(['message' => 'Receipt not found.'], Response::HTTP_NOT_FOUND);
+            }
+
+            $receiptItems = ReceiptItem::where('receiptId', $receipt->id);
+
+            if ($createdBefore) {
+                $request->validate(['createdBefore' => 'date|before_or_equal:today']);
+                $receiptItems->whereDate('dateCreated', '<=', $createdBefore);
+            }
+
+            if ($createdAfter) {
+                $request->validate(['createdAfter' => 'date|before_or_equal:today']);
+                $receiptItems->whereDate('dateCreated', '>=', $createdAfter);
+            }
+
+            return response()->json([
+                'message' => 'Receipt items retrieved successfully.',
+                'data' => $receiptItems->get()
+            ], Response::HTTP_OK);
+        }
+
+        $allReceiptItems = ReceiptItem::query();
+
+        if ($createdBefore) {
+            $request->validate(['createdBefore' => 'date|before_or_equal:today']);
+            $allReceiptItems->whereDate('dateCreated', '<=', $createdBefore);
+        }
+
+        if ($createdAfter) {
+            $request->validate(['createdAfter' => 'date|before_or_equal:today']);
+            $allReceiptItems->whereDate('dateCreated', '>=', $createdAfter);
+        }
+
+        return response()->json([
+            'message' => 'All receipt items retrieved successfully.',
+            'data' => $allReceiptItems->get()
+        ], Response::HTTP_OK);
+    }
 
     public function delete (Request $request): JsonResponse
     {

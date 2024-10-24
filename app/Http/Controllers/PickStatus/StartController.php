@@ -14,49 +14,7 @@ use Illuminate\Support\Facades\Validator;
 
 class StartController extends Controller
 {
-    /**
-     * Handle the incoming request.
-     */
-    /**
- * @OA\Post(
- *     path="/api/pick-start",
- *     tags={"Pick"},
- *     summary="Start picking items for a sales order",
- *     description="Marks specified sales order items as started and updates their statuses.",
- *     @OA\RequestBody(
- *         required=true,
- *         @OA\JsonContent(
- *             type="array",
- *             @OA\Items(
- *                 type="object",
- *                 @OA\Property(property="soItemId", type="integer", example=1, description="The ID of the sales order item to start picking"),
- *             )
- *         )
- *     ),
- *     @OA\Response(
- *         response=200,
- *         description="Pick items started successfully",
- *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="Pick Item has started"),
- *             @OA\Property(property="pickItems", type="array", @OA\Items(type="object")),
- *         )
- *     ),
- *     @OA\Response(
- *         response=422,
- *         description="Unprocessable Entity",
- *         @OA\JsonContent(
- *             @OA\Property(property="errors", type="object")
- *         )
- *     ),
- *     @OA\Response(
- *         response=404,
- *         description="Not Found",
- *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="Resource not found")
- *         )
- *     ),
- * )
- */
+
     public function __invoke(Request $request): JsonResponse
     {
         $startItemRequest = Validator::make(

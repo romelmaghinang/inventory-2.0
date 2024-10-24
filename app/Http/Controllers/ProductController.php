@@ -118,57 +118,76 @@ class ProductController extends Controller
         );
     }
 
-    /**
-     * @OA\Get(
-     *     path="api/product",
-     *     summary="Get Products",
-     *     description="Retrieves products. If productId is provided in the request body, returns that product; otherwise, returns all products.",
-     *     tags={"Product"},
-     *     @OA\RequestBody(
-     *         required=false,
-     *         @OA\JsonContent(
-     *             @OA\Property(property="productId", type="integer", description="ID of the product to retrieve")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Successful response",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="message", type="string", description="Success message"),
-     *             @OA\Property(property="data", type="array", @OA\Items(type="object"))
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Product not found",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", description="Error message")
-     *         )
-     *     )
-     * )
-     */
-    public function show(Request $request): JsonResponse
-    {
-        $productId = $request->input('productId');
+/**
+ * @OA\Get(
+ *     path="/api/product",
+ *     summary="Get Products",
+ *     description="Retrieves products. If num is provided as a query parameter or in the request body, returns that product; otherwise, returns all products.",
+ *     tags={"Product"},
+ *     @OA\Parameter(
+ *         name="num",
+ *         in="query",
+ *         description="Number of the product to retrieve",
+ *         required=false,
+ *         @OA\Schema(type="string")
+ *     ),
+ *     @OA\RequestBody(
+ *         required=false,
+ *         @OA\JsonContent(
+ *             @OA\Property(property="num", type="string", description="Number of the product to retrieve")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Successful response",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="message", type="string", description="Success message"),
+ *             @OA\Property(property="data", type="array", @OA\Items(type="object"))
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="Product not found",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", description="Error message")
+ *         )
+ *     )
+ * )
+ */
 
-        if ($productId) {
-            $product = Product::find($productId);
-
-            if (!$product) {
-                return response()->json(['message' => 'Product not found'], Response::HTTP_NOT_FOUND);
-            }
-
-            return response()->json($product, Response::HTTP_OK);
-        }
-
-        $products = Product::all();
-
-        return response()->json([
-            'message' => 'Products retrieved successfully',
-            'data' => $products
-        ], Response::HTTP_OK);
-    }
+ public function show(Request $request): JsonResponse
+ {
+     $numFromQuery = $request->input('num');
+     $numFromBody = $request->input('num'); 
+ 
+     if ($numFromQuery || $numFromBody) {
+         $num = $numFromQuery ?? $numFromBody;
+ 
+         $request->validate([
+             'num' => 'required|string|exists:product,num',
+         ]);
+ 
+         $product = Product::where('num', $num)->first();
+ 
+         if (!$product) {
+             return response()->json(['message' => 'Product not found'], Response::HTTP_NOT_FOUND);
+         }
+ 
+         return response()->json([
+             'message' => 'Product retrieved successfully',
+             'data' => [$product], 
+         ], Response::HTTP_OK);
+     }
+ 
+     $products = Product::all();
+ 
+     return response()->json([
+         'message' => 'Products retrieved successfully',
+         'data' => $products,
+     ], Response::HTTP_OK);
+ }
+ 
     /**
      * @OA\Put(
      *     path="api/product",
@@ -244,31 +263,7 @@ class ProductController extends Controller
     }
 
 
-    /**
-     * @OA\Delete(
-     *     path="api/product",
-     *     summary="Delete a Product",
-     *     description="Deletes a product based on the provided productId in the request body.",
-     *     tags={"Product"},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             @OA\Property(property="productId", type="integer", description="ID of the product to delete")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=204,
-     *         description="Product deleted successfully"
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Product not found",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", description="Error message")
-     *         )
-     *     )
-     * )
-     */
+
     public function destroy(Request $request): JsonResponse
     {
         $productId = $request->input('productId');

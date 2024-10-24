@@ -34,7 +34,7 @@ class UserController extends Controller
  *     path="/api/login",
  *     tags={"Authentication"},
  *     summary="User login",
- *     description="Logs in a user with email and password and returns an API token with user permissions.",
+ *     description="Logs in a user with email and password. If login is successful, an API token will be generated based on the user's permissions. The token must be used as a Bearer token in the Authorization header for authenticated API requests.",
  *     @OA\RequestBody(
  *         required=true,
  *         @OA\JsonContent(
@@ -49,7 +49,7 @@ class UserController extends Controller
  *         description="Login successful",
  *         @OA\JsonContent(
  *             type="object",
- *             @OA\Property(property="token", type="string", description="The generated API token")
+ *             @OA\Property(property="token", type="string", description="The generated API token to be used as a Bearer token for API requests")
  *         )
  *     ),
  *     @OA\Response(
@@ -64,6 +64,7 @@ class UserController extends Controller
  *     )
  * )
  */
+
 
     public function login(Request $request)
     {

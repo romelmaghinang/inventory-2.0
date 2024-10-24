@@ -128,23 +128,36 @@ class PartController extends Controller
             Response::HTTP_CREATED
         );
     }
-
     /**
      * @OA\Get(
      *     path="/api/part",
      *     tags={"Part"},
-     *     summary="Display a specified part",
-     *     description="Retrieve a part by its ID.",
+     *     summary="Display a specified part or all parts",
+     *     description="Retrieve a part by its number or return all parts if no input is provided.",
+     *     @OA\Parameter(
+     *         name="num",
+     *         in="query",
+     *         required=false,
+     *         @OA\Schema(type="integer"),
+     *         description="Part number to retrieve"
+     *     ),
      *     @OA\RequestBody(
-     *         required=true,
+     *         required=false,
      *         @OA\JsonContent(
-     *             required={"partId"},
-     *             @OA\Property(property="partId", type="integer", example=1)
+     *             @OA\Property(property="num", type="integer", description="Part number to retrieve")
      *         )
      *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="Part retrieved successfully.",
+     *         description="Part(s) retrieved successfully.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="id", type="integer", example=1),
+     *             @OA\Property(property="num", type="integer", example=12345),
+     *             @OA\Property(property="description", type="string", example="Description of the part."),
+     *             @OA\Property(property="price", type="number", format="float", example=19.99),
+     *             @OA\Property(property="created_at", type="string", format="date-time", example="2023-01-01T00:00:00Z"),
+     *             @OA\Property(property="updated_at", type="string", format="date-time", example="2023-01-01T00:00:00Z")
+     *         )
      *     ),
      *     @OA\Response(
      *         response=404,
@@ -157,9 +170,23 @@ class PartController extends Controller
      */
     public function show(Request $request): JsonResponse
     {
-        $part = Part::findOrFail($request->partId);
-        return response()->json($part, Response::HTTP_OK);
+        $num = $request->query('num');
+
+        if (!$num && $request->isJson()) {
+            $num = $request->input('num');
+        }
+
+        if ($num) {
+            $request->validate(['num' => 'integer|exists:part,num']);
+
+            $part = Part::where('num', $num)->firstOrFail();
+            return response()->json($part, Response::HTTP_OK);
+        }
+
+        $parts = Part::all();
+        return response()->json($parts, Response::HTTP_OK);
     }
+
 
     /**
      * Update the specified resource in storage.
@@ -287,34 +314,7 @@ class PartController extends Controller
     }
 
 
-    /**
-     * @OA\Delete(
-     *     path="/api/part",
-     *     tags={"Part"},
-     *     summary="Delete a specific part",
-     *     description="Deletes a specific part by part ID provided in the JSON request body.",
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             @OA\Property(property="partId", type="integer", description="ID of the part to delete")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Part deleted successfully.",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Part deleted successfully!")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Part not found.",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Part not found.")
-     *         )
-     *     )
-     * )
-     */
+ 
     public function destroy(Request $request): JsonResponse
     {
         $partId = $request->input('partId');

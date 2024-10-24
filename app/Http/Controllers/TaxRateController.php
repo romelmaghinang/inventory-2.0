@@ -17,7 +17,7 @@ class TaxRateController extends Controller
     
     /**
  * @OA\Post(
- *     path="/tax-rate",
+ *     path="/api/taxrate",
  *     summary="Create a new tax rate",
  *     tags={"TaxRate"},
  *     @OA\RequestBody(
@@ -77,13 +77,76 @@ class TaxRateController extends Controller
         );
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(TaxRate $taxRate): JsonResponse
-    {
-        return response()->json($taxRate, Response::HTTP_OK);
+  /**
+ * @OA\Get(
+ *     path="/api/taxrate",
+ *     summary="Retrieve tax rates",
+ *     tags={"TaxRate"},
+ *     description="Fetches a specific tax rate by name or retrieves all tax rates if no name is provided.",
+ *     @OA\Parameter(
+ *         name="name",
+ *         in="query",
+ *         description="The name of the tax rate to retrieve",
+ *         required=false,
+ *         @OA\Schema(type="string", example="Standard Rate")
+ *     ),
+ *     @OA\RequestBody(
+ *         required=false,
+ *         @OA\JsonContent(
+ *             @OA\Property(property="name", type="string", description="The name of the tax rate to retrieve", example="Standard Rate")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Tax Rate retrieved successfully.",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="message", type="string", example="Tax Rate retrieved successfully."),
+ *             @OA\Property(property="data", type="object")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="Tax Rate not found.",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="Tax Rate not found.")
+ *         )
+ *     )
+ * )
+ */
+
+public function show(Request $request): JsonResponse
+{
+    $nameFromQuery = $request->input('name');
+    $nameFromBody = $request->json('name');
+
+    if ($nameFromQuery || $nameFromBody) {
+        $name = $nameFromQuery ?? $nameFromBody;
+
+        $request->validate([
+            'name' => 'required|string|exists:taxrate,name',
+        ]);
+
+        $taxRate = TaxRate::where('name', $name)->first();
+
+        if (!$taxRate) {
+            return response()->json(['message' => 'Tax Rate not found.'], Response::HTTP_NOT_FOUND);
+        }
+
+        return response()->json([
+            'message' => 'Tax Rate retrieved successfully!',
+            'data' => $taxRate,
+        ], Response::HTTP_OK);
     }
+
+    $taxRates = TaxRate::all();
+
+    return response()->json([
+        'message' => 'All Tax Rates retrieved successfully!',
+        'data' => $taxRates,
+    ], Response::HTTP_OK);
+}
+
 
     /**
      * Update the specified resource in storage.

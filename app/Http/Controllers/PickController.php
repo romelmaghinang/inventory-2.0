@@ -277,16 +277,37 @@ class PickController extends Controller
 
         return response()->json(['message' => 'Pick updated successfully!', 'pick' => $pick], Response::HTTP_OK);
     }
-      /**
+    /**
      * @OA\Get(
      *     path="/api/pick",
      *     tags={"Pick"},
      *     summary="Show all picks or a specific pick",
-     *     description="Retrieve all picks or a specific pick by ID using a JSON request body.",
+     *     description="Retrieve all picks or a specific pick by number using a JSON request body or query parameters. Additionally, picks can be filtered by creation date using `createdBefore` and `createdAfter`.",
+     *     @OA\Parameter(
+     *         name="num",
+     *         in="query",
+     *         required=false,
+     *         @OA\Schema(type="string"),
+     *         description="The number of the pick to retrieve."
+     *     ),
+     *     @OA\Parameter(
+     *         name="createdBefore",
+     *         in="query",
+     *         description="Retrieve picks created before this date (YYYY-MM-DD)",
+     *         required=false,
+     *         @OA\Schema(type="string", format="date", example="2024-12-31")
+     *     ),
+     *     @OA\Parameter(
+     *         name="createdAfter",
+     *         in="query",
+     *         description="Retrieve picks created after this date (YYYY-MM-DD)",
+     *         required=false,
+     *         @OA\Schema(type="string", format="date", example="2024-01-01")
+     *     ),
      *     @OA\RequestBody(
      *         required=false,
      *         @OA\JsonContent(
-     *             @OA\Property(property="pickId", type="integer", example=1, description="The ID of the pick to retrieve.")
+     *             @OA\Property(property="num", type="string", example="PN-123", description="The number of the pick to retrieve.")
      *         )
      *     ),
      *     @OA\Response(
@@ -307,44 +328,54 @@ class PickController extends Controller
      */
     public function show(Request $request): JsonResponse
     {
-        if ($request->has('pickId')) {
-            $request->validate(['pickId' => 'required|integer|exists:pick,id']);
-            $pick = Pick::findOrFail($request->pickId);
-            return response()->json($pick, Response::HTTP_OK);
+        $numFromQuery = $request->query('num');
+        $numFromBody = $request->input('num');
+        
+        $createdBefore = $request->input('createdBefore');
+        $createdAfter = $request->input('createdAfter');
+        
+        $num = $numFromQuery ?? $numFromBody;
+
+        if ($num) {
+            $request->validate([
+                'num' => 'required|string|exists:pick,num',
+            ]);
+
+            $pick = Pick::where('num', $num)->firstOrFail();
+            return response()->json(
+                [
+                    'picks' => [$pick] 
+                ],
+                Response::HTTP_OK
+            );
         }
 
-        $picks = Pick::all();
-        return response()->json($picks, Response::HTTP_OK);
+        $query = Pick::query();
+
+        if ($createdBefore) {
+            $request->validate([
+                'createdBefore' => 'date|before_or_equal:today',
+            ]);
+            $query->whereDate('dateCreated', '<=', $createdBefore);
+        }
+
+        if ($createdAfter) {
+            $request->validate([
+                'createdAfter' => 'date|before_or_equal:today',
+            ]);
+            $query->whereDate('dateCreated', '>=', $createdAfter);
+        }
+
+        $picks = $query->get();
+
+        return response()->json(
+            [
+                'picks' => $picks,
+            ],
+            Response::HTTP_OK
+        );
     }
-     /**
-     * @OA\Delete(
-     *     path="/api/pick",
-     *     tags={"Pick"},
-     *     summary="Delete a specific pick",
-     *     description="Delete a specific pick by ID using a JSON request body.",
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"pickId"},
-     *             @OA\Property(property="pickId", type="integer", example=1, description="The ID of the pick to delete.")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Pick deleted successfully.",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Pick deleted successfully!")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Pick not found.",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Not Found.")
-     *         )
-     *     )
-     * )
-     */
+
     public function destroy(Request $request): JsonResponse
     {
         $request->validate(['pickId' => 'required|integer|exists:pick,id']);

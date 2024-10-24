@@ -54,28 +54,83 @@ class QuickBookClassController extends Controller
 
     /**
      * Display the specified resource.
-     */
+   
     public function show(qbClass $qbClass): JsonResponse
     {
         return response()->json($qbClass, Response::HTTP_OK);
-    }
+    }  */
+/**
+ * @OA\Get(
+ *     path="/api/qbclass",
+ *     summary="Retrieve QuickBook classes",
+ *     tags={"QuickBookClass"},
+ *     description="Fetches a specific QuickBook class by name or retrieves all classes if no name is provided.",
+ *     @OA\Parameter(
+ *         name="name",
+ *         in="query",
+ *         description="The name of the QuickBook class to retrieve",
+ *         required=false,
+ *         @OA\Schema(type="string", example="Class Name")
+ *     ),
+ *     @OA\RequestBody(
+ *         required=false,
+ *         @OA\JsonContent(
+ *             @OA\Property(property="name", type="string", description="The name of the QuickBook class to retrieve", example="Class Name")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="QuickBook Class retrieved successfully.",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="message", type="string", example="QuickBook Class retrieved successfully."),
+ *             @OA\Property(property="data", type="object")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="QuickBook Class not found.",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="QuickBook Class not found.")
+ *         )
+ *     )
+ * )
+ */
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateQuickBookClassRequest $updateQuickBookClassRequest, qbClass $qbClass): JsonResponse
-    {
-        $qbClass->update($updateQuickBookClassRequest->only('name') + ['active' => $updateQuickBookClassRequest->active]);
-
-        return response()->json(
-            [
-                'message' => 'Quick Book Class Updated Successfully!',
-                'data' => $qbClass,
-            ],
-            Response::HTTP_OK
-        );
-    }
-
+ public function show(Request $request): JsonResponse
+ {
+     $nameFromQuery = $request->input('name');
+     $nameFromBody = $request->json('name');
+ 
+     if ($nameFromQuery || $nameFromBody) {
+         $name = $nameFromQuery ?? $nameFromBody;
+ 
+         $request->validate([
+             'name' => 'required|string|exists:qbclass,name',
+         ]);
+ 
+         $qbClass = qbClass::where('name', $name)->first();
+ 
+         if (!$qbClass) {
+             return response()->json(['message' => 'QuickBook Class not found.'], Response::HTTP_NOT_FOUND);
+         }
+ 
+         return response()->json([
+             'message' => 'QuickBook Class retrieved successfully!',
+             'data' => $qbClass,
+         ], Response::HTTP_OK);
+     }
+ 
+     $qbClasses = qbClass::all();
+ 
+     return response()->json([
+         'message' => 'All QuickBook Classes retrieved successfully!',
+         'data' => $qbClasses,
+     ], Response::HTTP_OK);
+ }
+ 
+    
+     
     /**
      * Remove the specified resource from storage.
      */

@@ -35,7 +35,6 @@ class SalesOrderController extends Controller
  *         required=true,
  *         @OA\JsonContent(
  *             type="object",
- *             @OA\Property(property="flag", type="boolean", example=true),
  *             @OA\Property(property="soNum", type="integer", example=10001),
  *             @OA\Property(property="customerName", type="string", example="John Doe"),
  *             @OA\Property(property="customerContact", type="string", example="Jane Smith"),
@@ -80,7 +79,6 @@ class SalesOrderController extends Controller
  *                 property="items",
  *                 type="array",
  *                 @OA\Items(
- *                     @OA\Property(property="flag", type="boolean", example=true),
  *                     @OA\Property(property="soItemTypeId", type="integer", example=10),
  *                     @OA\Property(property="productNumber", type="string", example="CK100"),
  *                     @OA\Property(property="productDescription", type="string", example="Product Description"),
@@ -254,17 +252,41 @@ class SalesOrderController extends Controller
      *     path="/api/sales-order",
      *     tags={"Sales Order"},
      *     summary="Retrieve sales orders",
-     *     description="Fetches a single sales order by ID or retrieves all sales orders if no ID is provided.",
+     *     description="Fetches a specific sales order by number from either query parameters or request body, or filters sales orders by date range using createdBefore and createdAfter.",
      *     @OA\Parameter(
-     *         name="soId",
+     *         name="num",
      *         in="query",
+     *         description="The sales order number to retrieve",
      *         required=false,
-     *         description="The ID of the sales order to retrieve",
      *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="createdBefore",
+     *         in="query",
+     *         description="Retrieve sales orders created before this date (YYYY-MM-DD)",
+     *         required=false,
+     *         @OA\Schema(type="string", format="date", example="2024-12-31")
+     *     ),
+     *     @OA\Parameter(
+     *         name="createdAfter",
+     *         in="query",
+     *         description="Retrieve sales orders created after this date (YYYY-MM-DD)",
+     *         required=false,
+     *         @OA\Schema(type="string", format="date", example="2024-01-01")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=false,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="num", type="integer", description="The sales order number to retrieve", example=1)
+     *         )
      *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Successful retrieval of sales orders.",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(type="object")
+     *         )
      *     ),
      *     @OA\Response(
      *         response=404,
@@ -291,8 +313,20 @@ class SalesOrderController extends Controller
      */
     public function show(Request $request): JsonResponse
     {
-        if ($request->has('soId')) {
-            $salesOrder = SalesOrder::find($request->soId);
+        $numFromQuery = $request->input('num');
+        $numFromBody = $request->json('num');
+
+        $createdBefore = $request->input('createdBefore');
+        $createdAfter = $request->input('createdAfter');
+
+        $num = $numFromQuery ?? $numFromBody;
+
+        if ($num) {
+            $request->validate([
+                'num' => 'required|integer|exists:so,num',
+            ]);
+
+            $salesOrder = SalesOrder::where('num', $num)->first();
 
             if (!$salesOrder) {
                 return response()->json(['message' => 'Sales Order not found.'], Response::HTTP_NOT_FOUND);
@@ -301,10 +335,28 @@ class SalesOrderController extends Controller
             return response()->json($salesOrder, Response::HTTP_OK);
         }
 
-        $salesOrders = SalesOrder::all();
+        $query = SalesOrder::query();
+
+        if ($createdBefore) {
+            $request->validate([
+                'createdBefore' => 'date|before_or_equal:today',
+            ]);
+            $query->whereDate('dateCreated', '<=', $createdBefore);
+        }
+
+        if ($createdAfter) {
+            $request->validate([
+                'createdAfter' => 'date|before_or_equal:today',
+            ]);
+            $query->whereDate('dateCreated', '>=', $createdAfter);
+        }
+
+        $salesOrders = $query->get();
 
         return response()->json($salesOrders, Response::HTTP_OK);
     }
+
+
 /**
  * @OA\Put(
  *     path="/api/sales-order",
@@ -339,7 +391,6 @@ class SalesOrderController extends Controller
  *             @OA\Property(property="category", type="string", nullable=true),
  *             @OA\Property(property="customField", type="string", nullable=true),
  *             @OA\Property(property="currencyRate", type="number", format="float", nullable=true),
- *             @OA\Property(property="flag", type="boolean", nullable=true),
  *             @OA\Property(property="status", type="integer", nullable=true),
  *             @OA\Property(property="items", type="array", @OA\Items(
  *                 @OA\Property(property="note", type="string", nullable=true),

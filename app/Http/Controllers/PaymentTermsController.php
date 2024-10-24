@@ -10,6 +10,7 @@ use App\Models\PaymentTermsType;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Http\Request;
 
 class PaymentTermsController extends Controller
 {
@@ -82,12 +83,78 @@ class PaymentTermsController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     */
     public function show(PaymentTerms $paymentTerms): JsonResponse
     {
         return response()->json($paymentTerms, Response::HTTP_OK);
+    }*/
+
+/**
+ * @OA\Get(
+ *     path="/api/payment-terms",
+ *     summary="Get payment terms by name or all payment terms",
+ *     tags={"Payment Terms"},
+ *     @OA\Parameter(
+ *         name="name",
+ *         in="query",
+ *         required=false,
+ *         @OA\Schema(type="string"),
+ *         description="Name of the payment terms to retrieve"
+ *     ),
+ *     @OA\RequestBody(
+ *         required=false,
+ *         @OA\JsonContent(
+ *             @OA\Property(property="name", type="string", description="Name of the payment terms to retrieve")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Payment Terms retrieved successfully",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="message", type="string", example="Payment Terms retrieved successfully!"),
+ *             @OA\Property(property="data", type="object", description="Payment Terms object")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="Payment Terms not found",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="Payment Terms not found.")
+ *         )
+ *     )
+ * )
+ */
+public function show(Request $request): JsonResponse
+{
+    $name = $request->query('name');
+
+    if (!$name && $request->isJson()) {
+        $name = $request->input('name');
     }
+
+    if ($name) {
+        $request->validate(['name' => 'string|exists:paymentterms,name']);
+
+        $paymentTerms = PaymentTerms::where('name', $name)->firstOrFail();
+
+        return response()->json(
+            [
+                'message' => 'Payment Terms retrieved successfully!',
+                'data' => $paymentTerms,
+            ],
+            Response::HTTP_OK
+        );
+    }
+
+    $paymentTerms = PaymentTerms::all();
+    return response()->json(
+        [
+            'message' => 'All Payment Terms retrieved successfully!',
+            'data' => $paymentTerms,
+        ],
+        Response::HTTP_OK
+    );
+}
 
     /**
      * Update the specified resource in storage.

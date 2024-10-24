@@ -11,21 +11,31 @@
                 "tags": [
                     "Country and State"
                 ],
-                "summary": "Get a state by ID",
-                "description": "Retrieve a state by its ID.",
-                "operationId": "4fab035acb6dcd837f1bfb7c51d25575",
+                "summary": "Retrieve all states or filter by name",
+                "description": "Retrieve all states if no query parameters or JSON body is provided. Optionally filter by state name using query parameters or JSON body.",
+                "operationId": "e708fa1cd025365dbfa9d8c2ca9534aa",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "The name of the state to filter by",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "California"
+                    }
+                ],
                 "requestBody": {
-                    "required": true,
+                    "required": false,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "required": [
-                                    "stateId"
-                                ],
                                 "properties": {
-                                    "stateId": {
-                                        "type": "integer",
-                                        "example": 1
+                                    "name": {
+                                        "description": "Name of the state to filter by",
+                                        "type": "string",
+                                        "example": "California"
                                     }
                                 },
                                 "type": "object"
@@ -35,7 +45,36 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "State retrieved successfully."
+                        "description": "States retrieved successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "states": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "California"
+                                                    },
+                                                    "country_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "404": {
                         "description": "State not found.",
@@ -217,128 +256,6 @@
                         }
                     }
                 }
-            },
-            "delete": {
-                "tags": [
-                    "Country and State"
-                ],
-                "summary": "Delete a state",
-                "description": "Delete an existing state from the database.",
-                "operationId": "53cc0c8bcad0c7f29ff3fed19db20cee",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "stateId"
-                                ],
-                                "properties": {
-                                    "stateId": {
-                                        "type": "integer",
-                                        "example": 1
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "204": {
-                        "description": "State deleted successfully."
-                    },
-                    "404": {
-                        "description": "State not found.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "State not found."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/country-state/countries": {
-            "get": {
-                "tags": [
-                    "Country and State"
-                ],
-                "summary": "Get all countries",
-                "description": "Retrieve all countries from the database.",
-                "operationId": "ce0b455ad419e648cc470f196f4c4a9e",
-                "responses": {
-                    "200": {
-                        "description": "Countries retrieved successfully.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "properties": {
-                                            "id": {
-                                                "type": "integer",
-                                                "example": 1
-                                            },
-                                            "name": {
-                                                "type": "string",
-                                                "example": "United States"
-                                            }
-                                        },
-                                        "type": "object"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/country-state/states": {
-            "get": {
-                "tags": [
-                    "Country and State"
-                ],
-                "summary": "Get all states",
-                "description": "Retrieve all states from the database.",
-                "operationId": "f667223c98c9e1136e9a655c34e402ff",
-                "responses": {
-                    "200": {
-                        "description": "States retrieved successfully.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "properties": {
-                                            "id": {
-                                                "type": "integer",
-                                                "example": 1
-                                            },
-                                            "name": {
-                                                "type": "string",
-                                                "example": "California"
-                                            },
-                                            "country_id": {
-                                                "type": "integer",
-                                                "example": 1
-                                            }
-                                        },
-                                        "type": "object"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
             }
         },
         "/api/country-state/country": {
@@ -346,21 +263,31 @@
                 "tags": [
                     "Country and State"
                 ],
-                "summary": "Get a country by ID",
-                "description": "Retrieve a country by its ID.",
-                "operationId": "214e2e615e81232537b99a89470a1a2d",
+                "summary": "Retrieve all countries or filter by name",
+                "description": "Retrieve all countries if no query parameters or JSON body is provided. Optionally filter by country name using query parameters or JSON body.",
+                "operationId": "cdaaa3df588ca8c57a4ed9835d6d85a7",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "The name of the country to filter by",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "United States"
+                    }
+                ],
                 "requestBody": {
-                    "required": true,
+                    "required": false,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "required": [
-                                    "countryId"
-                                ],
                                 "properties": {
-                                    "countryId": {
-                                        "type": "integer",
-                                        "example": 1
+                                    "name": {
+                                        "description": "Name of the country to filter by",
+                                        "type": "string",
+                                        "example": "United States"
                                     }
                                 },
                                 "type": "object"
@@ -370,7 +297,32 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Country retrieved successfully."
+                        "description": "Countries retrieved successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "countries": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "United States"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "404": {
                         "description": "Country not found.",
@@ -392,6 +344,81 @@
             }
         },
         "/api/currency": {
+            "get": {
+                "tags": [
+                    "Currency"
+                ],
+                "summary": "Get currencies or filter by name",
+                "description": "Retrieves all currencies if no query parameters or JSON body is provided. Filters by name using either query parameters or JSON body.",
+                "operationId": "9c04f635bfdcfe8f485fe511ce772fa5",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "Name of the currency to filter by",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "USD"
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "description": "Name of the currency to filter by",
+                                        "type": "string",
+                                        "example": "USD"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Currency retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "description": "Currency object or list of currencies",
+                                            "type": "object"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Currency retrieved successfully!"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Currency not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Currency not found."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
             "post": {
                 "tags": [
                     "Currency"
@@ -483,17 +510,31 @@
                 "tags": [
                     "Customer"
                 ],
-                "summary": "Get a specific customer by ID",
-                "operationId": "09596dfb8b63806625b86768f4cf3cdd",
+                "summary": "Retrieve all customers or filter by name",
+                "description": "Retrieve all customers or filter by name using query parameters or request body.",
+                "operationId": "f5724dd36ef7093e89c1c9044dfcca25",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "The name of the customer to filter by",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "John Doe"
+                    }
+                ],
                 "requestBody": {
-                    "required": true,
+                    "required": false,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "properties": {
-                                    "customerId": {
-                                        "type": "integer",
-                                        "example": 1
+                                    "name": {
+                                        "description": "Name of the customer to filter by",
+                                        "type": "string",
+                                        "example": "John Doe"
                                     }
                                 },
                                 "type": "object"
@@ -503,7 +544,37 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Successful response"
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "description": "Array of customers",
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "John Doe"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Customer(s) retrieved successfully!"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "404": {
                         "description": "Customer not found"
@@ -945,22 +1016,51 @@
                         }
                     }
                 }
-            },
-            "delete": {
+            }
+        },
+        "/api/inventory": {
+            "get": {
                 "tags": [
-                    "Customer"
+                    "Inventory"
                 ],
-                "summary": "Delete a customer",
-                "operationId": "4465ad7288b19b34f66c3ac80c9bf2c7",
+                "summary": "Get inventory items by Part Number or Location Group",
+                "description": "This endpoint retrieves inventory items associated with a specific part number, location group, or all inventory items if no filters are specified.",
+                "operationId": "f36f846f5144a5814a75101323bdd665",
+                "parameters": [
+                    {
+                        "name": "num",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "PN-12345"
+                        }
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "Group A"
+                        }
+                    }
+                ],
                 "requestBody": {
-                    "required": true,
+                    "required": false,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "properties": {
-                                    "customerId": {
-                                        "type": "integer",
-                                        "example": 1
+                                    "num": {
+                                        "description": "The number of the part.",
+                                        "type": "string",
+                                        "example": "PN-12345"
+                                    },
+                                    "name": {
+                                        "description": "The name of the location group.",
+                                        "type": "string",
+                                        "example": "Group A"
                                     }
                                 },
                                 "type": "object"
@@ -970,14 +1070,32 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Customer deleted successfully.",
+                        "description": "Inventory items retrieved successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
                                         "message": {
+                                            "description": "Success message.",
                                             "type": "string",
-                                            "example": "Customer Deleted Successfully!"
+                                            "example": "Inventory items retrieved successfully!"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Error message.",
+                                            "type": "string",
+                                            "example": "Invalid parameters. Only one filter is allowed."
                                         }
                                     },
                                     "type": "object"
@@ -986,38 +1104,24 @@
                         }
                     },
                     "404": {
-                        "description": "Customer not found"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "403": {
-                        "description": "Forbidden"
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Error message.",
+                                            "type": "string",
+                                            "example": "No inventory found for the specified filters."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 }
-            }
-        },
-        "/customer": {
-            "get": {
-                "tags": [
-                    "Customer"
-                ],
-                "summary": "Get all customer",
-                "operationId": "18dd4763caaa9ff531e95505ecc05eba",
-                "responses": {
-                    "200": {
-                        "description": "Successful response"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "403": {
-                        "description": "Forbidden"
-                    }
-                }
-            }
-        },
-        "/api/inventory": {
+            },
             "post": {
                 "tags": [
                     "Inventory"
@@ -1167,19 +1271,37 @@
                     "Location"
                 ],
                 "summary": "Get location details",
-                "description": "Retrieve a specific location by ID or all locations.",
+                "description": "Retrieve a specific location by name or all locations if no name is provided.",
                 "operationId": "0b6b249e82a5fbc2822ff90759f06d29",
                 "parameters": [
                     {
-                        "name": "locationId",
+                        "name": "name",
                         "in": "query",
-                        "description": "ID of the location to retrieve",
+                        "description": "Name of the location to retrieve",
                         "required": false,
                         "schema": {
-                            "type": "integer"
+                            "type": "string",
+                            "example": "Main"
                         }
                     }
                 ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "description": "Name of the location to retrieve",
+                                        "type": "string",
+                                        "example": "Main"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
                         "description": "Location details retrieved successfully.",
@@ -1191,7 +1313,7 @@
                                             "type": "integer",
                                             "example": 1
                                         },
-                                        "location": {
+                                        "name": {
                                             "type": "string",
                                             "example": "Main"
                                         },
@@ -1490,67 +1612,6 @@
                         }
                     }
                 }
-            },
-            "delete": {
-                "tags": [
-                    "Location"
-                ],
-                "summary": "Delete a specific location",
-                "description": "Delete a specific location by ID using a JSON request body.",
-                "operationId": "64ddcc48269b541bf3b8c0562c7e2b44",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "locationId"
-                                ],
-                                "properties": {
-                                    "locationId": {
-                                        "type": "integer",
-                                        "example": 1
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Location deleted successfully.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Location deleted successfully!"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Location not found.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Not Found."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
             }
         },
         "/api/part": {
@@ -1558,21 +1619,29 @@
                 "tags": [
                     "Part"
                 ],
-                "summary": "Display a specified part",
-                "description": "Retrieve a part by its ID.",
+                "summary": "Display a specified part or all parts",
+                "description": "Retrieve a part by its number or return all parts if no input is provided.",
                 "operationId": "812743b7dc49b976c3b3c163417ef22d",
+                "parameters": [
+                    {
+                        "name": "num",
+                        "in": "query",
+                        "description": "Part number to retrieve",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
                 "requestBody": {
-                    "required": true,
+                    "required": false,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "required": [
-                                    "partId"
-                                ],
                                 "properties": {
-                                    "partId": {
-                                        "type": "integer",
-                                        "example": 1
+                                    "num": {
+                                        "description": "Part number to retrieve",
+                                        "type": "integer"
                                     }
                                 },
                                 "type": "object"
@@ -1582,7 +1651,43 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Part retrieved successfully."
+                        "description": "Part(s) retrieved successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "num": {
+                                            "type": "integer",
+                                            "example": 12345
+                                        },
+                                        "description": {
+                                            "type": "string",
+                                            "example": "Description of the part."
+                                        },
+                                        "price": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 19.99
+                                        },
+                                        "created_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2023-01-01T00:00:00Z"
+                                        },
+                                        "updated_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2023-01-01T00:00:00Z"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "404": {
                         "description": "Part not found.",
@@ -1944,23 +2049,35 @@
                         }
                     }
                 }
-            },
-            "delete": {
+            }
+        },
+        "/api/payment-terms": {
+            "get": {
                 "tags": [
-                    "Part"
+                    "Payment Terms"
                 ],
-                "summary": "Delete a specific part",
-                "description": "Deletes a specific part by part ID provided in the JSON request body.",
-                "operationId": "f5234bba641dca8d792a7ea3c684c9b5",
+                "summary": "Get payment terms by name or all payment terms",
+                "operationId": "68c882f8a269b2e2e19984a6d9532485",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "Name of the payment terms to retrieve",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
                 "requestBody": {
-                    "required": true,
+                    "required": false,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "properties": {
-                                    "partId": {
-                                        "description": "ID of the part to delete",
-                                        "type": "integer"
+                                    "name": {
+                                        "description": "Name of the payment terms to retrieve",
+                                        "type": "string"
                                     }
                                 },
                                 "type": "object"
@@ -1970,14 +2087,18 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Part deleted successfully.",
+                        "description": "Payment Terms retrieved successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
                                         "message": {
                                             "type": "string",
-                                            "example": "Part deleted successfully!"
+                                            "example": "Payment Terms retrieved successfully!"
+                                        },
+                                        "data": {
+                                            "description": "Payment Terms object",
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -1986,14 +2107,14 @@
                         }
                     },
                     "404": {
-                        "description": "Part not found.",
+                        "description": "Payment Terms not found",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
                                         "message": {
                                             "type": "string",
-                                            "example": "Part not found."
+                                            "example": "Payment Terms not found."
                                         }
                                     },
                                     "type": "object"
@@ -2002,9 +2123,7 @@
                         }
                     }
                 }
-            }
-        },
-        "/api/payment-terms": {
+            },
             "post": {
                 "tags": [
                     "Payment Terms"
@@ -2124,18 +2243,51 @@
                     "Pick"
                 ],
                 "summary": "Show all picks or a specific pick",
-                "description": "Retrieve all picks or a specific pick by ID using a JSON request body.",
+                "description": "Retrieve all picks or a specific pick by number using a JSON request body or query parameters. Additionally, picks can be filtered by creation date using `createdBefore` and `createdAfter`.",
                 "operationId": "5aa36275846f0b20338528d2269d885d",
+                "parameters": [
+                    {
+                        "name": "num",
+                        "in": "query",
+                        "description": "The number of the pick to retrieve.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "createdBefore",
+                        "in": "query",
+                        "description": "Retrieve picks created before this date (YYYY-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2024-12-31"
+                        }
+                    },
+                    {
+                        "name": "createdAfter",
+                        "in": "query",
+                        "description": "Retrieve picks created after this date (YYYY-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2024-01-01"
+                        }
+                    }
+                ],
                 "requestBody": {
                     "required": false,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "properties": {
-                                    "pickId": {
-                                        "description": "The ID of the pick to retrieve.",
-                                        "type": "integer",
-                                        "example": 1
+                                    "num": {
+                                        "description": "The number of the pick to retrieve.",
+                                        "type": "string",
+                                        "example": "PN-123"
                                     }
                                 },
                                 "type": "object"
@@ -2378,306 +2530,9 @@
                         }
                     }
                 }
-            },
-            "delete": {
-                "tags": [
-                    "Pick"
-                ],
-                "summary": "Delete a specific pick",
-                "description": "Delete a specific pick by ID using a JSON request body.",
-                "operationId": "6e1278676c5f9c3f832d84fe0df2b7d5",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "pickId"
-                                ],
-                                "properties": {
-                                    "pickId": {
-                                        "description": "The ID of the pick to delete.",
-                                        "type": "integer",
-                                        "example": 1
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Pick deleted successfully.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Pick deleted successfully!"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Pick not found.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Not Found."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/pick-finish": {
-            "post": {
-                "tags": [
-                    "Pick"
-                ],
-                "summary": "Finish pick items",
-                "description": "Mark specified pick items as finished and create corresponding shipments.",
-                "operationId": "f9353a54cace82ed6efd174fc6ba183c",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "array",
-                                "items": {
-                                    "properties": {
-                                        "pickItemId": {
-                                            "description": "The ID of the pick item to be finished",
-                                            "type": "integer",
-                                            "example": 1
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Pick item finished successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Pick Item is Finish"
-                                        },
-                                        "ship": {
-                                            "type": "object"
-                                        },
-                                        "shipItem": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid input",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Invalid input data"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Resource not found"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/pick-start": {
-            "post": {
-                "tags": [
-                    "Pick"
-                ],
-                "summary": "Start picking items for a sales order",
-                "description": "Marks specified sales order items as started and updates their statuses.",
-                "operationId": "26a993aad59fe255afb22ccec37a7b30",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "array",
-                                "items": {
-                                    "properties": {
-                                        "soItemId": {
-                                            "description": "The ID of the sales order item to start picking",
-                                            "type": "integer",
-                                            "example": 1
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Pick items started successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Pick Item has started"
-                                        },
-                                        "pickItems": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object"
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocessable Entity",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "errors": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Resource not found"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
             }
         },
         "api/product": {
-            "get": {
-                "tags": [
-                    "Product"
-                ],
-                "summary": "Get Products",
-                "description": "Retrieves products. If productId is provided in the request body, returns that product; otherwise, returns all products.",
-                "operationId": "7cc0adaaf98acb6fe42e90323c70bde9",
-                "requestBody": {
-                    "required": false,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "productId": {
-                                        "description": "ID of the product to retrieve",
-                                        "type": "integer"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Successful response",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "description": "Success message",
-                                            "type": "string"
-                                        },
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object"
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Product not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "description": "Error message",
-                                            "type": "string"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            },
             "put": {
                 "tags": [
                     "Product"
@@ -3031,23 +2886,36 @@
                         }
                     }
                 }
-            },
-            "delete": {
+            }
+        },
+        "/api/product": {
+            "get": {
                 "tags": [
                     "Product"
                 ],
-                "summary": "Delete a Product",
-                "description": "Deletes a product based on the provided productId in the request body.",
-                "operationId": "46a878869b5f8aa88674b88f71af606c",
+                "summary": "Get Products",
+                "description": "Retrieves products. If num is provided as a query parameter or in the request body, returns that product; otherwise, returns all products.",
+                "operationId": "be77b9897465d0527c2d85bc9cef84f9",
+                "parameters": [
+                    {
+                        "name": "num",
+                        "in": "query",
+                        "description": "Number of the product to retrieve",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
                 "requestBody": {
-                    "required": true,
+                    "required": false,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "properties": {
-                                    "productId": {
-                                        "description": "ID of the product to delete",
-                                        "type": "integer"
+                                    "num": {
+                                        "description": "Number of the product to retrieve",
+                                        "type": "string"
                                     }
                                 },
                                 "type": "object"
@@ -3056,8 +2924,27 @@
                     }
                 },
                 "responses": {
-                    "204": {
-                        "description": "Product deleted successfully"
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Success message",
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "404": {
                         "description": "Product not found",
@@ -3245,16 +3132,49 @@
                     "Purchase Order"
                 ],
                 "summary": "Retrieve Purchase Orders",
-                "description": "Fetches the details of a specific Purchase Order by `poId` from the JSON request body. If no `poId` is provided, it fetches all Purchase Orders.",
+                "description": "Fetches the details of a specific Purchase Order by `num` from the JSON request body or query parameters. If no `num` is provided, it fetches all Purchase Orders or filters by date range using createdBefore and createdAfter.",
                 "operationId": "349a33a86210dc518f21683057a58abe",
+                "parameters": [
+                    {
+                        "name": "num",
+                        "in": "query",
+                        "description": "Purchase Order Number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "createdBefore",
+                        "in": "query",
+                        "description": "Retrieve Purchase Orders created before this date (YYYY-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2024-12-31"
+                        }
+                    },
+                    {
+                        "name": "createdAfter",
+                        "in": "query",
+                        "description": "Retrieve Purchase Orders created after this date (YYYY-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2024-01-01"
+                        }
+                    }
+                ],
                 "requestBody": {
                     "required": false,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "properties": {
-                                    "poId": {
-                                        "description": "Purchase Order ID",
+                                    "num": {
+                                        "description": "Purchase Order Number",
                                         "type": "integer"
                                     }
                                 },
@@ -3284,7 +3204,36 @@
                         }
                     },
                     "404": {
-                        "description": "Purchase Order not found"
+                        "description": "Purchase Order not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Purchase Order not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid request"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 }
             },
@@ -3388,6 +3337,80 @@
             }
         },
         "/api/qbclass": {
+            "get": {
+                "tags": [
+                    "QuickBookClass"
+                ],
+                "summary": "Retrieve QuickBook classes",
+                "description": "Fetches a specific QuickBook class by name or retrieves all classes if no name is provided.",
+                "operationId": "d3440ce01302b8209b2d985ade48f692",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "The name of the QuickBook class to retrieve",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "Class Name"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "description": "The name of the QuickBook class to retrieve",
+                                        "type": "string",
+                                        "example": "Class Name"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "QuickBook Class retrieved successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "QuickBook Class retrieved successfully."
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "QuickBook Class not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "QuickBook Class not found."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
             "post": {
                 "tags": [
                     "QuickBookClass"
@@ -3437,197 +3460,105 @@
                 }
             }
         },
-        "/api/receipt-fulfilled": {
-            "post": {
-                "tags": [
-                    "Receipt"
-                ],
-                "summary": "Fulfill a receipt item",
-                "description": "Marks a receipt item as fulfilled by updating its status.",
-                "operationId": "385c5d5fb3d0ee4b7f7fb1f36694bc93",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "receiptItemId": {
-                                        "description": "ID of the receipt item to be fulfilled",
-                                        "type": "integer",
-                                        "example": 1
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Receipt Item fulfilled",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Receipt Item fulfilled"
-                                        },
-                                        "receiptItem": {
-                                            "description": "Details of the fulfilled receipt item",
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "statusId": {
-                                                    "type": "integer",
-                                                    "example": 40
-                                                },
-                                                "dateLastModified": {
-                                                    "type": "string",
-                                                    "example": "2024-10-18 15:30:00"
-                                                }
-                                            },
-                                            "type": "object"
-                                        },
-                                        "receipt": {
-                                            "description": "Details of the related receipt",
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "statusId": {
-                                                    "type": "integer",
-                                                    "example": 40
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocessable Entity",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "errors": {
-                                            "description": "Validation errors",
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/receipt-reconciled": {
-            "post": {
-                "tags": [
-                    "Receipt"
-                ],
-                "summary": "Reconcile a receipt item",
-                "description": "Reconciles a receipt item by updating its status and reconciliation date.",
-                "operationId": "d61e340518b250bf105906521566e009",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "receiptItemId": {
-                                        "description": "ID of the receipt item to be reconciled",
-                                        "type": "integer",
-                                        "example": 1
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Receipt Item reconciled",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Receipt Item reconciled"
-                                        },
-                                        "receiptItem": {
-                                            "description": "Details of the reconciled receipt item",
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "statusId": {
-                                                    "type": "integer",
-                                                    "example": 20
-                                                },
-                                                "dateReconciled": {
-                                                    "type": "string",
-                                                    "example": "2024-10-18 15:30:00"
-                                                },
-                                                "dateLastModified": {
-                                                    "type": "string",
-                                                    "example": "2024-10-18 15:30:00"
-                                                }
-                                            },
-                                            "type": "object"
-                                        },
-                                        "receipt": {
-                                            "description": "Details of the related receipt",
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "statusId": {
-                                                    "type": "integer",
-                                                    "example": 20
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocessable Entity",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "errors": {
-                                            "description": "Validation errors",
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/api/receiving": {
+            "get": {
+                "tags": [
+                    "Receiving"
+                ],
+                "summary": "Get receipt items by tracking number",
+                "description": "Retrieves receipt items associated with a specific tracking number (now called `num`). If no tracking number is provided, it retrieves all receipt items. Additionally, you can filter by creation date using `createdBefore` and `createdAfter`.",
+                "operationId": "438312671ffb4ccf2c32705f1a13331e",
+                "parameters": [
+                    {
+                        "name": "num",
+                        "in": "query",
+                        "description": "Tracking number of the receipt to retrieve items for",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "createdBefore",
+                        "in": "query",
+                        "description": "Retrieve receipt items created before this date (YYYY-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2024-12-31"
+                        }
+                    },
+                    {
+                        "name": "createdAfter",
+                        "in": "query",
+                        "description": "Retrieve receipt items created after this date (YYYY-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2024-01-01"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "num": {
+                                        "description": "Tracking number of the receipt",
+                                        "type": "string",
+                                        "example": "TN-12345"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Receipt items retrieved successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Receipt items retrieved successfully."
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Receipt not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Receipt not found."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
             "post": {
                 "tags": [
                     "Receiving"
@@ -3713,85 +3644,78 @@
                 }
             }
         },
-        "/api/receipt-void/{receiptItemId}": {
-            "delete": {
-                "tags": [
-                    "Receipt"
-                ],
-                "summary": "Void a receipt item",
-                "description": "Deletes (voids) a receipt item by its ID.",
-                "operationId": "97e59ca32d91526ddfe8f59cf35c1544",
-                "parameters": [
-                    {
-                        "name": "receiptItemId",
-                        "in": "path",
-                        "description": "ID of the receipt item to be voided",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        },
-                        "example": 1
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Receipt Item Void successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Receipt Item Void successfully"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocessable Entity",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "errors": {
-                                            "description": "Validation errors",
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/api/sales-order": {
             "get": {
                 "tags": [
                     "Sales Order"
                 ],
                 "summary": "Retrieve sales orders",
-                "description": "Fetches a single sales order by ID or retrieves all sales orders if no ID is provided.",
+                "description": "Fetches a specific sales order by number from either query parameters or request body, or filters sales orders by date range using createdBefore and createdAfter.",
                 "operationId": "ce62b39c903b9981b5c13efd2c6f3a33",
                 "parameters": [
                     {
-                        "name": "soId",
+                        "name": "num",
                         "in": "query",
-                        "description": "The ID of the sales order to retrieve",
+                        "description": "The sales order number to retrieve",
                         "required": false,
                         "schema": {
                             "type": "integer",
                             "example": 1
                         }
+                    },
+                    {
+                        "name": "createdBefore",
+                        "in": "query",
+                        "description": "Retrieve sales orders created before this date (YYYY-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2024-12-31"
+                        }
+                    },
+                    {
+                        "name": "createdAfter",
+                        "in": "query",
+                        "description": "Retrieve sales orders created after this date (YYYY-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2024-01-01"
+                        }
                     }
                 ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "num": {
+                                        "description": "The sales order number to retrieve",
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
-                        "description": "Successful retrieval of sales orders."
+                        "description": "Successful retrieval of sales orders.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
                     },
                     "404": {
                         "description": "Sales Order not found.",
@@ -3958,10 +3882,6 @@
                                     "currencyRate": {
                                         "type": "number",
                                         "format": "float",
-                                        "nullable": true
-                                    },
-                                    "flag": {
-                                        "type": "boolean",
                                         "nullable": true
                                     },
                                     "status": {
@@ -4135,10 +4055,6 @@
                         "application/json": {
                             "schema": {
                                 "properties": {
-                                    "flag": {
-                                        "type": "boolean",
-                                        "example": true
-                                    },
                                     "soNum": {
                                         "type": "integer",
                                         "example": 10001
@@ -4308,10 +4224,6 @@
                                         "type": "array",
                                         "items": {
                                             "properties": {
-                                                "flag": {
-                                                    "type": "boolean",
-                                                    "example": true
-                                                },
                                                 "soItemTypeId": {
                                                     "type": "integer",
                                                     "example": 10
@@ -4491,24 +4403,36 @@
                 }
             }
         },
-        "/api/pack": {
-            "post": {
+        "/api/taxrate": {
+            "get": {
                 "tags": [
-                    "Pack"
+                    "TaxRate"
                 ],
-                "summary": "Update the status of a shipment to packed",
-                "description": "Marks a shipment as packed based on the provided ship ID.",
-                "operationId": "bab609f2971ca90e2c012303916feaaf",
+                "summary": "Retrieve tax rates",
+                "description": "Fetches a specific tax rate by name or retrieves all tax rates if no name is provided.",
+                "operationId": "844e731c4060645d4e3fd038b5412956",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "The name of the tax rate to retrieve",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "Standard Rate"
+                        }
+                    }
+                ],
                 "requestBody": {
-                    "required": true,
+                    "required": false,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "properties": {
-                                    "shipId": {
-                                        "description": "The ID of the shipment to update",
-                                        "type": "integer",
-                                        "example": 1
+                                    "name": {
+                                        "description": "The name of the tax rate to retrieve",
+                                        "type": "string",
+                                        "example": "Standard Rate"
                                     }
                                 },
                                 "type": "object"
@@ -4518,28 +4442,16 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Shipment status updated successfully",
+                        "description": "Tax Rate retrieved successfully.",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
                                         "message": {
                                             "type": "string",
-                                            "example": "Packed"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocessable Entity",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "errors": {
+                                            "example": "Tax Rate retrieved successfully."
+                                        },
+                                        "data": {
                                             "type": "object"
                                         }
                                     },
@@ -4549,14 +4461,14 @@
                         }
                     },
                     "404": {
-                        "description": "Not Found",
+                        "description": "Tax Rate not found.",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
                                         "message": {
                                             "type": "string",
-                                            "example": "Resource not found"
+                                            "example": "Tax Rate not found."
                                         }
                                     },
                                     "type": "object"
@@ -4565,91 +4477,13 @@
                         }
                     }
                 }
-            }
-        },
-        "/api/ship": {
-            "post": {
-                "tags": [
-                    "Ship"
-                ],
-                "summary": "Update the status of a shipment",
-                "description": "Marks a shipment as shipped and updates the related sales order and sales order items statuses.",
-                "operationId": "dba40374a824f7515a321d040106714c",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "shipId": {
-                                        "description": "The ID of the shipment to update",
-                                        "type": "integer",
-                                        "example": 1
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Shipment status updated successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Shipped"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocessable Entity",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "errors": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Resource not found"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/tax-rate": {
+            },
             "post": {
                 "tags": [
                     "TaxRate"
                 ],
                 "summary": "Create a new tax rate",
-                "operationId": "3ad00ce057a88a58ffd7ff8b966d3c94",
+                "operationId": "e6f516bf76e4b91623867716b43ccefc",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -4729,7 +4563,7 @@
                     "Authentication"
                 ],
                 "summary": "User login",
-                "description": "Logs in a user with email and password and returns an API token with user permissions.",
+                "description": "Logs in a user with email and password. If login is successful, an API token will be generated based on the user's permissions. The token must be used as a Bearer token in the Authorization header for authenticated API requests.",
                 "operationId": "0fc9610184083ac6dddab2c63139225a",
                 "requestBody": {
                     "required": true,
@@ -4765,7 +4599,7 @@
                                 "schema": {
                                     "properties": {
                                         "token": {
-                                            "description": "The generated API token",
+                                            "description": "The generated API token to be used as a Bearer token for API requests",
                                             "type": "string"
                                         }
                                     },
@@ -5307,18 +5141,30 @@
                     "Vendor"
                 ],
                 "summary": "Get vendor(s) details",
-                "description": "Retrieve a specific vendor's information by their ID from a JSON request body. If no vendorId is provided, return all vendors.",
+                "description": "Retrieve a specific vendor's information by their name from either the JSON request body or query parameters. If no vendorName is provided, return all vendors.",
                 "operationId": "getVendor",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "Name of the vendor to retrieve",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "Vendor Name"
+                        }
+                    }
+                ],
                 "requestBody": {
                     "required": false,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "properties": {
-                                    "vendorId": {
-                                        "description": "ID of the vendor to retrieve",
-                                        "type": "integer",
-                                        "example": 1
+                                    "vendorName": {
+                                        "description": "Name of the vendor to retrieve",
+                                        "type": "string",
+                                        "example": "Vendor Name"
                                     }
                                 },
                                 "type": "object"
@@ -5647,24 +5493,12 @@
             "description": "QuickBookClass"
         },
         {
-            "name": "Receipt",
-            "description": "Receipt"
-        },
-        {
             "name": "Receiving",
             "description": "Receiving"
         },
         {
             "name": "Sales Order",
             "description": "Sales Order"
-        },
-        {
-            "name": "Pack",
-            "description": "Pack"
-        },
-        {
-            "name": "Ship",
-            "description": "Ship"
         },
         {
             "name": "TaxRate",

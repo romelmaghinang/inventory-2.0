@@ -137,75 +137,85 @@ class VendorController extends Controller
         );
     }
 
-    /**
-     * @OA\Get(
-     *     path="/api/vendor",
-     *     summary="Get vendor(s) details",
-     *     description="Retrieve a specific vendor's information by their ID from a JSON request body. If no vendorId is provided, return all vendors.",
-     *     operationId="getVendor",
-     *     tags={"Vendor"},
-     *     @OA\RequestBody(
-     *         required=false,
-     *         @OA\JsonContent(
-     *             @OA\Property(property="vendorId", type="integer", example=1, description="ID of the vendor to retrieve")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Vendor(s) details retrieved successfully",
-     *         @OA\JsonContent(
-     *             oneOf={
-     *                 @OA\Schema(
-     *                     type="object",
-     *                     @OA\Property(property="id", type="integer", example=1),
-     *                     @OA\Property(property="name", type="string", example="Vendor Name"),
-     *                     @OA\Property(property="email", type="string", example="vendor@example.com"),
-     *                     @OA\Property(property="address", type="string", example="123 Vendor Street"),
-     *                     @OA\Property(property="phone", type="string", example="123-456-7890")
-     *                 ),
-     *                 @OA\Schema(
-     *                     type="array",
-     *                     @OA\Items(
-     *                         type="object",
-     *                         @OA\Property(property="id", type="integer", example=1),
-     *                         @OA\Property(property="name", type="string", example="Vendor Name"),
-     *                         @OA\Property(property="email", type="string", example="vendor@example.com"),
-     *                         @OA\Property(property="address", type="string", example="123 Vendor Street"),
-     *                         @OA\Property(property="phone", type="string", example="123-456-7890")
-     *                     )
-     *                 )
-     *             }
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Vendor not found",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="message", type="string", example="Vendor not found")
-     *         )
-     *     )
-     * )
-     */
-    public function show(Request $request): JsonResponse
-    {
-        $vendorId = $request->input('vendorId'); 
-        
-        if ($vendorId) {
-            $vendor = Vendor::find($vendorId);
+ /**
+ * @OA\Get(
+ *     path="/api/vendor",
+ *     summary="Get vendor(s) details",
+ *     description="Retrieve a specific vendor's information by their name from either the JSON request body or query parameters. If no vendorName is provided, return all vendors.",
+ *     operationId="getVendor",
+ *     tags={"Vendor"},
+ *     @OA\Parameter(
+ *         name="name",
+ *         in="query",
+ *         description="Name of the vendor to retrieve",
+ *         required=false,
+ *         @OA\Schema(type="string", example="Vendor Name")
+ *     ),
+ *     @OA\RequestBody(
+ *         required=false,
+ *         @OA\JsonContent(
+ *             @OA\Property(property="vendorName", type="string", example="Vendor Name", description="Name of the vendor to retrieve")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Vendor(s) details retrieved successfully",
+ *         @OA\JsonContent(
+ *             oneOf={
+ *                 @OA\Schema(
+ *                     type="object",
+ *                     @OA\Property(property="id", type="integer", example=1),
+ *                     @OA\Property(property="name", type="string", example="Vendor Name"),
+ *                     @OA\Property(property="email", type="string", example="vendor@example.com"),
+ *                     @OA\Property(property="address", type="string", example="123 Vendor Street"),
+ *                     @OA\Property(property="phone", type="string", example="123-456-7890")
+ *                 ),
+ *                 @OA\Schema(
+ *                     type="array",
+ *                     @OA\Items(
+ *                         type="object",
+ *                         @OA\Property(property="id", type="integer", example=1),
+ *                         @OA\Property(property="name", type="string", example="Vendor Name"),
+ *                         @OA\Property(property="email", type="string", example="vendor@example.com"),
+ *                         @OA\Property(property="address", type="string", example="123 Vendor Street"),
+ *                         @OA\Property(property="phone", type="string", example="123-456-7890")
+ *                     )
+ *                 )
+ *             }
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="Vendor not found",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="message", type="string", example="Vendor not found")
+ *         )
+ *     )
+ * )
+ */
 
-            if (!$vendor) {
-                return response()->json(['message' => 'Vendor not found'], Response::HTTP_NOT_FOUND);
-            }
-
-            return response()->json($vendor, Response::HTTP_OK);
-        }
-
-        $vendors = Vendor::all();
-        return response()->json($vendors, Response::HTTP_OK);
-    }
-
-
+ public function show(Request $request): JsonResponse
+ {
+     $vendorNameFromQuery = $request->input('name');
+     $vendorNameFromBody = $request->json('name');
+ 
+     if ($vendorNameFromQuery || $vendorNameFromBody) {
+         $vendorName = $vendorNameFromQuery ?? $vendorNameFromBody;
+ 
+         $vendor = Vendor::where('name', $vendorName)->first();
+ 
+         if (!$vendor) {
+             return response()->json(['message' => 'Vendor not found'], Response::HTTP_NOT_FOUND);
+         }
+ 
+         return response()->json($vendor, Response::HTTP_OK);
+     }
+ 
+     $vendors = Vendor::all();
+     return response()->json($vendors, Response::HTTP_OK);
+ }
+ 
     /**
      * @OA\Put(
      *      path="/api/vendor",

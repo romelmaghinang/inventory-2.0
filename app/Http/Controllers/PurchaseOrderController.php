@@ -295,16 +295,37 @@ class PurchaseOrderController extends Controller
         ], Response::HTTP_CREATED);
     }
     
-   /**
+    /**
      * @OA\Get(
      *     path="/api/purchase-order",
      *     summary="Retrieve Purchase Orders",
-     *     description="Fetches the details of a specific Purchase Order by `poId` from the JSON request body. If no `poId` is provided, it fetches all Purchase Orders.",
+     *     description="Fetches the details of a specific Purchase Order by `num` from the JSON request body or query parameters. If no `num` is provided, it fetches all Purchase Orders or filters by date range using createdBefore and createdAfter.",
      *     tags={"Purchase Order"},
+     *     @OA\Parameter(
+     *         name="num",
+     *         in="query",
+     *         description="Purchase Order Number",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="createdBefore",
+     *         in="query",
+     *         description="Retrieve Purchase Orders created before this date (YYYY-MM-DD)",
+     *         required=false,
+     *         @OA\Schema(type="string", format="date", example="2024-12-31")
+     *     ),
+     *     @OA\Parameter(
+     *         name="createdAfter",
+     *         in="query",
+     *         description="Retrieve Purchase Orders created after this date (YYYY-MM-DD)",
+     *         required=false,
+     *         @OA\Schema(type="string", format="date", example="2024-01-01")
+     *     ),
      *     @OA\RequestBody(
      *         required=false,
      *         @OA\JsonContent(
-     *             @OA\Property(property="poId", type="integer", description="Purchase Order ID")
+     *             @OA\Property(property="num", type="integer", description="Purchase Order Number")
      *         )
      *     ),
      *     @OA\Response(
@@ -317,27 +338,67 @@ class PurchaseOrderController extends Controller
      *     ),
      *     @OA\Response(
      *         response=404,
-     *         description="Purchase Order not found"
+     *         description="Purchase Order not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Purchase Order not found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Invalid request",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Invalid request")
+     *         )
      *     )
      * )
      */
+
     public function show(Request $request): JsonResponse
     {
-        $poId = $request->input('poId');
-
-        if ($poId) {
-            $purchaseOrder = PurchaseOrder::find($poId);
-
+        $numFromQuery = $request->input('num');
+        $numFromBody = $request->input('num');
+    
+        $createdBefore = $request->input('createdBefore');
+        $createdAfter = $request->input('createdAfter');
+    
+        $num = $numFromQuery ?? $numFromBody;
+    
+        if ($num) {
+            $request->validate([
+                'num' => 'required|integer|exists:po,num',
+            ]);
+    
+            $purchaseOrder = PurchaseOrder::where('num', $num)->first();
+    
             if (!$purchaseOrder) {
                 return response()->json(['message' => 'Purchase Order not found'], Response::HTTP_NOT_FOUND);
             }
-
+    
             return response()->json(['success' => true, 'data' => $purchaseOrder], Response::HTTP_OK);
         }
-
-        $purchaseOrders = PurchaseOrder::all();
+    
+        $query = PurchaseOrder::query();
+    
+        if ($createdBefore) {
+            $request->validate([
+                'createdBefore' => 'date|before_or_equal:today',
+            ]);
+            $query->whereDate('dateCreated', '<=', $createdBefore);
+        }
+    
+        if ($createdAfter) {
+            $request->validate([
+                'createdAfter' => 'date|before_or_equal:today',
+            ]);
+            $query->whereDate('dateCreated', '>=', $createdAfter);
+        }
+    
+        $purchaseOrders = $query->get();
+    
         return response()->json(['success' => true, 'data' => $purchaseOrders], Response::HTTP_OK);
     }
+ 
+     
     /**
      * @OA\Put(
      *     path="/api/purchase-order",
