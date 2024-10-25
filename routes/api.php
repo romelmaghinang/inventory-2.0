@@ -31,24 +31,25 @@ Route::post('/register', [UserController::class, 'createUser']);
 Route::post('/login', [UserController::class, 'login']);
 Route::get('/permissions', [UserController::class, 'getUserPermissions']);
 
-Route::middleware(['auth:sanctum', 'abilities:create-users,create-permission,create-role,assign-role,assign-permission,pick-finish,pick-start,pack,ship,inventory'])->group(function () {
+Route::middleware(['auth:sanctum', ])->group(function () {
 
     Route::prefix('qbclass')->group(function () {
-        Route::post('/', [QuickBookClassController::class, 'store'])->middleware('abilities:create-qbclass]');
+        
+        Route::post('/', [QuickBookClassController::class, 'store'])->middleware('abilities:create-qbclass');
         Route::put('/', [QuickBookClassController::class, 'update'])->middleware('abilities:update-qbclass');
         Route::get('/', [QuickBookClassController::class, 'show'])->middleware('abilities:view-qbclass');
         Route::delete('/', [QuickBookClassController::class, 'destroy'])->middleware('abilities:delete-qbclass');
     });
 
     Route::prefix('taxrate')->group(function () {
-        Route::post('/', [TaxRateController::class, 'store'])->middleware('abilities:create-taxrate]');
+        Route::post('/', [TaxRateController::class, 'store'])->middleware('abilities:create-taxrate');
         Route::put('/', [TaxRateController::class, 'update'])->middleware('abilities:update-taxrate');
         Route::get('/', [TaxRateController::class, 'show'])->middleware('abilities:view-taxrate');
         Route::delete('/', [TaxRateController::class, 'destroy'])->middleware('abilities:delete-taxrate');
     });
 
     Route::prefix('payment-terms')->group(function () {
-        Route::post('/', [PaymentTermsController::class, 'store'])->middleware('abilities:create-payment-terms]');
+        Route::post('/', [PaymentTermsController::class, 'store'])->middleware('abilities:create-payment-terms');
         Route::put('/', [PaymentTermsController::class, 'update'])->middleware('abilities:update-payment-terms');
         Route::get('/', [PaymentTermsController::class, 'show'])->middleware('abilities:view-payment-terms');
         Route::delete('/', [PaymentTermsController::class, 'destroy'])->middleware('abilities:delete-payment-terms');

@@ -21,8 +21,8 @@ return new class extends Migration
             $table->integer('pipelineContactNum')->nullable();
             $table->string('address', 90);
             $table->string('zip', 10)->nullable();
-
-            $table->foreignId('countryId')->nullable()->constrained('country');
+            $table->unsignedBigInteger('countryId')->nullable();
+            $table->foreign('countryId')->references('id')->on('country')->cascadeOnDelete();
             $table->foreignId('typeId')->nullable()->constrained('addresstype');
             $table->foreignId('stateId')->nullable()->constrained('state');
             $table->foreignId('locationGroupId')->nullable()->constrained('locationgroup');

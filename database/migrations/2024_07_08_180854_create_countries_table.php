@@ -12,13 +12,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('countries', function (Blueprint $table) {
+        Schema::create('country', function (Blueprint $table) {
             $table->id();
-            $table->string('abbreviation', 2)->nullable();
+            $table->string('abbreviation', 10)->nullable();
             $table->string('name', 50)->nullable();
         });
 
-        DB::table('countries')->insert([
+        DB::table('country')->insert([
             ['abbreviation' => 'Unknown', 'name' => 'Unknown'],
             ['abbreviation' => 'US', 'name' => 'United States'],
             ['abbreviation' => 'CA', 'name' => 'Canada'],

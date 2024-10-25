@@ -54,13 +54,11 @@ class CountryAndStateController extends Controller
         $validated = $request->validate([
             'stateName' => 'required|string|max:255',
             'stateCode' => 'required|string|max:10',
-            'countryId' => 'required|exists:countries,id',
         ]);
 
         $state = State::create([
             'name' => $validated['stateName'],
             'code' => $validated['stateCode'],
-            'country_id' => $validated['countryId'],
         ]);
 
         return response()->json(
@@ -199,7 +197,7 @@ class CountryAndStateController extends Controller
         }
 
         $request->validate([
-            'name' => 'string|exists:states,name',
+            'name' => 'string|exists:state,name',
         ]);
 
         $state = State::where('name', $name)->first();
@@ -260,17 +258,15 @@ class CountryAndStateController extends Controller
     public function updateState(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'stateId' => 'required|integer|exists:states,id',
+            'stateId' => 'required|integer|exists:state,id',
             'stateName' => 'required|string|max:255',
             'stateCode' => 'required|string|max:10',
-            'countryId' => 'required|exists:countries,id',
         ]);
 
         $state = State::find($validated['stateId']);
         $state->update([
             'name' => $validated['stateName'],
             'code' => $validated['stateCode'],
-            'country_id' => $validated['countryId'],
         ]);
 
         return response()->json(['message' => 'State Updated Successfully!'], Response::HTTP_OK);
@@ -280,7 +276,7 @@ class CountryAndStateController extends Controller
     public function deleteState(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'stateId' => 'required|integer|exists:states,id',
+            'stateId' => 'required|integer|exists:state,id',
         ]);
 
         $state = State::find($validated['stateId']);

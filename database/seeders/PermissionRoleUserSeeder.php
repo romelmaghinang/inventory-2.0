@@ -15,7 +15,7 @@ class PermissionRoleUserSeeder extends Seeder
      */
     public function run(): void
     {
-        $guardName = 'web'; 
+        $guardName = 'api'; 
 
         $permissions = [
             'create-users', 'create-permission', 'create-role', 'assign-role', 'assign-permission',
