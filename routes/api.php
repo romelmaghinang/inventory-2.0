@@ -111,12 +111,15 @@ Route::middleware(['auth:sanctum', ])->group(function () {
         Route::delete('/', [LocationController::class, 'destroy'])->middleware('abilities:delete-location');
     });
 
-    Route::prefix('country-state')->group(function () {
-        Route::post('/state', [CountryAndStateController::class, 'storeState'])->middleware('abilities:create-state');
-        Route::post('/country', [CountryAndStateController::class, 'showCountry'])->middleware('abilities:view-country');
-        Route::post('/state', [CountryAndStateController::class, 'showState'])->middleware('abilities:view-state');
-        Route::put('/state', [CountryAndStateController::class, 'updateState'])->middleware('abilities:update-state');
-        Route::delete('/state', [CountryAndStateController::class, 'deleteState'])->middleware('abilities:delete-state');
+    Route::prefix('state')->group(function () {
+        Route::post('/', [CountryAndStateController::class, 'storeState'])->middleware('abilities:create-state');
+        Route::post('/', [CountryAndStateController::class, 'showState'])->middleware('abilities:view-state');
+        Route::put('/', [CountryAndStateController::class, 'updateState'])->middleware('abilities:update-state');
+        Route::delete('/', [CountryAndStateController::class, 'deleteState'])->middleware('abilities:delete-state');
+    });
+
+    Route::prefix('country')->group(function () {
+        Route::post('/', [CountryAndStateController::class, 'showCountry'])->middleware('abilities:view-country');
     });
 
     Route::prefix('customer')->group(function () {
