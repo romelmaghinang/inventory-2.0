@@ -13,7 +13,7 @@ use Carbon\Carbon;
 class ReconciledController extends Controller
 {
  
-    public function __invoke(Request $request): JsonResponse
+    public function store (Request $request): JsonResponse
     {
         $reconcileRequest = Validator::make(
             $request->all(),

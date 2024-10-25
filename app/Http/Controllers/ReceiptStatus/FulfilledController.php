@@ -13,7 +13,7 @@ use Carbon\Carbon;
 class FulfilledController extends Controller
 {
   
-    public function __invoke(Request $request): JsonResponse
+    public function store (Request $request): JsonResponse
     {
         $fulfillRequest = Validator::make(
             $request->all(),

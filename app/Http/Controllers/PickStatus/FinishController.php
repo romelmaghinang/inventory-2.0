@@ -16,7 +16,7 @@ use Carbon\Carbon;
 class FinishController extends Controller
 {
 
-    public function __invoke(Request $request): JsonResponse
+    public function store (Request $request): JsonResponse
     {
         $finishItemRequest = Validator::make(
             $request->all(),

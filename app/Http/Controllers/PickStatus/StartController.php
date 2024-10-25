@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Validator;
 class StartController extends Controller
 {
 
-    public function __invoke(Request $request): JsonResponse
+    public function store (Request $request): JsonResponse
     {
         $startItemRequest = Validator::make(
             $request->all(),
