@@ -113,7 +113,7 @@ Route::middleware(['auth:sanctum', ])->group(function () {
 
     Route::prefix('state')->group(function () {
         Route::post('/', [CountryAndStateController::class, 'storeState'])->middleware('abilities:create-state');
-        Route::post('/', [CountryAndStateController::class, 'showState'])->middleware('abilities:view-state');
+        Route::get('/', [CountryAndStateController::class, 'showState'])->middleware('abilities:view-state');
         Route::put('/', [CountryAndStateController::class, 'updateState'])->middleware('abilities:update-state');
         Route::delete('/', [CountryAndStateController::class, 'deleteState'])->middleware('abilities:delete-state');
     });
