@@ -141,7 +141,7 @@ Route::middleware(['auth:sanctum', ])->group(function () {
     Route::post('pack', [PackController::class, 'store'])->middleware('abilities:pack');
     Route::post('ship', [ShipController::class, 'store'])->middleware('abilities:ship');
     Route::post('inventory', [InventoryController::class, 'store'])->middleware('abilities:inventory');
-    Route::get('inventor', [InventoryController::class, 'showInventories'])->middleware('abilities:inventory');
+    Route::get('inventory', [InventoryController::class, 'showInventories'])->middleware('abilities:inventory');
     Route::post('/receiving', [ReceivingController::class, 'receiving'])->middleware('abilities:receiving');
     Route::get('/receiving', [ReceivingController::class, 'show'])->middleware('abilities:receiving');
     Route::delete('receipt-void', [ReceivingController::class, 'delete'])->middleware('abilities:receipt-void');

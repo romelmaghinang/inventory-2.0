@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Validator;
 class PackController extends Controller
 {
 
-    public function __invoke(Request $request): JsonResponse
+    public function store (Request $request): JsonResponse
     {
         $packRequest = Validator::make(
             $request->all(),
