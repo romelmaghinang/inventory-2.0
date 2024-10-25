@@ -15,6 +15,8 @@ class PermissionRoleUserSeeder extends Seeder
      */
     public function run(): void
     {
+        $guardName = 'api'; 
+
         $permissions = [
             'create-users', 'create-permission', 'create-role', 'assign-role', 'assign-permission',
             'pick-finish', 'pick-start', 'pack', 'ship', 'inventory',
@@ -35,10 +37,17 @@ class PermissionRoleUserSeeder extends Seeder
         ];
 
         foreach ($permissions as $permission) {
-            Permission::firstOrCreate(['name' => $permission]);
+            Permission::firstOrCreate([
+                'name' => $permission,
+                'guard_name' => $guardName,
+            ]);
         }
 
-        $adminRole = Role::firstOrCreate(['name' => 'Admin']);
+        $adminRole = Role::firstOrCreate([
+            'name' => 'Admin',
+            'guard_name' => $guardName, 
+        ]);
+
         $adminRole->syncPermissions($permissions);
 
         $adminUser = User::firstOrCreate(
