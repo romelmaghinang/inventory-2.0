@@ -27,6 +27,7 @@ use App\Http\Controllers\ReceiptStatus\VoidController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+Route::post('/register', [UserController::class, 'createUser']);
 Route::post('/login', [UserController::class, 'login']);
 Route::get('/permissions', [UserController::class, 'getUserPermissions']);
 
