@@ -25,9 +25,7 @@ class UserController extends Controller
         $newUser = (new \App\Models\User)->createUser($request);
         $newUser->assignRole('user');
 
-        $token = $newUser->createToken('API Token')->plainTextToken;
-
-        return response()->json(['message' => 'User created successfully', 'User' => $newUser, 'token' => $token], 201);
+        return response()->json(['message' => 'User created successfully', 'User' => $newUser], 201);
     }
 /**
  * @OA\Post(
