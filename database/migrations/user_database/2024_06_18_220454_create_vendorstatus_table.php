@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -12,9 +13,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('vendorstatus', function (Blueprint $table) {
-            $table->integer('id')->primary();
-            $table->string('name', 30)->unique('u_name');
+            $table->id();
+            $table->string('name', 30)->unique();
         });
+
+        DB::table('vendorstatus')->insert([
+            ['name' => 'Normal'],
+            ['name' => 'Preferred'],
+            ['name' => 'Hold PO'],
+            ['name' => 'Hold Receipt'],
+            ['name' => 'Hold All'],
+        ]);
     }
 
     /**
@@ -22,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('vendorstatus');
+        Schema::dropIfExists('vendor_statuses');
     }
 };

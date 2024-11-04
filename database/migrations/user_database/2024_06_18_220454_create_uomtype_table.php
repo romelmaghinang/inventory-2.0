@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -12,9 +13,20 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('uomtype', function (Blueprint $table) {
-            $table->integer('id', true);
-            $table->string('name', 30)->unique('u_name');
+            $table->id();
+            $table->string('name', 15)->unique();
         });
+
+        DB::table('uomtype')->insert(
+            [
+                ['name' => 'Count'],
+                ['name' => 'Weight'],
+                ['name' => 'Length'],
+                ['name' => 'Area'],
+                ['name' => 'Volume'],
+                ['name' => 'Time'],
+            ]
+        );
     }
 
     /**
@@ -22,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('uomtype');
+        Schema::dropIfExists('unit_of_measure_types');
     }
 };

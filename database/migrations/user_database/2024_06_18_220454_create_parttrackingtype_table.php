@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -12,9 +13,20 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('parttrackingtype', function (Blueprint $table) {
-            $table->integer('id')->primary();
-            $table->string('name', 20)->unique('u_name');
+            $table->id();
+            $table->string('name'); 
         });
+
+        DB::table('parttrackingtype')->insert([
+            ['id' => 80, 'name' => 'Checkbox'],
+            ['id' => 70, 'name' => 'Count'],
+            ['id' => 20, 'name' => 'Date'],
+            ['id' => 30, 'name' => 'Expiration Date'],
+            ['id' => 50, 'name' => 'Money'],
+            ['id' => 60, 'name' => 'Quantity'],
+            ['id' => 40, 'name' => 'Serial Number'],
+            ['id' => 10, 'name' => 'Text'],
+        ]);
     }
 
     /**
@@ -22,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('parttrackingtype');
+        Schema::dropIfExists('part_tracking_types');
     }
 };

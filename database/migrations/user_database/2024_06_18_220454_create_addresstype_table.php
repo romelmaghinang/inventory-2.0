@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -12,9 +13,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('addresstype', function (Blueprint $table) {
-            $table->integer('id')->primary();
-            $table->string('name', 30)->nullable()->unique('u_name');
+            $table->id();
+            $table->string('name', 15)->unique('name');
         });
+
+        DB::table('addresstype')->insert([
+            ['id' => 20,'name' => 'Bill To'],
+            ['id' => 40,'name' => 'Home'],
+            ['id' => 50,'name' => 'Main Office'],
+            ['id' => 30,'name' => 'Remit To'],
+            ['id' => 10,'name' => 'Ship To'],
+        ]);
     }
 
     /**
@@ -22,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('addresstype');
+        Schema::dropIfExists('address_types');
     }
 };

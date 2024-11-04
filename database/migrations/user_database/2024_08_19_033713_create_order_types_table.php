@@ -12,16 +12,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pickstatus', function (Blueprint $table) {
+        Schema::create('ordertype', function (Blueprint $table) {
             $table->id();
             $table->string('name');
         });
 
-        DB::table('pickstatus')->insert([
-            ['id' => 30, 'name' => 'Committed'],
-            ['id' => 10, 'name' => 'Entered'],
-            ['id' => 40, 'name' => 'Finished'],
-            ['id' => 20, 'name' => 'Started'],
+        DB::table('ordertype')->insert([
+            ['id' => 1, 'name' => 'None'],
+            ['id' => 10, 'name' => 'PO'],
+            ['id' => 20, 'name' => 'SO'],
+            ['id' => 30, 'name' => 'TO'],
+            ['id' => 40, 'name' => 'WO'],
         ]);
     }
 
@@ -30,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('pick_statuses');
+        Schema::dropIfExists('order_types');
     }
 };

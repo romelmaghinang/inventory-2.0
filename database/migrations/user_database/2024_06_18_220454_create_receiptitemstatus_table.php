@@ -3,25 +3,38 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
-return new class extends Migration
+class CreateReceiptitemsstatusTable extends Migration
 {
     /**
      * Run the migrations.
+     *
+     * @return void
      */
-    public function up(): void
+    public function up()
     {
-        Schema::create('receiptitemstatus', function (Blueprint $table) {
-            $table->integer('id')->primary();
-            $table->string('name', 30)->unique('u_name');
+        Schema::create('receiptitemsstatus', function (Blueprint $table) {
+            $table->id();
+            $table->string('name', 50);
+            $table->timestamps();
         });
+
+        DB::table('receiptitemsstatus')->insert([
+            ['id' => 10, 'name' => 'Entered'],
+            ['id' => 40, 'name' => 'Fullfiled'],
+            ['id' => 30, 'name' => 'Received'],
+            ['id' => 20, 'name' => 'Reconciled'],
+        ]);
     }
 
     /**
      * Reverse the migrations.
+     *
+     * @return void
      */
-    public function down(): void
+    public function down()
     {
-        Schema::dropIfExists('receiptitemstatus');
+        Schema::dropIfExists('receiptitemsstatus');
     }
-};
+}

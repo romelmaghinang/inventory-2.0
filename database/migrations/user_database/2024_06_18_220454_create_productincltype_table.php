@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -12,9 +13,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('productincltype', function (Blueprint $table) {
-            $table->integer('id', true);
-            $table->string('name', 30)->unique('u_name');
+            $table->id();
+            $table->string('name');
         });
+
+        DB::table('productincltype')->insert(
+            [
+                ['id' => 1, 'name' => 'All'],
+                ['id' => 2, 'name' => 'Part Category'],
+                ['id'=> 3, 'name'=> 'Product'],
+                ['id'=> 4, 'name'=> 'Product Tree'],
+            ]
+        );
     }
 
     /**
@@ -22,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('productincltype');
+        Schema::dropIfExists('product_incl_types');
     }
 };
