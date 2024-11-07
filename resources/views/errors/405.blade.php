@@ -1,9 +1,9 @@
 @if(request()->expectsJson())
-    @json(['error' => 'Unauthorized', 'message' => 'Invalid Request'])
+    @json(['error' => 'Method Not Allowed', 'message' => 'Unsupported Method'])
 @else
     @extends('errors::minimal')
 
-    @section('title', __('Unauthorized'))
-    @section('code', '401')
-    @section('message', __('Invalid Request'))
+    @section('title', __('Method Not Allowed'))
+    @section('code', '405')
+    @section('message', __('Unsupported Method'))
 @endif
