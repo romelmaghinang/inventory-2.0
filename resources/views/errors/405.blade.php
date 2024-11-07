@@ -3,7 +3,7 @@
 @else
     @extends('errors::minimal')
 
-    @section('title', __('Method Not Allowed'))
-    @section('code', '405')
-    @section('message', __('Unsupported Method'))
+    @section('title', __('Unauthorized'))
+    @section('code', '401')
+    @section('message', __('Invalid Request'))
 @endif

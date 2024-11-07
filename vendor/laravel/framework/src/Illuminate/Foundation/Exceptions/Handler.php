@@ -561,7 +561,14 @@ class Handler implements ExceptionHandlerContract
     public function render($request, Throwable $e)
     {
         $e = $this->mapException($e);
-
+    
+        if ($e instanceof \Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException) {
+            return response()->json([
+                'error' => 'Method not allowed',
+                'message' => 'The HTTP method you used is not allowed for this route.'
+            ], 405);
+        }
+    
         if (method_exists($e, 'render') && $response = $e->render($request)) {
             return $this->finalizeRenderedResponse(
                 $request,
@@ -569,17 +576,17 @@ class Handler implements ExceptionHandlerContract
                 $e
             );
         }
-
+    
         if ($e instanceof Responsable) {
             return $this->finalizeRenderedResponse($request, $e->toResponse($request), $e);
         }
-
+    
         $e = $this->prepareException($e);
-
+    
         if ($response = $this->renderViaCallbacks($request, $e)) {
             return $this->finalizeRenderedResponse($request, $response, $e);
         }
-
+    
         return $this->finalizeRenderedResponse($request, match (true) {
             $e instanceof HttpResponseException => $e->getResponse(),
             $e instanceof AuthenticationException => $this->unauthenticated($request, $e),
@@ -587,6 +594,7 @@ class Handler implements ExceptionHandlerContract
             default => $this->renderExceptionResponse($request, $e),
         }, $e);
     }
+    
 
     /**
      * Prepare the final, rendered response to be returned to the browser.
