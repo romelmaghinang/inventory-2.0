@@ -21,12 +21,35 @@ class UserController extends Controller
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json(['message' => $e->errors()], 422);
         }
-
+    
         $newUser = (new \App\Models\User)->createUser($request);
-        $newUser->assignRole('user');
-
+    
+        $newUser->assignRole('User'); 
+    
+        $permissions = [
+            'create-qbclass', 'update-qbclass', 'view-qbclass', 'delete-qbclass',
+            'create-taxrate', 'update-taxrate', 'view-taxrate', 'delete-taxrate',
+            'create-payment-terms', 'update-payment-terms', 'view-payment-terms', 'delete-payment-terms',
+            'create-currency', 'update-currency', 'view-currency', 'delete-currency',
+            'create-vendor', 'update-vendor', 'view-vendor', 'delete-vendor',
+            'create-part', 'update-part', 'view-part', 'delete-part',
+            'create-purchase-order', 'update-purchase-order', 'view-purchase-order', 'delete-purchase-order',
+            'create-product', 'update-product', 'view-product', 'delete-product',
+            'create-sales-order', 'update-sales-order', 'view-sales-order', 'delete-sales-order',
+            'create-pick', 'update-pick', 'view-pick', 'delete-pick',
+            'create-location', 'update-location', 'view-location', 'delete-location',
+            'create-state', 'view-country', 'view-state', 'update-state', 'delete-state',
+            'create-customer', 'view-customer', 'update-customer', 'delete-customer',
+            'pick-start', 'pick-finish', 'receipt-reconciled', 'receipt-fulfilled', 'pack', 'ship', 'inventory', 'receiving', 'receipt-void'
+        ];
+    
+        foreach ($permissions as $permission) {
+            $newUser->givePermissionTo($permission);
+        }
+    
         return response()->json(['message' => 'User created successfully', 'User' => $newUser], 201);
     }
+    
 /**
  * @OA\Post(
  *     path="/api/login",

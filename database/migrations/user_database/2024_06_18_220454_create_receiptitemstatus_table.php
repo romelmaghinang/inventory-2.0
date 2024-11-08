@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
-class CreateReceiptitemsstatusTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -15,16 +15,16 @@ class CreateReceiptitemsstatusTable extends Migration
     public function up()
     {
         Schema::create('receiptitemsstatus', function (Blueprint $table) {
-            $table->id();
-            $table->string('name', 50);
+            $table->id(); 
+            $table->string('name', 50); 
             $table->timestamps();
         });
 
         DB::table('receiptitemsstatus')->insert([
-            ['id' => 10, 'name' => 'Entered'],
-            ['id' => 40, 'name' => 'Fullfiled'],
-            ['id' => 30, 'name' => 'Received'],
-            ['id' => 20, 'name' => 'Reconciled'],
+            ['name' => 'Entered'],
+            ['name' => 'Fulfilled'],
+            ['name' => 'Received'],
+            ['name' => 'Reconciled'],
         ]);
     }
 
@@ -37,4 +37,4 @@ class CreateReceiptitemsstatusTable extends Migration
     {
         Schema::dropIfExists('receiptitemsstatus');
     }
-}
+};

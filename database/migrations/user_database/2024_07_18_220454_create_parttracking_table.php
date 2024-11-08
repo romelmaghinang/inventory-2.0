@@ -19,20 +19,19 @@ return new class extends Migration
             $table->string('description', 256)->nullable();
             $table->string('name', 41)->unique();
             $table->integer('sortOrder')->nullable();
-            
-            $table->foreignId('typeId')->constrained('parttrackingtype');
+
+            $table->unsignedBigInteger('typeId');
+            $table->foreign('typeId')->references('id')->on('parttrackingtype')->onDelete('cascade');
 
             $table->index('typeId', 'Performance');
         });
 
-        DB::table('parttracking')->insert(
-            [
-                ['abbr' => 'Lot#', 'name' => 'Lot Number', 'sortOrder' => 1, 'typeId' => 10],
-                ['abbr' => 'Rev#', 'name' => 'Revision Level', 'sortOrder' => 2, 'typeId' => 10],
-                ['abbr' => 'ExpDate', 'name' => 'Expiration Date', 'sortOrder' => 3, 'typeId' => 30],
-                ['abbr' => 'SN(s)', 'name' => 'Serial Number', 'sortOrder' => 4, 'typeId' => 40],
-            ]
-        );
+        DB::table('parttracking')->insert([
+            ['abbr' => 'Lot#', 'name' => 'Lot Number', 'sortOrder' => 1, 'typeId' => 10],
+            ['abbr' => 'Rev#', 'name' => 'Revision Level', 'sortOrder' => 2, 'typeId' => 10], 
+            ['abbr' => 'ExpDate', 'name' => 'Expiration Date', 'sortOrder' => 3, 'typeId' => 30], 
+            ['abbr' => 'SN(s)', 'name' => 'Serial Number', 'sortOrder' => 4, 'typeId' => 40],
+        ]);
     }
 
     /**

@@ -21,8 +21,9 @@ return new class extends Migration
             $table->boolean('integral')->default(true);
             $table->string('name', 30)->unique();
             $table->boolean('readOnly');
-            $table->foreignId('uomType')->constrained('uomtype');
-        });
+            $table->unsignedBigInteger('uomType'); 
+            $table->foreign('uomType')->references('id')->on('uomtype')->onDelete('cascade');
+          });
 
         DB::table('uom')->insert(
             [
