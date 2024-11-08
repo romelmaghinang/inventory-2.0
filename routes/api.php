@@ -119,7 +119,7 @@ Route::middleware(['auth:sanctum', ])->group(function () {
     });
 
     Route::prefix('country')->group(function () {
-        Route::post('/', [CountryAndStateController::class, 'showCountry'])->middleware('abilities:view-country');
+        Route::get('/', [CountryAndStateController::class, 'showCountry'])->middleware('abilities:view-country');
     });
 
     Route::prefix('customer')->group(function () {
