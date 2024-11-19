@@ -39,8 +39,6 @@ class TransferOrderController extends Controller
             'TO.ToAddressZip' => 'required|string',
             'TO.ToAddressCountry' => 'required|string',
             'TO.OwnerIsFrom' => 'required|string',
-            'TO.ConfirmedDate' => 'nullable|date',
-            'TO.FulfillmentDate' => 'nullable|date',
             'TO.CarrierName' => 'required|string',
             'TO.CarrierService' => 'nullable|string',
             'TO.Note' => 'nullable|string',
@@ -150,7 +148,6 @@ class TransferOrderController extends Controller
             'ownerIsFrom' => $data['TO']['OwnerIsFrom'] === 'true',
             'dateCreated' => Carbon::now(),
             'dateIssued' => Carbon::now(),
-            'dateConfirmed' => $data['TO']['ConfirmedDate'] ? Carbon::parse($data['TO']['ConfirmedDate']) : null,
             'note' => $data['TO']['Note'] ?? null,
             'mainLocationTagId' => '0',
             'userId' => '0'
