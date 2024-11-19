@@ -54,9 +54,6 @@ class TransferOrderController extends Controller
             'Items.*.Note' => 'nullable|string',
         ]);
 
-        if (empty($data['TO']['TONum'])) {
-            $data['TO']['TONum'] = 'TO-' . strtoupper(uniqid());
-        }
 
         try {
             $status = XoItemStatus::where('name', $data['TO']['Status'])->firstOrFail();
@@ -103,13 +100,6 @@ class TransferOrderController extends Controller
             ], 404);
         }
 
-        $fromAddress = Address::firstOrCreate([
-            'addressName' => $data['TO']['FromAddressName'],
-            'addressStreet' => $data['TO']['FromAddressStreet'],
-            'addressCity' => $data['TO']['FromAddressCity'],
-            'addressZip' => $data['TO']['FromAddressZip'],
-            'country_id' => $country->id,
-        ]);
 
         try {
             $toLocationGroup = LocationGroup::where('name', $data['TO']['ToLocationGroup'])->firstOrFail();
@@ -119,7 +109,31 @@ class TransferOrderController extends Controller
                 'message' => "The location group '{$data['TO']['ToLocationGroup']}' was not found.",
             ], 404);
         }
-
+        
+        $fromAddress = Address::firstOrCreate([
+            'name' => 'New Address',
+            'addressName' => $data['TO']['FromAddressName'],
+            'address' => $data['TO']['FromAddressStreet'],
+            'city' => $data['TO']['FromAddressCity'],
+            'zip' => $data['TO']['FromAddressZip'],
+            'countryId' => $country->id,
+            'locationGroupId' =>$toLocationGroup->id
+        ]);
+        if (empty($data['TO']['TONum'])) {
+            $lastTonum = Xo::orderBy('num', 'desc')->first(); 
+        
+            if ($lastTonum) {
+                $nextNum = (int) $lastTonum->num + 1;
+            } else {
+                $nextNum = 1; 
+            }
+        
+            while (Xo::where('num', $nextNum)->exists()) {
+                $nextNum++; 
+            }
+        
+            $data['TO']['TONum'] = $nextNum; 
+        }
         $xo = Xo::create([
             'num' => $data['TO']['TONum'],
             'statusId' => $status->id,
@@ -127,11 +141,21 @@ class TransferOrderController extends Controller
             'carrierId' => $carrier->id,
             'fromLGId' => $fromLocationGroup->id,
             'shipToLGId' => $toLocationGroup->id,
-            'ownerIsFrom' => $data['TO']['OwnerIsFrom'],
+            'fromAddress' => $data['TO']['FromAddressStreet'],
+            'fromCity' => $data['TO']['FromAddressCity'],
+            'fromZip' => $data['TO']['FromAddressZip'],
+            'fromCountryId' => $country->id,
+            'shipToAddress' => $data['TO']['ToAddressStreet'],
+            'shipToCity' => $data['TO']['ToAddressCity'],
+            'shipToZip' => $data['TO']['ToAddressZip'],
+            'shipToCountryId' => Country::where('abbreviation', $data['TO']['ToAddressCountry'])->value('id'),
+            'ownerIsFrom' => $data['TO']['OwnerIsFrom'] === 'true',
             'dateCreated' => Carbon::now(),
             'dateIssued' => Carbon::parse($data['TO']['IssuedDate']),
-            'dateConfirmed' => Carbon::parse($data['TO']['ConfirmedDate'] ?? now()),
+            'dateConfirmed' => $data['TO']['ConfirmedDate'] ? Carbon::parse($data['TO']['ConfirmedDate']) : null,
             'note' => $data['TO']['Note'] ?? null,
+            'mainLocationTagId' => '0',
+            'userId' => '0'
         ]);
 
         foreach ($data['Items'] as $item) {
@@ -165,6 +189,7 @@ class TransferOrderController extends Controller
                 'qtyFulfilled' => 0,
                 'description' => $item['Note'],
                 'note' => $item['Note'] ?? null,
+                'typeId' => $toType->id
             ]);
 
             switch ($data['TO']['Status']) {
@@ -187,7 +212,7 @@ class TransferOrderController extends Controller
         return response()->json([
             'message' => 'Transfer Order successfully created.',
             'xo' => $xo,
-            'xoItems' => $xo->xoItems,
+            'xoItems' => $xoItem,
         ], 201);
     }
 }
