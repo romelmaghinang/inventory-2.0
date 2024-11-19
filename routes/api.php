@@ -26,10 +26,12 @@ use App\Http\Controllers\ReceiptStatus\FulfilledController;
 use App\Http\Controllers\ReceiptStatus\VoidController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TransferOrderController;
 
 Route::post('/register', [UserController::class, 'createUser']);
 Route::post('/login', [UserController::class, 'login']);
 Route::get('/permissions', [UserController::class, 'getUserPermissions']);
+Route::post('/transfer-orders', [TransferOrderController::class, 'store']);
 
 Route::middleware(['auth:sanctum', ])->group(function () {
 

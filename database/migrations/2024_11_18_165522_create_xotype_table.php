@@ -12,7 +12,6 @@ class CreateXotypeTable extends Migration
         Schema::create('xotype', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->timestamps();
         });
 
         DB::table('xotype')->insert([

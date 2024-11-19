@@ -12,7 +12,6 @@ class CreateXoitemstatusTable extends Migration
         Schema::create('xoitemstatus', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->timestamps();
         });
 
         DB::table('xoitemstatus')->insert([
