@@ -17,7 +17,7 @@ class CreateXoitemstatusTable extends Migration
         DB::table('xoitemstatus')->insert([
             ['id' => 70, 'name' => 'Closed Short'],
             ['id' => 10, 'name' => 'Entered'],
-            ['id' => 60, 'name' => 'Fullifield'],
+            ['id' => 60, 'name' => 'Fulfilled'],
             ['id' => 30, 'name' => 'Patrial'],
             ['id' => 40, 'name' => 'Picked'],
             ['id' => 20, 'name' => 'Picking'],

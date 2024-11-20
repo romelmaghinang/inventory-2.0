@@ -32,7 +32,8 @@ Route::post('/register', [UserController::class, 'createUser']);
 Route::post('/login', [UserController::class, 'login']);
 Route::get('/permissions', [UserController::class, 'getUserPermissions']);
 Route::post('/transfer-orders', [TransferOrderController::class, 'store']);
-
+Route::post('/transfer-orders/fulfilled', [TransferOrderController::class, 'updateStatusToFulfilled']);
+Route::post('/transfer-orders/issued', [TransferOrderController::class, 'updateStatusToIssued']);
 Route::middleware(['auth:sanctum', ])->group(function () {
 
     Route::prefix('qbclass')->group(function () {
