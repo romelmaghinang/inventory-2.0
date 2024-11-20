@@ -35,7 +35,7 @@ class PermissionRoleUserSeeder extends Seeder
             'create-customer', 'view-customer', 'update-customer', 'delete-customer',
             'pick-start', 'pick-finish', 'receipt-reconciled', 'receipt-fulfilled', 'pack', 'ship', 'inventory', 
             'receiving', 'receipt-void', 'create-transfer-order', 'fulfilled-transfer-order','issued-transfer-order',
-            'void-transfer-order', 'delete-transfer-order'
+            'void-transfer-order', 'delete-transfer-order', 'update-transfer-order', 'show-transfer-order', 'item-show-transfer-order'
         ];
 
         foreach ($permissions as $permission) {
@@ -85,7 +85,7 @@ class PermissionRoleUserSeeder extends Seeder
             'create-customer', 'view-customer', 'update-customer', 'delete-customer',
             'pick-start', 'pick-finish', 'receipt-reconciled', 'receipt-fulfilled', 'pack', 'ship', 'inventory', 
             'receiving', 'receipt-void', 'create-transfer-order', 'fulfilled-transfer-order','issued-transfer-order',
-            'void-transfer-order', 'delete-transfer-order'
+            'void-transfer-order', 'delete-transfer-order', 'update-transfer-order', 'show-transfer-order', 'item-show-transfer-order'
 
         ];
 

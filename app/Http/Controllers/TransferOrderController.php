@@ -211,6 +211,131 @@ class TransferOrderController extends Controller
             'xoItems' => $xoItem,
         ], 201);
     }
+    public function update(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'xoId' => 'required|integer',
+            'TO.TONum' => 'nullable|string',
+            'TO.TOType' => 'nullable|string',
+            'TO.Status' => 'nullable|string',
+            'TO.FromLocationGroup' => 'nullable|string',
+            'TO.FromAddressName' => 'nullable|string',
+            'TO.FromAddressStreet' => 'nullable|string',
+            'TO.FromAddressCity' => 'nullable|string',
+            'TO.FromAddressZip' => 'nullable|string',
+            'TO.FromAddressCountry' => 'nullable|string',
+            'TO.ToLocationGroup' => 'nullable|string',
+            'TO.ToAddressName' => 'nullable|string',
+            'TO.ToAddressStreet' => 'nullable|string',
+            'TO.ToAddressCity' => 'nullable|string',
+            'TO.ToAddressZip' => 'nullable|string',
+            'TO.ToAddressCountry' => 'nullable|string',
+            'TO.OwnerIsFrom' => 'nullable|string',
+            'TO.CarrierName' => 'nullable|string',
+            'TO.CarrierService' => 'nullable|string',
+            'TO.Note' => 'nullable|string',
+            'TO.CF' => 'nullable|string',
+        ]);
+
+        try {
+            $xo = Xo::findOrFail($data['xoId']);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'Transfer Order not found',
+                'message' => "The Transfer Order with ID '{$data['xoId']}' was not found.",
+            ], 404);
+        }
+
+        if (isset($data['TO'])) {
+            $updatedFields = [];
+
+            if (!empty($data['TO']['Status'])) {
+                $status = XoStatus::where('name', $data['TO']['Status'])->first();
+                if ($status) {
+                    $updatedFields['statusId'] = $status->id;
+                }
+            }
+
+            if (!empty($data['TO']['TOType'])) {
+                $toType = XoType::where('name', $data['TO']['TOType'])->first();
+                if ($toType) {
+                    $updatedFields['typeId'] = $toType->id;
+                }
+            }
+
+            if (!empty($data['TO']['CarrierName'])) {
+                $carrier = Carrier::where('name', $data['TO']['CarrierName'])->first();
+                if ($carrier) {
+                    $updatedFields['carrierId'] = $carrier->id;
+                }
+            }
+
+            if (!empty($data['TO']['FromLocationGroup'])) {
+                $fromLocationGroup = LocationGroup::where('name', $data['TO']['FromLocationGroup'])->first();
+                if ($fromLocationGroup) {
+                    $updatedFields['fromLGId'] = $fromLocationGroup->id;
+                }
+            }
+
+            if (!empty($data['TO']['ToLocationGroup'])) {
+                $toLocationGroup = LocationGroup::where('name', $data['TO']['ToLocationGroup'])->first();
+                if ($toLocationGroup) {
+                    $updatedFields['shipToLGId'] = $toLocationGroup->id;
+                }
+            }
+
+            $addressFields = [
+                'fromAddress' => $data['TO']['FromAddressStreet'] ?? $xo->fromAddress,
+                'fromCity' => $data['TO']['FromAddressCity'] ?? $xo->fromCity,
+                'fromZip' => $data['TO']['FromAddressZip'] ?? $xo->fromZip,
+                'shipToAddress' => $data['TO']['ToAddressStreet'] ?? $xo->shipToAddress,
+                'shipToCity' => $data['TO']['ToAddressCity'] ?? $xo->shipToCity,
+                'shipToZip' => $data['TO']['ToAddressZip'] ?? $xo->shipToZip,
+            ];
+
+            $updatedFields = array_merge($updatedFields, $addressFields);
+
+            $xo->update($updatedFields);
+        }
+
+        return response()->json([
+            'message' => 'Transfer Order updated successfully.',
+            'xo' => $xo,
+        ], 200);
+    }
+
+        public function showXo(Request $request): JsonResponse
+    {
+        $xoId = $request->input('xoId');
+
+        if ($xoId) {
+            $data = Xo::where('id', $xoId)->get();
+        } else {
+            $data = Xo::all();
+        }
+
+        return response()->json($data);
+    }
+
+    public function showXoItem(Request $request): JsonResponse
+    {
+        $xoId = $request->input('xoId');
+        $partNum = $request->input('partNum');
+
+        if ($xoId && $partNum) {
+            $data = XoItem::where('xoId', $xoId)
+                ->where('partNum', $partNum)
+                ->get();
+        } elseif ($xoId) {
+            $data = XoItem::where('xoId', $xoId)->get();
+        } else {
+            $data = XoItem::all();
+        }
+
+        return response()->json($data);
+    }
+
+
     public function markAsFulfilled(Request $request): JsonResponse
     {
         $data = $request->validate([
@@ -372,15 +497,19 @@ class TransferOrderController extends Controller
     {
         $data = $request->validate([
             'partNum' => 'required|string',  
+            'xoId' => 'required|integer', 
         ]);
 
         try {
-            $xoItem = XoItem::where('partNum', $data['partNum'])->firstOrFail();
+            $xoItem = XoItem::where('partNum', $data['partNum'])
+                ->where('xoId', $data['xoId']) 
+                ->firstOrFail();
+
             $xoItem->delete(); 
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'error' => 'XoItem not found',
-                'message' => "The XoItem with part number '{$data['partNum']}' was not found.",
+                'message' => "The XoItem with part number '{$data['partNum']}' and xoId '{$data['xoId']}' was not found.",
             ], 404);
         }
 
