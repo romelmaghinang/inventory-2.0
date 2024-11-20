@@ -12,6 +12,7 @@ use App\Models\Address;
 use App\Models\Country;
 use App\Models\LocationGroup;
 use App\Models\XoItemStatus;
+use App\Models\XoStatus;
 use App\Models\Carrier;
 use App\Models\XoType;
 use Carbon\Carbon;
@@ -296,13 +297,14 @@ class TransferOrderController extends Controller
         $data = $request->validate([
             'xoId' => 'required|integer',
         ]);
-    
+
         try {
             $xo = Xo::findOrFail($data['xoId']);
+            
             $fulfilledStatus = XoItemStatus::where('name', 'Fulfilled')->firstOrFail();
-    
+
             $xo->update(['statusId' => $fulfilledStatus->id]);
-    
+
             $xoItems = XoItem::where('xoId', $xo->id)->get();
             foreach ($xoItems as $xoItem) {
                 $xoItem->update([
@@ -311,9 +313,9 @@ class TransferOrderController extends Controller
                     'dateLastFulfillment' => Carbon::now(),
                 ]);
             }
-    
+
             return response()->json([
-                'message' => 'Xo items updated to Fulfilled status successfully.',
+                'message' => 'Xo and Xo items updated to Fulfilled status successfully.',
                 'xo' => $xo,
                 'xoItems' => $xoItems,
             ], 200);
@@ -321,35 +323,30 @@ class TransferOrderController extends Controller
             return response()->json(['error' => 'Record not found', 'message' => $e->getMessage()], 404);
         }
     }
-    
+
     public function updateStatusToIssued(Request $request): JsonResponse
     {
         $data = $request->validate([
             'xoId' => 'required|integer',
         ]);
-    
+
         try {
             $xo = Xo::findOrFail($data['xoId']);
-            $issuedStatus = XoItemStatus::where('name', 'Issued')->firstOrFail();
-    
+            
+            $issuedStatus = XoStatus::where('name', 'Issued')->firstOrFail();
+
             $xo->update(['statusId' => $issuedStatus->id]);
-    
-            $xoItems = XoItem::where('xoId', $xo->id)->get();
-            foreach ($xoItems as $xoItem) {
-                $xoItem->update([
-                    'statusId' => $issuedStatus->id,
-                ]);
-            }
-    
+
+
             return response()->json([
-                'message' => 'Xo items updated to Issued status successfully.',
+                'message' => 'Xo status updated to Issued successfully.',
                 'xo' => $xo,
-                'xoItems' => $xoItems,
             ], 200);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'Record not found', 'message' => $e->getMessage()], 404);
         }
     }
-}    
+}
+
 
 
