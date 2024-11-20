@@ -35,7 +35,10 @@ Route::get('/permissions', [UserController::class, 'getUserPermissions']);
 Route::middleware(['auth:sanctum', ])->group(function () {
     Route::post('/transfer-orders', [TransferOrderController::class, 'store'])->middleware('abilities:create-transfer-order');
     Route::post('/transfer-orders/fulfilled', [TransferOrderController::class, 'updateStatusToFulfilled'])->middleware('abilities:fulfilled-transfer-order');
-    Route::post('/transfer-orders/issued', [TransferOrderController::class, 'updateStatusToIssued'])->middleware('abilities:create-issued-transfer-order');
+    Route::post('/transfer-orders/issued', [TransferOrderController::class, 'updateStatusToIssued'])->middleware('abilities:issued-transfer-order');
+    Route::delete('/transfer-orders/void', [TransferOrderController::class, 'deleteXo'])->middleware('abilities:void-transfer-order');
+    Route::delete('/transfer-orders/delete', [TransferOrderController::class, 'deleteXoItem'])->middleware('abilities:delete-transfer-order');
+
     Route::prefix('qbclass')->group(function () {
         
         Route::post('/', [QuickBookClassController::class, 'store'])->middleware('abilities:create-qbclass');

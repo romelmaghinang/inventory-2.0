@@ -33,7 +33,9 @@ class PermissionRoleUserSeeder extends Seeder
             'create-location', 'update-location', 'view-location', 'delete-location',
             'create-state', 'view-country', 'view-state', 'update-state', 'delete-state',
             'create-customer', 'view-customer', 'update-customer', 'delete-customer',
-            'pick-start', 'pick-finish', 'receipt-reconciled', 'receipt-fulfilled', 'pack', 'ship', 'inventory', 'receiving', 'receipt-void', 'create-transfer-order', 'fulfilled-transfer-order','issued-transfer-order'
+            'pick-start', 'pick-finish', 'receipt-reconciled', 'receipt-fulfilled', 'pack', 'ship', 'inventory', 
+            'receiving', 'receipt-void', 'create-transfer-order', 'fulfilled-transfer-order','issued-transfer-order',
+            'void-transfer-order', 'delete-transfer-order'
         ];
 
         foreach ($permissions as $permission) {
@@ -81,7 +83,10 @@ class PermissionRoleUserSeeder extends Seeder
             'create-location', 'update-location', 'view-location', 'delete-location',
             'create-state', 'view-country', 'view-state', 'update-state', 'delete-state',
             'create-customer', 'view-customer', 'update-customer', 'delete-customer',
-            'pick-start', 'pick-finish', 'receipt-reconciled', 'receipt-fulfilled', 'pack', 'ship', 'inventory', 'receiving', 'receipt-void', 'create-transfer-order', 'fulfilled-transfer-order','issued-transfer-order'
+            'pick-start', 'pick-finish', 'receipt-reconciled', 'receipt-fulfilled', 'pack', 'ship', 'inventory', 
+            'receiving', 'receipt-void', 'create-transfer-order', 'fulfilled-transfer-order','issued-transfer-order',
+            'void-transfer-order', 'delete-transfer-order'
+
         ];
 
         $userRole = Role::firstOrCreate([

@@ -346,7 +346,50 @@ class TransferOrderController extends Controller
             return response()->json(['error' => 'Record not found', 'message' => $e->getMessage()], 404);
         }
     }
+
+        public function deleteXo(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'xoId' => 'required|integer', 
+        ]);
+
+        try {
+            $xo = Xo::findOrFail($data['xoId']);
+            $xo->delete();  
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'Transfer Order not found',
+                'message' => "The Transfer Order with ID '{$data['xoId']}' was not found.",
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'Transfer Order successfully deleted.',
+        ], 200);
+    }
+
+    public function deleteXoItem(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'partNum' => 'required|string',  
+        ]);
+
+        try {
+            $xoItem = XoItem::where('partNum', $data['partNum'])->firstOrFail();
+            $xoItem->delete(); 
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'XoItem not found',
+                'message' => "The XoItem with part number '{$data['partNum']}' was not found.",
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'XoItem successfully deleted.',
+        ], 200);
+    }
 }
+
 
 
 
