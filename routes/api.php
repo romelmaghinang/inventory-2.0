@@ -35,7 +35,7 @@ Route::get('/permissions', [UserController::class, 'getUserPermissions']);
 Route::middleware(['auth:sanctum', ])->group(function () {
     Route::post('/transfer-orders', [TransferOrderController::class, 'store'])->middleware('abilities:create-transfer-order');
     Route::put('/transfer-orders/update', [TransferOrderController::class, 'update'])->middleware('abilities:update-transfer-order');
-    Route::post('/update-status/{statusName}', [TransferOrderController::class, 'updateStatus'])->middleware('abilities:update-status-transfer-order');
+    Route::post('transfer-orders/update-status/{statusName}', [TransferOrderController::class, 'updateStatus'])->middleware('abilities:update-status-transfer-order');
     Route::delete('/transfer-orders/void', [TransferOrderController::class, 'deleteXo'])->middleware('abilities:void-transfer-order');
     Route::delete('/transfer-orders/delete', [TransferOrderController::class, 'deleteXoItem'])->middleware('abilities:delete-transfer-order');
     Route::get('/transfer-orders/xo', [TransferOrderController::class, 'showXo'])->middleware('abilities:show-transfer-order');
