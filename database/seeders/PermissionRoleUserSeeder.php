@@ -34,7 +34,7 @@ class PermissionRoleUserSeeder extends Seeder
             'create-state', 'view-country', 'view-state', 'update-state', 'delete-state',
             'create-customer', 'view-customer', 'update-customer', 'delete-customer',
             'pick-start', 'pick-finish', 'receipt-reconciled', 'receipt-fulfilled', 'pack', 'ship', 'inventory', 
-            'receiving', 'receipt-void', 'create-transfer-order', 'fulfilled-transfer-order','issued-transfer-order',
+            'receiving', 'receipt-void', 'create-transfer-order', 'update-status-transfer-order',
             'void-transfer-order', 'delete-transfer-order', 'update-transfer-order', 'show-transfer-order', 'item-show-transfer-order'
         ];
 
@@ -84,7 +84,7 @@ class PermissionRoleUserSeeder extends Seeder
             'create-state', 'view-country', 'view-state', 'update-state', 'delete-state',
             'create-customer', 'view-customer', 'update-customer', 'delete-customer',
             'pick-start', 'pick-finish', 'receipt-reconciled', 'receipt-fulfilled', 'pack', 'ship', 'inventory', 
-            'receiving', 'receipt-void', 'create-transfer-order', 'fulfilled-transfer-order','issued-transfer-order',
+            'receiving', 'receipt-void', 'create-transfer-order', 'update-status-transfer-order',
             'void-transfer-order', 'delete-transfer-order', 'update-transfer-order', 'show-transfer-order', 'item-show-transfer-order'
 
         ];
