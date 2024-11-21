@@ -26,7 +26,7 @@ class TransferOrderController extends Controller
             'TO' => 'required|array',
             'TO.TONum' => 'nullable|string',
             'TO.TOType' => 'required|string',
-            'TO.Status' => 'required|string',
+            'TO.Status' => 'nullable|string',
             'TO.FromLocationGroup' => 'required|string',
             'TO.FromAddressName' => 'required|string',
             'TO.FromAddressStreet' => 'required|string',
@@ -51,13 +51,14 @@ class TransferOrderController extends Controller
             'Items.*.Note' => 'nullable|string',
         ]);
 
-
         try {
-            $status = XoItemStatus::where('name', $data['TO']['Status'])->firstOrFail();
+            $statusName = $data['TO']['Status'] ?? 'Entered';
+        
+            $status = XoItemStatus::where('name', $statusName)->firstOrFail();
         } catch (ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'Status not found',
-                'message' => "The status '{$data['TO']['Status']}' was not found.",
+                'error' => 'Status Not Found',
+                'message' => sprintf("The status '%s' does not exist in the database.", $statusName),
             ], 404);
         }
 
@@ -71,13 +72,16 @@ class TransferOrderController extends Controller
         }
 
         try {
-            $toType = XoType::where('name', $data['TO']['TOType'])->firstOrFail();
+            $toTypeName = $data['TO']['TOType'] ?? 'Entered';
+        
+            $toType = XoType::where('name', $toTypeName)->firstOrFail();
         } catch (ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'Transfer Order Type not found',
-                'message' => "The Transfer Order type '{$data['TO']['TOType']}' was not found.",
+                'error' => 'Transfer Order Type Not Found',
+                'message' => sprintf("The Transfer Order type '%s' does not exist in the database.", $toTypeName),
             ], 404);
         }
+        
 
         try {
             $carrier = Carrier::where('name', $data['TO']['CarrierName'])->firstOrFail();
