@@ -26,7 +26,7 @@ class TransferOrderController extends Controller
             'TO' => 'required|array',
             'TO.TONum' => 'nullable|string',
             'TO.TOType' => 'required|string',
-            'TO.Status' => 'Entered',
+            'TO.Status' => 'nullable|string',
             'TO.FromLocationGroup' => 'required|string',
             'TO.FromAddressName' => 'required|string',
             'TO.FromAddressStreet' => 'required|string',
@@ -53,7 +53,7 @@ class TransferOrderController extends Controller
 
 
         try {
-            $status = XoItemStatus::where('name', $data['TO']['Status'])->firstOrFail();
+            $status = XoItemStatus::where('name', 'Entered')->firstOrFail();
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'error' => 'Status not found',
@@ -188,7 +188,7 @@ class TransferOrderController extends Controller
                 'typeId' => $toType->id
             ]);
 
-            switch ($data['TO']['Status']) {
+            switch ('Entered') {
                 case 'Fulfilled':
                     $xoItem->update(['qtyFulfilled' => $xoItem->qtyToFulfill]);
                     break;
@@ -200,9 +200,7 @@ class TransferOrderController extends Controller
                     break;
             }
 
-            if ($data['TO']['Status'] === 'Fulfilled') {
-                $xoItem->update(['dateLastFulfillment' => Carbon::now()]);
-            }
+
         }
 
         return response()->json([
