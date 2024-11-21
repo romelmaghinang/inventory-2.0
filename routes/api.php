@@ -39,8 +39,8 @@ Route::middleware(['auth:sanctum', ])->group(function () {
     Route::post('/transfer-orders/issued', [TransferOrderController::class, 'updateStatusToIssued'])->middleware('abilities:issued-transfer-order');
     Route::delete('/transfer-orders/void', [TransferOrderController::class, 'deleteXo'])->middleware('abilities:void-transfer-order');
     Route::delete('/transfer-orders/delete', [TransferOrderController::class, 'deleteXoItem'])->middleware('abilities:delete-transfer-order');
-    Route::get('/transfer-orders', [TransferOrderController::class, 'showXo'])->middleware('abilities:show-transfer-order');
-    Route::get('transfer-orders/item', [TransferOrderController::class, 'showXoItem'])->middleware('abilities:item-show-transfer-order');
+    Route::get('/transfer-orders/xo', [TransferOrderController::class, 'showXo'])->middleware('abilities:show-transfer-order');
+    Route::get('transfer-orders/xoitem', [TransferOrderController::class, 'showXoItem'])->middleware('abilities:item-show-transfer-order');
 
     Route::prefix('qbclass')->group(function () {
         
