@@ -27,7 +27,7 @@ class StoreCurrencyRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255', 'unique:currency,name'],
-            'code' => ['required', 'string',  'max:255'],
+            'code' => ['required', 'string',  'max:255', 'unique:currency,code'],
             'active' => ['required', 'boolean'],
             'quickBookCurrencyRate' => ['nullable', 'numeric'],
             'globalCurrencyRate' => ['required', 'numeric'],
