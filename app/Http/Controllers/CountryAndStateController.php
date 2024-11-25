@@ -124,7 +124,7 @@ class CountryAndStateController extends Controller
         }
 
         $request->validate([
-            'name' => 'string|exists:countries,name',
+            'name' => 'string|exists:country,name',
         ]);
 
         $country = Country::where('name', $name)->first();
