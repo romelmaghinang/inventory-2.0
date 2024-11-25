@@ -58,7 +58,7 @@ class CountryAndStateController extends Controller
 
         $state = State::create([
             'name' => $validated['stateName'],
-            'abbreviation' => $validated['abbreviation'],
+            'code' => $validated['abbreviation'],
         ]);
 
         return response()->json(
@@ -266,7 +266,7 @@ class CountryAndStateController extends Controller
         $state = State::find($validated['stateId']);
         $state->update([
             'name' => $validated['stateName'],
-            'abbreviation' => $validated['abbreviation'],
+            'code' => $validated['abbreviation'],
         ]);
 
         return response()->json(['message' => 'State Updated Successfully!'], Response::HTTP_OK);
