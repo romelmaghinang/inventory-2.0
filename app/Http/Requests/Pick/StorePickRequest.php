@@ -29,43 +29,48 @@ class StorePickRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'pickNum' => ['required', 'numeric', 'exists:so,num'],
+            'pickNum' => ['required', 'numeric', 'exists:so,num', 'unique:pick,pickNum'], // Added unique rule for duplicate check
             'locationName' => ['required', 'string', 'max:255', 'exists:location,name'],
             'partNum' => ['required', 'string', 'max:255', 'exists:part,num'],
             'partTrackingType' => ['required', 'string', 'exists:parttracking,name'],
-            'trackingInfo' => ['required_if:partTrackingType,Serial Number', 'array', 'bail', function ($attribute, $value, $fail) {
-                if ($this->input('partTrackingType') === 'Serial Number') {
-                    $partNum = $this->input('partNum');
-                    
-                    $part = Part::where('num', $partNum)->first();
-                    if (!$part) {
-                        $fail("Invalid part number.");
-                        return;
-                    }
+            'trackingInfo' => [
+                'required_if:partTrackingType,Serial Number',
+                'array',
+                'bail',
+                function ($attribute, $value, $fail) {
+                    if ($this->input('partTrackingType') === 'Serial Number') {
+                        $partNum = $this->input('partNum');
 
-                    $tags = Tag::where('partId', $part->id)->pluck('id');
-                    if ($tags->isEmpty()) {
-                        $fail("No tags found for the specified part.");
-                        return;
-                    }
+                        $part = Part::where('num', $partNum)->first();
+                        if (!$part) {
+                            $fail("Invalid part number.");
+                            return;
+                        }
 
-                    $serials = Serial::whereIn('tagId', $tags)->pluck('id');
-                    if ($serials->isEmpty()) {
-                        $fail("No serials found for the specified part.");
-                        return;
-                    }
+                        $tags = Tag::where('partId', $part->id)->pluck('id');
+                        if ($tags->isEmpty()) {
+                            $fail("No tags found for the specified part.");
+                            return;
+                        }
 
-                    $serialNums = SerialNum::whereIn('serialId', $serials)->pluck('serialNum')->toArray();
-                    $invalidSerials = array_diff($value, $serialNums);
-                    if (!empty($invalidSerials)) {
-                        $fail("Invalid tracking serial numbers: " . implode(", ", $invalidSerials));
-                    }
+                        $serials = Serial::whereIn('tagId', $tags)->pluck('id');
+                        if ($serials->isEmpty()) {
+                            $fail("No serials found for the specified part.");
+                            return;
+                        }
 
-                    if (count($value) !== count($serialNums)) {
-                        $fail("The number of tracking serials does not match the required count.");
+                        $serialNums = SerialNum::whereIn('serialId', $serials)->pluck('serialNum')->toArray();
+                        $invalidSerials = array_diff($value, $serialNums);
+                        if (!empty($invalidSerials)) {
+                            $fail("Invalid tracking serial numbers: " . implode(", ", $invalidSerials));
+                        }
+
+                        if (count($value) !== count($serialNums)) {
+                            $fail("The number of tracking serials does not match the required count.");
+                        }
                     }
-                }
-            }],
+                },
+            ],
         ];
     }
 
@@ -76,13 +81,38 @@ class StorePickRequest extends FormRequest
      */
     protected function failedValidation(Validator $validator)
     {
-        throw new HttpResponseException(response()->json(
+        $errors = $validator->errors();
+
+        $categorizedErrors = [
+            'missingRequiredFields' => [],
+            'invalidFormat' => [],
+            'invalidTrackingInfo' => [],
+            'duplicateFields' => [],
+        ];
+
+        foreach ($errors->messages() as $field => $messages) {
+            foreach ($messages as $message) {
+                if (str_contains($message, 'required')) {
+                    $categorizedErrors['missingRequiredFields'][] = $field;
+                } elseif (str_contains($message, 'must be') || str_contains($message, 'Invalid')) {
+                    $categorizedErrors['invalidFormat'][] = $field;
+                } elseif (str_contains($message, 'serial')) {
+                    $categorizedErrors['invalidTrackingInfo'][] = $field;
+                } elseif (str_contains($message, 'has already been taken')) {
+                    $categorizedErrors['duplicateFields'][] = $field;
+                }
+            }
+        }
+
+        $response = response()->json(
             [
                 'success' => false,
-                'message' => 'Validation errors',
-                'data' => $validator->errors()
+                'message' => 'Validation errors occurred.',
+                'errors' => array_filter($categorizedErrors), // Remove empty categories
             ],
             Response::HTTP_UNPROCESSABLE_ENTITY
-        ));
+        );
+
+        throw new HttpResponseException($response);
     }
 }

@@ -5,7 +5,7 @@ namespace App\Http\Requests\Inventory;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException; 
-use Symfony\Component\HttpFoundation\Response; 
+use Symfony\Component\HttpFoundation\Response;
 
 class StoreInventoryRequest extends FormRequest
 {
@@ -34,8 +34,8 @@ class StoreInventoryRequest extends FormRequest
             'QbClass' => ['nullable', 'string', 'exists:qbclass,name'],
             'Date' => ['nullable', 'date'],
             'Note' => ['nullable', 'string'],
-            'TrackingType' => ['nullable', 'string', 'exists:parttracking,name'], 
-      ];
+            'TrackingType' => ['nullable', 'string', 'exists:parttracking,name'],
+        ];
     }
 
     /**
@@ -43,11 +43,32 @@ class StoreInventoryRequest extends FormRequest
      */
     protected function failedValidation(Validator $validator)
     {
+        $categorizedErrors = [
+            'missingRequiredFields' => [],
+            'invalidFormat' => [],
+            'duplicateFields' => [],
+            'relatedFieldErrors' => [],
+        ];
+
+        foreach ($validator->errors()->toArray() as $field => $messages) {
+            foreach ($messages as $message) {
+                if (str_contains($message, 'required')) {
+                    $categorizedErrors['missingRequiredFields'][] = $field;
+                } elseif (str_contains($message, 'must be') || str_contains($message, 'Invalid')) {
+                    $categorizedErrors['invalidFormat'][] = $field;
+                } elseif (str_contains($message, 'has already been taken')) {
+                    $categorizedErrors['duplicateFields'][] = $field;
+                } elseif (str_contains($message, 'exists')) {
+                    $categorizedErrors['relatedFieldErrors'][] = $field;
+                }
+            }
+        }
+
         throw new HttpResponseException(response()->json(
             [
                 'success' => false,
-                'message' => 'Validation errors',
-                'data' => $validator->errors()
+                'message' => 'Validation errors occurred.',
+                'errors' => array_filter($categorizedErrors),
             ],
             Response::HTTP_UNPROCESSABLE_ENTITY
         ));

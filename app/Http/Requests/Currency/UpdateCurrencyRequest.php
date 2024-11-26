@@ -7,7 +7,6 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Symfony\Component\HttpFoundation\Response;
 
-
 class UpdateCurrencyRequest extends FormRequest
 {
     /**
@@ -26,21 +25,43 @@ class UpdateCurrencyRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255', 'unique:currency, name'],
-            'code' => ['required', 'string',  'max:255'],
+            'name' => ['required', 'string', 'max:255', 'unique:currency,name'],
+            'code' => ['required', 'string', 'max:255'],
             'active' => ['required', 'boolean'],
             'quickBookCurrencyRate' => ['nullable', 'numeric'],
             'globalCurrencyRate' => ['required', 'numeric'],
         ];
     }
 
+    /**
+     * Handle a failed validation attempt.
+     *
+     * @param  \Illuminate\Contracts\Validation\Validator  $validator
+     * @return void
+     */
     protected function failedValidation(Validator $validator)
     {
+        $categorizedErrors = [];
+
+        foreach ($validator->errors()->toArray() as $field => $messages) {
+            foreach ($messages as $message) {
+                if (str_contains($message, 'required')) {
+                    $categorizedErrors['missingRequiredFields'][] = $field;
+                } elseif (str_contains($message, 'must be') || str_contains($message, 'Invalid')) {
+                    $categorizedErrors['invalidFormat'][] = $field;
+                } elseif (str_contains($message, 'has already been taken')) {
+                    $categorizedErrors['duplicateFields'][] = $field;
+                } elseif (str_contains($message, 'exists')) {
+                    $categorizedErrors['relatedFieldErrors'][] = $field;
+                }
+            }
+        }
+
         throw new HttpResponseException(response()->json(
             [
                 'success' => false,
-                'message' => 'Validation errors',
-                'data' => $validator->errors()
+                'message' => 'Validation errors occurred.',
+                'errors' => array_filter($categorizedErrors),
             ],
             Response::HTTP_UNPROCESSABLE_ENTITY
         ));

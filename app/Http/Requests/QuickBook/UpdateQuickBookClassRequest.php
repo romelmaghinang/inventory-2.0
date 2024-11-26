@@ -3,11 +3,9 @@
 namespace App\Http\Requests\QuickBook;
 
 use Illuminate\Foundation\Http\FormRequest;
-
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Symfony\Component\HttpFoundation\Response;
-
 
 class UpdateQuickBookClassRequest extends FormRequest
 {
@@ -32,15 +30,46 @@ class UpdateQuickBookClassRequest extends FormRequest
         ];
     }
 
+    /**
+     * Handle failed validation.
+     *
+     * @param \Illuminate\Contracts\Validation\Validator $validator
+     * @return void
+     */
     protected function failedValidation(Validator $validator)
     {
-        throw new HttpResponseException(response()->json(
-            [
-                'success' => false,
-                'message' => 'Validation errors',
-                'data' => $validator->errors()
-            ],
-            Response::HTTP_UNPROCESSABLE_ENTITY
-        ));
+        $errors = $validator->errors();
+
+        $categorizedErrors = [
+            'missingRequiredFields' => [],
+            'invalidFormat' => [],
+            'duplicateFields' => [],
+            'relatedFieldErrors' => []
+        ];
+
+        foreach ($errors->messages() as $field => $messages) {
+            foreach ($messages as $message) {
+                if (str_contains($message, 'required')) {
+                    $categorizedErrors['missingRequiredFields'][] = $field;
+                } elseif (str_contains($message, 'must be') || str_contains($message, 'Invalid')) {
+                    $categorizedErrors['invalidFormat'][] = $field;
+                } elseif (str_contains($message, 'has already been taken')) {
+                    $categorizedErrors['duplicateFields'][] = $field;
+                } elseif (str_contains($message, 'exists')) {
+                    $categorizedErrors['relatedFieldErrors'][] = $field;
+                }
+            }
+        }
+
+        throw new HttpResponseException(
+            response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Validation errors occurred.',
+                    'errors' => array_filter($categorizedErrors)
+                ],
+                Response::HTTP_UNPROCESSABLE_ENTITY
+            )
+        );
     }
 }

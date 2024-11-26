@@ -3,6 +3,9 @@
 namespace App\Http\Requests\Product;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Symfony\Component\HttpFoundation\Response;
 
 class StoreProductRequest extends FormRequest
 {
@@ -51,5 +54,44 @@ class StoreProductRequest extends FormRequest
             'cartonType' => ['required', 'string'],
             'cf' => ['required', 'string'],
         ];
+    }
+
+    /**
+     * Handle a failed validation attempt.
+     *
+     * @param \Illuminate\Contracts\Validation\Validator $validator
+     */
+    protected function failedValidation(Validator $validator)
+    {
+        $errors = $validator->errors();
+
+        $categorizedErrors = [
+            'missingRequiredFields' => [],
+            'invalidFormat' => [],
+            'duplicateFields' => [],
+        ];
+
+        foreach ($errors->messages() as $field => $messages) {
+            foreach ($messages as $message) {
+                if (str_contains($message, 'required')) {
+                    $categorizedErrors['missingRequiredFields'][] = $field;
+                } elseif (str_contains($message, 'must be') || str_contains($message, 'Invalid')) {
+                    $categorizedErrors['invalidFormat'][] = $field;
+                } elseif (str_contains($message, 'has already been taken')) {
+                    $categorizedErrors['duplicateFields'][] = $field;
+                }
+            }
+        }
+
+        $response = response()->json(
+            [
+                'success' => false,
+                'message' => 'Validation errors occurred.',
+                'errors' => array_filter($categorizedErrors),
+            ],
+            Response::HTTP_UNPROCESSABLE_ENTITY
+        );
+
+        throw new HttpResponseException($response);
     }
 }

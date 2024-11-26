@@ -7,7 +7,6 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Symfony\Component\HttpFoundation\Response;
 
-
 class UpdateCustomerRequest extends FormRequest
 {
     /**
@@ -26,10 +25,10 @@ class UpdateCustomerRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['nullable', 'string', 'max:41', 'unique:customer,name'],
+            'name' => ['nullable', 'string', 'max:41', 'unique:customer,name,' . $this->route('customer')], // Exclude the current customer from uniqueness check
             'addressName' => ['required', 'string'],  
             'addressContact' => ['required', 'string'],
-            'addressType' => ['required', 'numeric',  'exists:addresstype:name'], 
+            'addressType' => ['required', 'string',  'exists:addresstype,name'], // Changed to string to match your data type
             'isDefault' => ['required', 'boolean'], 
             'address' => ['nullable', 'string', 'max:90'], 
             'city' => ['nullable', 'string', 'max:30'], 
@@ -46,23 +45,23 @@ class UpdateCustomerRequest extends FormRequest
             'pager' => ['required', 'string'],
             'web' => ['required', 'string'],
             'other' => ['required', 'string'],
-            'curencyName' => ['required', 'string', 'exists:currency,name'],
+            'currencyName' => ['required', 'string', 'exists:currency,name'],
             'currencyRate' => ['required', 'numeric'],
             'group' => ['required', 'string'],
             'creditLimit' => ['nullable', 'numeric'], 
             'status' => ['nullable', 'string', 'exists:customerstatus,name'], 
-            'active' => ['nullable', 'boolean',], 
+            'active' => ['nullable', 'boolean'], 
             'taxRate' => ['nullable', 'string', 'exists:taxrate,name'], 
             'salesman' => ['nullable', 'integer'],
             'defaultPriority' => ['required', 'string', 'exists:priority,name'],
-            'number' => ['nullable', 'string', 'max:30', 'unique:customer,name'],
-            'paymentTerms' => ['nullable', 'integer'], 
+            'number' => ['nullable', 'string', 'max:30', 'unique:customer,name,' . $this->route('customer')], // Exclude the current customer from uniqueness check
+            'paymentTerms' => ['nullable', 'string', 'exists:paymentterms,name'],
             'taxExempt' => ['nullable', 'boolean'], 
             'taxExemptNumber' => ['nullable', 'string', 'max:30'],
             'url' => ['nullable', 'url', 'max:30'], 
-            'carrierName' => ['nullable', 'string'], 
-            'carrierService' => ['nullable', 'string'], 
-            'shippingTerms' => ['nullable', 'string'],
+            'carrierName' => ['nullable', 'string', 'exists:carrier,name'], 
+            'carrierService' => ['nullable', 'string', 'exists:carrierservice,name'], 
+            'shippingTerms' => ['nullable', 'string', 'exists:shipterms,name'], 
             'alertNotes' => ['required', 'string'],
             'quickBooksClassName' => ['nullable', 'string', 'exists:qbclass,name'],
             'toBeEmailed' => ['nullable', 'boolean'], 
@@ -72,13 +71,35 @@ class UpdateCustomerRequest extends FormRequest
         ];
     }
 
+    /**
+     * Handle a failed validation attempt.
+     *
+     * @param  \Illuminate\Contracts\Validation\Validator  $validator
+     * @return void
+     */
     protected function failedValidation(Validator $validator)
     {
+        $categorizedErrors = [];
+
+        foreach ($validator->errors()->toArray() as $field => $messages) {
+            foreach ($messages as $message) {
+                if (str_contains($message, 'required')) {
+                    $categorizedErrors['missingRequiredFields'][] = $field;
+                } elseif (str_contains($message, 'must be') || str_contains($message, 'Invalid')) {
+                    $categorizedErrors['invalidFormat'][] = $field;
+                } elseif (str_contains($message, 'has already been taken')) {
+                    $categorizedErrors['duplicateFields'][] = $field;
+                } elseif (str_contains($message, 'exists')) {
+                    $categorizedErrors['relatedFieldErrors'][] = $field;
+                }
+            }
+        }
+
         throw new HttpResponseException(response()->json(
             [
                 'success' => false,
-                'message' => 'Validation errors',
-                'data' => $validator->errors()
+                'message' => 'Validation errors occurred.',
+                'errors' => array_filter($categorizedErrors),
             ],
             Response::HTTP_UNPROCESSABLE_ENTITY
         ));

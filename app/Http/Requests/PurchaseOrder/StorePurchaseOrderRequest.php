@@ -3,6 +3,9 @@
 namespace App\Http\Requests\PurchaseOrder;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Symfony\Component\HttpFoundation\Response;
 
 class StorePurchaseOrderRequest extends FormRequest
 {
@@ -54,7 +57,7 @@ class StorePurchaseOrderRequest extends FormRequest
             'Phone' => 'nullable|string|max:20',
             'Email' => 'nullable|email|max:255',
             'CF' => 'nullable|string|max:255',
-            
+
             'items' => 'required|array|min:1',
             'items.*.Flag' => 'required|string|in:Item',
             'items.*.POItemTypeID' => 'required|integer',
@@ -73,5 +76,46 @@ class StorePurchaseOrderRequest extends FormRequest
             'items.*.CFI' => 'nullable|string|max:255',
         ];
     }
-    
+
+    /**
+     * Handle a failed validation attempt.
+     *
+     * @param \Illuminate\Contracts\Validation\Validator $validator
+     */
+    protected function failedValidation(Validator $validator)
+    {
+        $errors = $validator->errors();
+
+        $categorizedErrors = [
+            'missingRequiredFields' => [],
+            'invalidFormat' => [],
+            'duplicateFields' => [],
+            'relatedFieldErrors' => [],
+        ];
+
+        foreach ($errors->messages() as $field => $messages) {
+            foreach ($messages as $message) {
+                if (str_contains($message, 'required')) {
+                    $categorizedErrors['missingRequiredFields'][] = $field;
+                } elseif (str_contains($message, 'must be') || str_contains($message, 'Invalid')) {
+                    $categorizedErrors['invalidFormat'][] = $field;
+                } elseif (str_contains($message, 'has already been taken')) {
+                    $categorizedErrors['duplicateFields'][] = $field;
+                } elseif (str_contains($message, 'exists')) {
+                    $categorizedErrors['relatedFieldErrors'][] = $field;
+                }
+            }
+        }
+
+        $response = response()->json(
+            [
+                'success' => false,
+                'message' => 'Validation errors occurred.',
+                'errors' => array_filter($categorizedErrors), 
+            ],
+            Response::HTTP_UNPROCESSABLE_ENTITY
+        );
+
+        throw new HttpResponseException($response);
+    }
 }

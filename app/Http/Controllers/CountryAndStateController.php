@@ -7,41 +7,40 @@ use App\Models\Country;
 use App\Models\State;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Validator;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class CountryAndStateController extends Controller
 {
-    /**
-     * @OA\Post(
-     *     path="/api/country-state/state",
-     *     tags={"Country and State"},
-     *     summary="Create a new state",
-     *     description="Store a new state in the database.",
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"stateName", "stateCode", "countryId"},
-     *             @OA\Property(property="stateName", type="string", example="California"),
-     *             @OA\Property(property="stateCode", type="string", example="CA"),
-     *             @OA\Property(property="countryId", type="integer", example=1)
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=201,
-     *         description="State created successfully.",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="State Created Successfully!"),
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=400,
-     *         description="Bad request.",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Validation error message.")
-     *         )
-     *     )
-     * )
-     */
+    protected function failedValidation(Validator $validator)
+    {
+        $categorizedErrors = [];
+
+        foreach ($validator->errors()->toArray() as $field => $messages) {
+            foreach ($messages as $message) {
+                if (str_contains($message, 'required')) {
+                    $categorizedErrors['missingRequiredFields'][] = $field;
+                } elseif (str_contains($message, 'must be') || str_contains($message, 'Invalid')) {
+                    $categorizedErrors['invalidFormat'][] = $field;
+                } elseif (str_contains($message, 'has already been taken')) {
+                    $categorizedErrors['duplicateFields'][] = $field;
+                } elseif (str_contains($message, 'exists')) {
+                    $categorizedErrors['relatedFieldErrors'][] = $field;
+                }
+            }
+        }
+
+        throw new HttpResponseException(response()->json(
+            [
+                'success' => false,
+                'message' => 'Validation errors occurred.',
+                'errors' => array_filter($categorizedErrors),
+            ],
+            Response::HTTP_UNPROCESSABLE_ENTITY
+        ));
+    }
+
     public function storeState(Request $request): JsonResponse
     {
         if (!$request->isJson()) {
@@ -70,47 +69,6 @@ class CountryAndStateController extends Controller
         );
     }
 
-   /**
-     * @OA\Get(
-     *     path="/api/country-state/country",
-     *     tags={"Country and State"},
-     *     summary="Retrieve all countries or filter by name",
-     *     description="Retrieve all countries if no query parameters or JSON body is provided. Optionally filter by country name using query parameters or JSON body.",
-     *     @OA\Parameter(
-     *         name="name",
-     *         in="query",
-     *         required=false,
-     *         @OA\Schema(type="string"),
-     *         description="The name of the country to filter by",
-     *         example="United States"
-     *     ),
-     *     @OA\RequestBody(
-     *         required=false,
-     *         @OA\JsonContent(
-     *             @OA\Property(property="name", type="string", example="United States", description="Name of the country to filter by")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Countries retrieved successfully.",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="countries", type="array", 
-     *                 @OA\Items(
-     *                     @OA\Property(property="id", type="integer", example=1),
-     *                     @OA\Property(property="name", type="string", example="United States")
-     *                 )
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Country not found.",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Country not found.")
-     *         )
-     *     )
-     * )
-     */
     public function showCountry(Request $request): JsonResponse
     {
         $name = $request->query('name') ?? $request->input('name');
@@ -119,7 +77,7 @@ class CountryAndStateController extends Controller
             $countries = Country::all();
             return response()->json([
                 'message' => 'All countries retrieved successfully!',
-                'countries'  => $countries,
+                'countries' => $countries,
             ], Response::HTTP_OK);
         }
 
@@ -141,49 +99,6 @@ class CountryAndStateController extends Controller
         ], Response::HTTP_OK);
     }
 
-
-    /**
-     * @OA\Get(
-     *     path="/api/country-state/state",
-     *     tags={"Country and State"},
-     *     summary="Retrieve all states or filter by name",
-     *     description="Retrieve all states if no query parameters or JSON body is provided. Optionally filter by state name using query parameters or JSON body.",
-     *     @OA\Parameter(
-     *         name="name",
-     *         in="query",
-     *         required=false,
-     *         @OA\Schema(type="string"),
-     *         description="The name of the state to filter by",
-     *         example="California"
-     *     ),
-     *     @OA\RequestBody(
-     *         required=false,
-     *         @OA\JsonContent(
-     *             @OA\Property(property="name", type="string", example="California", description="Name of the state to filter by")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="States retrieved successfully.",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="states", type="array", 
-     *                 @OA\Items(
-     *                     @OA\Property(property="id", type="integer", example=1),
-     *                     @OA\Property(property="name", type="string", example="California"),
-     *                     @OA\Property(property="country_id", type="integer", example=1)
-     *                 )
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="State not found.",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="State not found.")
-     *         )
-     *     )
-     * )
-     */
     public function showState(Request $request): JsonResponse
     {
         $name = $request->query('name') ?? $request->input('name');
@@ -192,7 +107,7 @@ class CountryAndStateController extends Controller
             $states = State::all();
             return response()->json([
                 'message' => 'All states retrieved successfully!',
-                'states'  => $states,
+                'states' => $states,
             ], Response::HTTP_OK);
         }
 
@@ -208,53 +123,12 @@ class CountryAndStateController extends Controller
             ], Response::HTTP_NOT_FOUND);
         }
 
-        // Return the filtered state
         return response()->json([
             'message' => 'State retrieved successfully!',
-            'state'   => $state,
+            'state' => $state,
         ], Response::HTTP_OK);
     }
 
-
-       /**
-     * @OA\Put(
-     *     path="/api/country-state/state",
-     *     tags={"Country and State"},
-     *     summary="Update a state",
-     *     description="Update an existing state in the database.",
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"stateId", "stateName", "stateCode", "countryId"},
-     *             @OA\Property(property="stateId", type="integer", example=1),
-     *             @OA\Property(property="stateName", type="string", example="California"),
-     *             @OA\Property(property="stateCode", type="string", example="CA"),
-     *             @OA\Property(property="countryId", type="integer", example=1)
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="State updated successfully.",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="State Updated Successfully!"),
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="State not found.",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="State not found.")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=400,
-     *         description="Bad request.",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Validation error message.")
-     *         )
-     *     )
-     * )
-     */
     public function updateState(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -272,7 +146,6 @@ class CountryAndStateController extends Controller
         return response()->json(['message' => 'State Updated Successfully!'], Response::HTTP_OK);
     }
 
-
     public function deleteState(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -284,6 +157,4 @@ class CountryAndStateController extends Controller
 
         return response()->json(null, Response::HTTP_NO_CONTENT);
     }
-
-
 }

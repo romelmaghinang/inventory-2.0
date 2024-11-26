@@ -51,7 +51,7 @@ class StorePaymentTermsRequest extends FormRequest
         $categorizedErrors = [
             'missingRequiredFields' => [],
             'invalidFormat' => [],
-            'valueConflict' => [],
+            'duplicateFields' => [],
         ];
 
         foreach ($errors->messages() as $field => $messages) {
@@ -61,7 +61,7 @@ class StorePaymentTermsRequest extends FormRequest
                 } elseif (str_contains($message, 'must be')) {
                     $categorizedErrors['invalidFormat'][] = $field;
                 } elseif (str_contains($message, 'already been taken') || str_contains($message, 'exists')) {
-                    $categorizedErrors['valueConflict'][] = $field;
+                    $categorizedErrors['duplicateFields'][] = $field;
                 }
             }
         }
