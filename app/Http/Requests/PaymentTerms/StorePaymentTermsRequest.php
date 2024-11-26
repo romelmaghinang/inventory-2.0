@@ -46,10 +46,30 @@ class StorePaymentTermsRequest extends FormRequest
      */
     protected function failedValidation(Validator $validator): void
     {
+        $errors = $validator->errors();
+
+        $categorizedErrors = [
+            'missingRequiredFields' => [],
+            'invalidFormat' => [],
+            'valueConflict' => [],
+        ];
+
+        foreach ($errors->messages() as $field => $messages) {
+            foreach ($messages as $message) {
+                if (str_contains($message, 'required')) {
+                    $categorizedErrors['missingRequiredFields'][] = $field;
+                } elseif (str_contains($message, 'must be')) {
+                    $categorizedErrors['invalidFormat'][] = $field;
+                } elseif (str_contains($message, 'already been taken') || str_contains($message, 'exists')) {
+                    $categorizedErrors['valueConflict'][] = $field;
+                }
+            }
+        }
+
         $response = new JsonResponse([
             'success' => false,
             'message' => 'Validation errors occurred.',
-            'errors' => $validator->errors(),
+            'errors' => array_filter($categorizedErrors), 
         ], 422);
 
         throw new ValidationException($validator, $response);
