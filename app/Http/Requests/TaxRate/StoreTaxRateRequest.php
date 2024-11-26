@@ -26,8 +26,8 @@ class StoreTaxRateRequest extends FormRequest
     {
         return [
             // TAX RATE
-            'taxName' => ['required', 'string', 'max:31'], // Tax Rate ID 
-            'taxCode' => ['required', 'string', 'max:5'],
+            'taxName' => ['required', 'string', 'max:31', 'unique:taxrate,name'], 
+            'taxCode' => ['required', 'string', 'max:5', 'unique:taxrate,code'],  
             'taxType' => ['required', 'string', 'exists:taxratetype,name'],
             'description' => ['required', 'string', 'max:255'],
             'rate' => ['required', 'numeric'],

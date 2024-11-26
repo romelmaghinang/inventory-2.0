@@ -26,9 +26,9 @@ class StoreCustomerRequest extends FormRequest
     {
         return [
             'name' => ['nullable', 'string', 'max:41', 'unique:customer,name'],
-            'addressName' => ['required','string'],  
-            'addressContact' => ['required','string'],
-            'addressType' => ['required','string',  'exists:addresstype,name'], 
+            'addressName' => ['required', 'string'],  
+            'addressContact' => ['required', 'string'],
+            'addressType' => ['required', 'string', 'exists:addresstype,name'], 
             'isDefault' => ['required', 'boolean'], 
             'address' => ['nullable', 'string', 'max:90'], 
             'city' => ['nullable', 'string', 'max:30'], 
@@ -50,7 +50,7 @@ class StoreCustomerRequest extends FormRequest
             'group' => ['required', 'string'],
             'creditLimit' => ['nullable', 'numeric'], 
             'status' => ['nullable', 'string', 'exists:customerstatus,name'], 
-            'active' => ['nullable', 'boolean',], 
+            'active' => ['nullable', 'boolean'], 
             'taxRate' => ['nullable', 'string', 'exists:taxrate,name'], 
             'salesman' => ['nullable', 'integer'], 
             'defaultPriority' => ['required', 'string', 'exists:priority,name'], 
@@ -72,27 +72,46 @@ class StoreCustomerRequest extends FormRequest
     }
 
     /**
+     * Get custom error messages.
+     *
+     * @return array
+     */
+    public function messages(): array
+    {
+        return [
+            'currencyName.exists' => 'The selected currency name is invalid.',
+            'quickBooksClassName.exists' => 'The selected QuickBooks class name is invalid.',
+        ];
+    }
+
+    /**
      * Handle a failed validation attempt.
      */
     protected function failedValidation(Validator $validator)
     {
-        $categorizedErrors = [
-            'missingRequiredFields' => [],
-            'invalidFormat' => [],
-            'duplicateFields' => [],
-            'relatedFieldErrors' => [],
-        ];
+        $categorizedErrors = [];
 
         foreach ($validator->errors()->toArray() as $field => $messages) {
             foreach ($messages as $message) {
                 if (str_contains($message, 'required')) {
                     $categorizedErrors['missingRequiredFields'][] = $field;
-                } elseif (str_contains($message, 'must be') || str_contains($message, 'Invalid')) {
-                    $categorizedErrors['invalidFormat'][] = $field;
-                } elseif (str_contains($message, 'has already been taken')) {
+                } elseif (str_contains($message, 'must be') || str_contains($message, 'invalid')) {
+                    $categorizedErrors['invalidFormat'][] = [
+                        'field' => $field,
+                        'message' => $message,
+                    ];
+                } elseif (str_contains($message, 'already been taken')) {
                     $categorizedErrors['duplicateFields'][] = $field;
                 } elseif (str_contains($message, 'exists')) {
-                    $categorizedErrors['relatedFieldErrors'][] = $field;
+                    $categorizedErrors['relatedFieldErrors'][] = [
+                        'field' => $field,
+                        'message' => $message,
+                    ];
+                } else {
+                    $categorizedErrors['otherErrors'][] = [
+                        'field' => $field,
+                        'message' => $message,
+                    ];
                 }
             }
         }

@@ -85,12 +85,23 @@ class UpdateCustomerRequest extends FormRequest
             foreach ($messages as $message) {
                 if (str_contains($message, 'required')) {
                     $categorizedErrors['missingRequiredFields'][] = $field;
-                } elseif (str_contains($message, 'must be') || str_contains($message, 'Invalid')) {
-                    $categorizedErrors['invalidFormat'][] = $field;
-                } elseif (str_contains($message, 'has already been taken')) {
+                } elseif (str_contains($message, 'must be') || str_contains($message, 'invalid')) {
+                    $categorizedErrors['invalidFormat'][] = [
+                        'field' => $field,
+                        'message' => $message,
+                    ];
+                } elseif (str_contains($message, 'already been taken')) {
                     $categorizedErrors['duplicateFields'][] = $field;
                 } elseif (str_contains($message, 'exists')) {
-                    $categorizedErrors['relatedFieldErrors'][] = $field;
+                    $categorizedErrors['relatedFieldErrors'][] = [
+                        'field' => $field,
+                        'message' => $message,
+                    ];
+                } else {
+                    $categorizedErrors['otherErrors'][] = [
+                        'field' => $field,
+                        'message' => $message,
+                    ];
                 }
             }
         }

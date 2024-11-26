@@ -24,10 +24,22 @@ class UpdateTaxRateRequest extends FormRequest
      */
     public function rules(): array
     {
+        $taxRateId = $this->route('taxrate'); 
+
         return [
             // TAX RATE
-            'taxName' => ['required', 'string', 'max:31'], // Tax Rate ID 
-            'taxCode' => ['required', 'string', 'max:5'],
+            'taxName' => [
+                'required',
+                'string',
+                'max:31',
+                "unique:taxrate,name,{$taxRateId}" 
+            ],
+            'taxCode' => [
+                'required',
+                'string',
+                'max:5',
+                "unique:taxrate,code,{$taxRateId}" 
+            ],
             'taxType' => ['required', 'string', 'exists:taxratetype,name'],
             'description' => ['required', 'string', 'max:255'],
             'rate' => ['required', 'numeric'],
@@ -69,7 +81,7 @@ class UpdateTaxRateRequest extends FormRequest
             [
                 'success' => false,
                 'message' => 'Validation errors occurred.',
-                'errors' => array_filter($categorizedErrors), 
+                'errors' => array_filter($categorizedErrors),
             ],
             Response::HTTP_UNPROCESSABLE_ENTITY
         ));

@@ -3,11 +3,9 @@
 namespace App\Http\Requests\Vendor;
 
 use Illuminate\Foundation\Http\FormRequest;
-
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Symfony\Component\HttpFoundation\Response;
-
 
 class StoreVendorRequest extends FormRequest
 {
@@ -29,7 +27,7 @@ class StoreVendorRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:41'],
             'addressName' => ['required', 'string', 'max:90', 'unique:address,name'],
-            'addressContact' => ['string', 'max:41'],
+            'addressContact' => ['nullable', 'string', 'max:41'],
             'addressType' => ['required', 'integer', 'in:10,20,30,40,50', 'exists:addresstype,id'],
             'isDefault' => ['nullable', 'boolean'],
             'address' => ['nullable', 'string', 'max:90'],
@@ -61,13 +59,43 @@ class StoreVendorRequest extends FormRequest
         ];
     }
 
+    /**
+     * Handle a failed validation attempt.
+     */
     protected function failedValidation(Validator $validator)
     {
+        $categorizedErrors = [];
+
+        foreach ($validator->errors()->toArray() as $field => $messages) {
+            foreach ($messages as $message) {
+                if (str_contains($message, 'required')) {
+                    $categorizedErrors['missingRequiredFields'][] = $field;
+                } elseif (str_contains($message, 'must be') || str_contains($message, 'invalid')) {
+                    $categorizedErrors['invalidFormat'][] = [
+                        'field' => $field,
+                        'message' => $message,
+                    ];
+                } elseif (str_contains($message, 'already been taken')) {
+                    $categorizedErrors['duplicateFields'][] = $field;
+                } elseif (str_contains($message, 'exists')) {
+                    $categorizedErrors['relatedFieldErrors'][] = [
+                        'field' => $field,
+                        'message' => $message,
+                    ];
+                } else {
+                    $categorizedErrors['otherErrors'][] = [
+                        'field' => $field,
+                        'message' => $message,
+                    ];
+                }
+            }
+        }
+
         throw new HttpResponseException(response()->json(
             [
                 'success' => false,
-                'message' => 'Validation errors',
-                'data' => $validator->errors()
+                'message' => 'Validation errors occurred.',
+                'errors' => array_filter($categorizedErrors),
             ],
             Response::HTTP_UNPROCESSABLE_ENTITY
         ));

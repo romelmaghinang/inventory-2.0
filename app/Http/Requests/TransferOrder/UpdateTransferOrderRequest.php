@@ -1,60 +1,51 @@
 <?php
 
-namespace App\Http\Requests\Location;
+namespace App\Http\Requests\TransferOrder;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
-use Symfony\Component\HttpFoundation\Response;
-use App\Models\Customer;
+use Illuminate\Contracts\Validation\Validator;
 
-class StoreLocationRequest extends FormRequest
+class UpdateTransferOrderRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
+        // Authorize the request (adjust this if needed)
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
-            'location' => ['required', 'string', 'max:30', 'unique:location,name'],
-            'description' => ['required', 'string', 'max:90'],
-            'type' => ['required', 'string', 'exists:locationtype,name'],
-            'locationGroup' => ['required', 'string', 'max:30'],
-            'locationNum' => ['nullable', 'numeric'],
-            'customerName' => [
-                'required',
-                'string',
-                'max:30',
-                function ($attribute, $value, $fail) {
-                    if ($value && !Customer::where('name', $value)->exists()) {
-                        $fail("The selected customer does not exist.");
-                    }
-                },
-            ],
-            'active' => ['required', 'boolean'],
-            'available' => ['required', 'boolean'],
-            'pickable' => ['required', 'boolean'],
-            'receivable' => ['required', 'boolean'],
-            'sortOrder' => ['nullable', 'numeric'],
+            'TO' => 'required|array',
+            'TO.TONum' => 'nullable|string',
+            'TO.TOType' => 'required|string',
+            'TO.Status' => 'nullable|string',
+            'TO.FromLocationGroup' => 'required|string',
+            'TO.FromAddressName' => 'required|string',
+            'TO.FromAddressStreet' => 'required|string',
+            'TO.FromAddressCity' => 'required|string',
+            'TO.FromAddressZip' => 'required|string',
+            'TO.FromAddressCountry' => 'required|string',
+            'TO.ToLocationGroup' => 'required|string',
+            'TO.ToAddressName' => 'required|string',
+            'TO.ToAddressStreet' => 'required|string',
+            'TO.ToAddressCity' => 'required|string',
+            'TO.ToAddressZip' => 'required|string',
+            'TO.ToAddressCountry' => 'required|string',
+            'TO.OwnerIsFrom' => 'required|string',
+            'TO.CarrierName' => 'required|string',
+            'TO.CarrierService' => 'nullable|string',
+            'TO.Note' => 'nullable|string',
+            'TO.CF' => 'nullable|string',
+            'Items' => 'required|array',
+            'Items.*.PartNumber' => 'required|string',
+            'Items.*.PartQuantity' => 'required|integer',
+            'Items.*.UOM' => 'required|string',
+            'Items.*.Note' => 'nullable|string',
         ];
     }
 
-    /**
-     * Handle failed validation.
-     *
-     * @param \Illuminate\Contracts\Validation\Validator $validator
-     * @return void
-     */
     protected function failedValidation(Validator $validator)
     {
         $categorizedErrors = [];
@@ -90,7 +81,7 @@ class StoreLocationRequest extends FormRequest
                 'message' => 'Validation errors occurred.',
                 'errors' => array_filter($categorizedErrors),
             ],
-            Response::HTTP_UNPROCESSABLE_ENTITY
+            422
         ));
     }
 }

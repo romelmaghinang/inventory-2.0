@@ -81,38 +81,40 @@ class StorePickRequest extends FormRequest
      */
     protected function failedValidation(Validator $validator)
     {
-        $errors = $validator->errors();
+        $categorizedErrors = [];
 
-        $categorizedErrors = [
-            'missingRequiredFields' => [],
-            'invalidFormat' => [],
-            'invalidTrackingInfo' => [],
-            'duplicateFields' => [],
-        ];
-
-        foreach ($errors->messages() as $field => $messages) {
+        foreach ($validator->errors()->toArray() as $field => $messages) {
             foreach ($messages as $message) {
                 if (str_contains($message, 'required')) {
                     $categorizedErrors['missingRequiredFields'][] = $field;
-                } elseif (str_contains($message, 'must be') || str_contains($message, 'Invalid')) {
-                    $categorizedErrors['invalidFormat'][] = $field;
-                } elseif (str_contains($message, 'serial')) {
-                    $categorizedErrors['invalidTrackingInfo'][] = $field;
-                } elseif (str_contains($message, 'has already been taken')) {
+                } elseif (str_contains($message, 'must be') || str_contains($message, 'invalid')) {
+                    $categorizedErrors['invalidFormat'][] = [
+                        'field' => $field,
+                        'message' => $message,
+                    ];
+                } elseif (str_contains($message, 'already been taken')) {
                     $categorizedErrors['duplicateFields'][] = $field;
+                } elseif (str_contains($message, 'exists')) {
+                    $categorizedErrors['relatedFieldErrors'][] = [
+                        'field' => $field,
+                        'message' => $message,
+                    ];
+                } else {
+                    $categorizedErrors['otherErrors'][] = [
+                        'field' => $field,
+                        'message' => $message,
+                    ];
                 }
             }
         }
 
-        $response = response()->json(
+        throw new HttpResponseException(response()->json(
             [
                 'success' => false,
                 'message' => 'Validation errors occurred.',
-                'errors' => array_filter($categorizedErrors), // Remove empty categories
+                'errors' => array_filter($categorizedErrors),
             ],
             Response::HTTP_UNPROCESSABLE_ENTITY
-        );
-
-        throw new HttpResponseException($response);
+        ));
     }
 }

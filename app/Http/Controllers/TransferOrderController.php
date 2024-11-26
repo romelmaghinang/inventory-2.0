@@ -17,10 +17,12 @@ use App\Models\Carrier;
 use App\Models\XoType;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Http\Requests\TransferOrder\StoreTransferOrderRequest;
+use App\Http\Requests\TransferOrder\UpdateTransferOrderRequest;
 
 class TransferOrderController extends Controller
 {
-    public function store(Request $request): JsonResponse
+    public function store(StoreTransferOrderRequest $request): JsonResponse
     {
         $data = $request->validate([
             'TO' => 'required|array',
@@ -209,7 +211,7 @@ class TransferOrderController extends Controller
             'xoItems' => $xoItem,
         ], 201);
     }
-    public function update(Request $request): JsonResponse
+    public function update(UpdateTransferOrderRequest $request, $id): JsonResponse
     {
         $data = $request->validate([
             'xoId' => 'required|integer',
