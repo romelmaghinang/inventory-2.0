@@ -135,7 +135,7 @@ Route::middleware(['auth:sanctum', ])->group(function () {
         Route::get('/', [CustomerController::class, 'showAll'])->middleware('abilities:view-customer');
         Route::get('/', [CustomerController::class, 'show'])->middleware('abilities:view-customer');
         Route::get('/', [CustomerController::class, 'showFilter'])->middleware('abilities:view-customer');
-        Route::put('/', [CustomerController::class, 'update'])->middleware('abilities:update-customer');
+        Route::put('/{id}', [CustomerController::class, 'update'])->middleware('abilities:update-customer');
         Route::delete('/', [CustomerController::class, 'destroy'])->middleware('abilities:delete-customer');
     });
     Route::post('/create-role', [UserController::class, 'createRole']);

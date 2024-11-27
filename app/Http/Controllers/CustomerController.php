@@ -303,14 +303,13 @@ class CustomerController extends Controller
      *     @OA\Response(response=422, description="Validation errors")
      * )
      */
-    public function update(UpdateCustomerRequest $request): JsonResponse
+    public function update(UpdateCustomerRequest $request, int $id): JsonResponse
     {
-        $customerId = $request->input('customerId');  
-        $customer = Customer::findOrFail($customerId);
-        
+        $customer = Customer::findOrFail($id); // Get the customer using the ID from the route parameter
+    
         $account = Account::findOrFail($customer->account_id);
         $address = Address::where('customer_id', $customer->id)->firstOrFail();
-        
+    
         $currency = Currency::where('name', $request->currencyName)->firstOrFail();
         $customerStatus = CustomerStatus::where('name', $request->status)->firstOrFail();
         $taxRate = TaxRate::where('name', $request->taxRate)->firstOrFail();
@@ -323,9 +322,9 @@ class CustomerController extends Controller
         $addressType = AddressType::where('name', $request->addressType)->firstOrFail();
         $state = State::where('name', $request->state)->firstOrFail();
         $country = Country::where('name', $request->country)->firstOrFail();
-
+    
         $account->update(['typeId' => $request->accountTypeId]);
-
+    
         $customer->update(
             $request->only(
                 [
@@ -352,7 +351,7 @@ class CustomerController extends Controller
                 'qbClassId' => $quickBook->id,
             ]
         );
-
+    
         $address->update(
             $request->only(
                 [
@@ -370,7 +369,7 @@ class CustomerController extends Controller
                 'countryId' => $country->id,
             ]
         );
-
+    
         return response()->json(
             [
                 'customer' => $customer,
@@ -380,7 +379,7 @@ class CustomerController extends Controller
             Response::HTTP_OK
         );
     }
-
+    
 
     public function destroy(Request $request): JsonResponse
     {
