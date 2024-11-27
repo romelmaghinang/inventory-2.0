@@ -26,7 +26,7 @@ class StoreCustomerRequest extends FormRequest
     {
         return [
             'name' => ['nullable', 'string', 'max:41', 'unique:customer,name'],
-            'addressName' => ['required', 'string'],  
+            'addressName' => ['required', 'string', 'unique:address,name'],  
             'addressContact' => ['required', 'string'],
             'addressType' => ['required', 'string', 'exists:addresstype,name'], 
             'isDefault' => ['required', 'boolean'], 
