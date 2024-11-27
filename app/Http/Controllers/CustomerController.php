@@ -389,16 +389,34 @@ public function store(StoreCustomerRequest $storeCustomerRequest): JsonResponse
 
     public function destroy(Request $request): JsonResponse
     {
-        $customerId = $request->input('customerId'); 
-        $customer = Customer::findOrFail($customerId);
-        
-        $customer->delete();
-
-        return response()->json(
-            [
-                'message' => 'Customer Deleted Successfully!',
-            ],
-            Response::HTTP_OK
-        );
+        $customerId = $request->input('customerId');
+    
+        try {
+            $customer = Customer::findOrFail($customerId);
+    
+            $customer->delete();
+    
+            return response()->json(
+                [
+                    'message' => 'Customer Deleted Successfully!',
+                ],
+                Response::HTTP_OK
+            );
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json(
+                [
+                    'error' => 'Customer not found or does not exist.',
+                ],
+                Response::HTTP_NOT_FOUND
+            );
+        } catch (\Exception $e) {
+            return response()->json(
+                [
+                    'error' => 'An error occurred while trying to delete the customer.',
+                ],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
     }
+    
 }
