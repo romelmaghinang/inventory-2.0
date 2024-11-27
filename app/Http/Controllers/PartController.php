@@ -285,27 +285,13 @@ class PartController extends Controller
             ]
         );
     
-        $partTracking = PartTracking::updateOrCreate(
-            ['partId' => $part->id],
-            $request->only('description') +
-            [
-                'name' => $request->primaryTracking,
-                'typeId' => $partTrackingType->id,
-                'abbr' => $request->uom,
-            ]
-        );
     
-        $partToTracking = PartToTracking::updateOrCreate(
-            ['partTrackingId' => $partTracking->id, 'partId' => $part->id],
-            $request->only('nextValue')
-        );
     
         return response()->json(
             [
                 'message' => 'Product Updated Successfully!',
                 'partData' => $part,
-                'partTrackingData' => $partTracking,
-                'partToTrackingData' => $partToTracking,
+        
             ],
             Response::HTTP_OK
         );
