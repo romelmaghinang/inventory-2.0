@@ -71,62 +71,66 @@ class CountryAndStateController extends Controller
 
     public function showCountry(Request $request): JsonResponse
     {
-        $name = $request->query('name') ?? $request->input('name');
+        $filters = $request->only(['name', 'code']);
+        $query = Country::query();
 
-        if (empty($name)) {
-            $countries = Country::all();
-            return response()->json([
-                'message' => 'All countries retrieved successfully!',
+        if (!empty($filters)) {
+            if (isset($filters['name'])) {
+                $query->where('name', $filters['name']);
+            }
+            if (isset($filters['code'])) {
+                $query->where('code', $filters['code']);
+            }
+        }
+
+        $countries = $query->get();
+
+        if ($countries->isEmpty()) {
+            return response()->json(
+                ['message' => 'No countries found matching the filters.'],
+                Response::HTTP_NOT_FOUND
+            );
+        }
+
+        return response()->json(
+            [
+                'message' => 'Countries retrieved successfully!',
                 'countries' => $countries,
-            ], Response::HTTP_OK);
-        }
-
-        $request->validate([
-            'name' => 'string|exists:country,name',
-        ]);
-
-        $country = Country::where('name', $name)->first();
-
-        if (!$country) {
-            return response()->json([
-                'message' => 'Country not found.'
-            ], Response::HTTP_NOT_FOUND);
-        }
-
-        return response()->json([
-            'message' => 'Country retrieved successfully!',
-            'country' => $country,
-        ], Response::HTTP_OK);
+            ],
+            Response::HTTP_OK
+        );
     }
 
     public function showState(Request $request): JsonResponse
     {
-        $name = $request->query('name') ?? $request->input('name');
+        $filters = $request->only(['name', 'code']);
+        $query = State::query();
 
-        if (empty($name)) {
-            $states = State::all();
-            return response()->json([
-                'message' => 'All states retrieved successfully!',
+        if (!empty($filters)) {
+            if (isset($filters['name'])) {
+                $query->where('name', $filters['name']);
+            }
+            if (isset($filters['code'])) {
+                $query->where('code', $filters['code']);
+            }
+        }
+
+        $states = $query->get();
+
+        if ($states->isEmpty()) {
+            return response()->json(
+                ['message' => 'No states found matching the filters.'],
+                Response::HTTP_NOT_FOUND
+            );
+        }
+
+        return response()->json(
+            [
+                'message' => 'States retrieved successfully!',
                 'states' => $states,
-            ], Response::HTTP_OK);
-        }
-
-        $request->validate([
-            'name' => 'string|exists:state,name',
-        ]);
-
-        $state = State::where('name', $name)->first();
-
-        if (!$state) {
-            return response()->json([
-                'message' => 'State not found.'
-            ], Response::HTTP_NOT_FOUND);
-        }
-
-        return response()->json([
-            'message' => 'State retrieved successfully!',
-            'state' => $state,
-        ], Response::HTTP_OK);
+            ],
+            Response::HTTP_OK
+        );
     }
 
     public function updateState(Request $request): JsonResponse
