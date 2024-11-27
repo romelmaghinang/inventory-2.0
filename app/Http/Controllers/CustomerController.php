@@ -93,79 +93,85 @@ class CustomerController extends Controller
  *     ),
  * )
  */
-    public function store(StoreCustomerRequest $storeCustomerRequest): JsonResponse
-    {
-        $currency = Currency::where('name', $storeCustomerRequest->currencyName)->firstOrFail();
-        $customerStatus = CustomerStatus::where('name', $storeCustomerRequest->status)->firstOrFail();
-        $taxRate = TaxRate::where('name', $storeCustomerRequest->taxRate)->firstOrFail();
-        $priority = Priority::where('name', $storeCustomerRequest->defaultPriority)->firstOrFail();
-        $paymentTerms = PaymentTerms::where('name', $storeCustomerRequest->paymentTerms)->firstOrFail();
-        $carrier = Carrier::where('name', $storeCustomerRequest->carrierName)->firstOrFail();
-        $carrierService = CarrierService::where('name', $storeCustomerRequest->carrierService)->firstOrFail();
-        $shipTerms = ShipTerms::where('name', $storeCustomerRequest->shippingTerms)->firstOrFail();
-        $quickBook = qbClass::where('name', $storeCustomerRequest->quickBooksClassName)->firstOrFail();
-        $addressType = AddressType::where('name', $storeCustomerRequest->addressType)->firstOrFail();
-        $state = State::where('name', $storeCustomerRequest->state)->firstOrFail();
-        $country = Country::where('name', $storeCustomerRequest->country)->firstOrFail();
+public function store(StoreCustomerRequest $storeCustomerRequest): JsonResponse
+{
+    $currency = Currency::where('name', $storeCustomerRequest->currencyName)->firstOrFail();
+    $customerStatus = CustomerStatus::where('name', $storeCustomerRequest->status)->firstOrFail();
+    $taxRate = TaxRate::where('name', $storeCustomerRequest->taxRate)->firstOrFail();
+    $priority = Priority::where('name', $storeCustomerRequest->defaultPriority)->firstOrFail();
+    $paymentTerms = PaymentTerms::where('name', $storeCustomerRequest->paymentTerms)->firstOrFail();
+    $carrier = Carrier::where('name', $storeCustomerRequest->carrierName)->firstOrFail();
+    $carrierService = CarrierService::where('name', $storeCustomerRequest->carrierService)->firstOrFail();
+    $shipTerms = ShipTerms::where('name', $storeCustomerRequest->shippingTerms)->firstOrFail();
+    $quickBook = qbClass::where('name', $storeCustomerRequest->quickBooksClassName)->firstOrFail();
+    $addressType = AddressType::where('name', $storeCustomerRequest->addressType)->firstOrFail();
+    $state = State::where('name', $storeCustomerRequest->state)->firstOrFail();
+    $country = Country::where('name', $storeCustomerRequest->country)->firstOrFail();
 
-        $customer = Customer::create(
-            $storeCustomerRequest->only(
-                [
-                    'name',
-                    'currencyRate',
-                    'creditLimit',
-                    'number',
-                    'taxExempt',
-                    'taxExemptNumber',
-                    'url',
-                    'toBeEmailed',
-                    'toBePrinted',
-                    'cf'
-                ]
-            )
-                +
-                [
-                    'currencyId' => $currency->id,
-                    'statusId' => $customerStatus->id,
-                    'activeFLag' => $storeCustomerRequest->active,
-                    'taxRateId' => $taxRate->id,
-                    'defaultPaymentTermsId' => $paymentTerms->id,
-                    'defaultCarrierId' => $carrier->id,
-                    'carrierServiceId' => $carrierService->id,
-                    'qbClassId' => $quickBook->id,
-                    'defaultShipTermsId' => $shipTerms->id,
-                ]
-        );
+    $account = Account::create([
+        'typeId' => 10, 
+    ]);
 
-        $address = Address::create(
-            $storeCustomerRequest->only(
-                [
-                    'addressName',
-                    'address',
-                    'city',
-                    'zip',
-
-                ]
-            ) +
-                [
-                    'piplineContactNum' => $storeCustomerRequest->addressContact,
-                    'typeId' => $addressType->id,
-                    'activeFlag' => $storeCustomerRequest->isDefault,
-                    'stateId' => $state->id,
-                    'countryId' => $country->id,
-                    'name' => $storeCustomerRequest->addressName,
-                ]
-        );
-
-        return response()->json(
+    $customer = Customer::create(
+        $storeCustomerRequest->only(
             [
-                'customer' => $customer,
-                'address' => $address,
-                'message' => 'Customer Created Successfully!',
-            ],
-            Response::HTTP_CREATED
-        );
-    }
+                'name',
+                'currencyRate',
+                'creditLimit',
+                'number',
+                'taxExempt',
+                'taxExemptNumber',
+                'url',
+                'toBeEmailed',
+                'toBePrinted',
+                'cf'
+            ]
+        ) +
+        [
+            'currencyId' => $currency->id,
+            'statusId' => $customerStatus->id,
+            'activeFLag' => $storeCustomerRequest->active,
+            'taxRateId' => $taxRate->id,
+            'defaultPaymentTermsId' => $paymentTerms->id,
+            'defaultCarrierId' => $carrier->id,
+            'carrierServiceId' => $carrierService->id,
+            'qbClassId' => $quickBook->id,
+            'defaultShipTermsId' => $shipTerms->id,
+            'accountId' => $account->id, 
+        ]
+    );
+
+    $address = Address::create(
+        $storeCustomerRequest->only(
+            [
+                'addressName',
+                'address',
+                'city',
+                'zip',
+            ]
+        ) +
+        [
+            'piplineContactNum' => $storeCustomerRequest->addressContact,
+            'typeId' => $addressType->id,
+            'activeFlag' => $storeCustomerRequest->isDefault,
+            'stateId' => $state->id,
+            'countryId' => $country->id,
+            'name' => $storeCustomerRequest->addressName,
+            'accountId' => $account->id, 
+
+        ]
+    );
+
+    return response()->json(
+        [
+            'customer' => $customer,
+            'address' => $address,
+            'message' => 'Customer Created Successfully!',
+        ],
+        Response::HTTP_CREATED
+    );
+}
+
     /**
      * @OA\Get(
      *     path="/api/customer",
@@ -305,10 +311,10 @@ class CustomerController extends Controller
      */
     public function update(UpdateCustomerRequest $request, int $id): JsonResponse
     {
-        $customer = Customer::findOrFail($id); // Get the customer using the ID from the route parameter
+        $customer = Customer::findOrFail($id); 
     
-        $account = Account::findOrFail($customer->account_id);
-        $address = Address::where('customer_id', $customer->id)->firstOrFail();
+        $account = Customer::findOrFail($customer->accountId);
+        $address = Address::where('accountId', $customer->accountId)->firstOrFail();
     
         $currency = Currency::where('name', $request->currencyName)->firstOrFail();
         $customerStatus = CustomerStatus::where('name', $request->status)->firstOrFail();
