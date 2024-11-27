@@ -79,7 +79,7 @@ class CountryAndStateController extends Controller
                 $query->where('name', $filters['name']);
             }
             if (isset($filters['code'])) {
-                $query->where('code', $filters['code']);
+                $query->where('abbreviation', $filters['code']);
             }
         }
 
