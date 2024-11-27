@@ -286,7 +286,7 @@ class PartController extends Controller
         );
     
         $partTracking = PartTracking::updateOrCreate(
-            ['part_id' => $part->id],
+            ['partId' => $part->id],
             $request->only('description') +
             [
                 'name' => $request->primaryTracking,
