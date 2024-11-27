@@ -426,20 +426,20 @@ class PurchaseOrderController extends Controller
      *     )
      * )
      */
-    public function update(UpdatePurchaseOrderRequest $request): JsonResponse
+    public function update(UpdatePurchaseOrderRequest $request, $id): JsonResponse
     {
-        $poId = $request->input('poId');
-        $purchaseOrder = PurchaseOrder::find($poId);
-
+        $purchaseOrder = PurchaseOrder::find($id);
+    
         if (!$purchaseOrder) {
             return response()->json(['message' => 'Purchase Order not found'], Response::HTTP_NOT_FOUND);
         }
-
+    
         $purchaseOrder->status = $request->input('status');
         $purchaseOrder->save();
-
+    
         return response()->json(['success' => true, 'message' => 'Purchase Order updated successfully'], Response::HTTP_OK);
     }
+    
 
     /**
      * @OA\Delete(

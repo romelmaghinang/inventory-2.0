@@ -251,17 +251,15 @@ class PartController extends Controller
      *     )
      * )
      */
-    public function update(UpdatePartRequest $request): JsonResponse
+    public function update($id, UpdatePartRequest $request): JsonResponse
     {
-        $partId = $request->partId;
-
-        $part = Part::findOrFail($partId);
-
+        $part = Part::findOrFail($id);
+    
         $uom = UnitOfMeasure::where('name', $request->uom)->firstOrFail();
         $partType = PartType::where('name', $request->partType)->firstOrFail();
         $poItemType = PurchaseOrderItemType::where('name', $request->poItemType)->firstOrFail();
         $partTrackingType = PartTrackingType::where('name', $request->tracks)->firstOrFail();
-
+    
         $part->update(
             $request->only(
                 [
@@ -286,7 +284,7 @@ class PartController extends Controller
                 'defaultPoItemTypeId' => $poItemType->id,
             ]
         );
-
+    
         $partTracking = PartTracking::updateOrCreate(
             ['part_id' => $part->id],
             $request->only('description') +
@@ -296,12 +294,12 @@ class PartController extends Controller
                 'abbr' => $request->uom,
             ]
         );
-
+    
         $partToTracking = PartToTracking::updateOrCreate(
             ['partTrackingId' => $partTracking->id, 'partId' => $part->id],
             $request->only('nextValue')
         );
-
+    
         return response()->json(
             [
                 'message' => 'Product Updated Successfully!',
@@ -312,8 +310,7 @@ class PartController extends Controller
             Response::HTTP_OK
         );
     }
-
-
+    
  
     public function destroy(Request $request): JsonResponse
     {

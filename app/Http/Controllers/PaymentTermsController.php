@@ -159,11 +159,12 @@ public function show(Request $request): JsonResponse
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdatePaymentTermsRequest $updatePaymentTermsRequest, PaymentTerms $paymentTerms): JsonResponse
+    public function update(UpdatePaymentTermsRequest $updatePaymentTermsRequest, PaymentTerms $paymentTerms, $id): JsonResponse
     {
+        $paymentTerms = PaymentTerms::findOrFail($id);
+    
         $paymentTermsType = PaymentTermsType::where('name', $updatePaymentTermsRequest->termsType)->firstOrFail();
-
-
+    
         $paymentTerms->update(
             $updatePaymentTermsRequest->only(
                 [
@@ -179,7 +180,7 @@ public function show(Request $request): JsonResponse
                 'activeFlag' => $updatePaymentTermsRequest->active,
             ]
         );
-
+    
         return response()->json(
             [
                 'message' => 'Payment Terms Updated Successfully!',
@@ -188,7 +189,6 @@ public function show(Request $request): JsonResponse
             Response::HTTP_OK
         );
     }
-
     /**
      * Remove the specified resource from storage.
      */

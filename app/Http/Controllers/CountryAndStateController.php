@@ -133,22 +133,24 @@ class CountryAndStateController extends Controller
         );
     }
 
-    public function updateState(Request $request): JsonResponse
+    public function updateState(Request $request, int $id): JsonResponse
     {
         $validated = $request->validate([
-            'stateId' => 'required|integer|exists:state,id',
             'stateName' => 'required|string|max:255',
             'abbreviation' => 'required|string|max:10',
         ]);
-
-        $state = State::find($validated['stateId']);
+    
+        $state = State::findOrFail($id);
+    
+        // Update the state
         $state->update([
             'name' => $validated['stateName'],
             'code' => $validated['abbreviation'],
         ]);
-
+    
         return response()->json(['message' => 'State Updated Successfully!'], Response::HTTP_OK);
     }
+    
 
     public function deleteState(Request $request): JsonResponse
     {

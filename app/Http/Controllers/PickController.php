@@ -263,20 +263,21 @@ class PickController extends Controller
      *     )
      * )
      */
-    public function update(Request $request): JsonResponse
+    public function update(Request $request, $id): JsonResponse
     {
         $request->validate([
-            'pickId' => 'required|integer|exists:pick,id',
             'locationName' => 'required|string',
             'partNum' => 'required|string',
             'trackingInfo' => 'nullable|array',
         ]);
-
-        $pick = Pick::findOrFail($request->pickId);
+    
+        $pick = Pick::findOrFail($id);
+    
         $pick->update($request->only(['locationName', 'partNum', 'trackingInfo']));
-
+    
         return response()->json(['message' => 'Pick updated successfully!', 'pick' => $pick], Response::HTTP_OK);
     }
+    
     /**
      * @OA\Get(
      *     path="/api/pick",

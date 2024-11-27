@@ -34,7 +34,7 @@ Route::get('/permissions', [UserController::class, 'getUserPermissions']);
 
 Route::middleware(['auth:sanctum', ])->group(function () {
     Route::post('/transfer-orders', [TransferOrderController::class, 'store'])->middleware('abilities:create-transfer-order');
-    Route::put('/transfer-orders/update', [TransferOrderController::class, 'update'])->middleware('abilities:update-transfer-order');
+    Route::put('/transfer-orders/update/{id}', [TransferOrderController::class, 'update'])->middleware('abilities:update-transfer-order');
     Route::post('transfer-orders/update-status/{statusName}', [TransferOrderController::class, 'updateStatus'])->middleware('abilities:update-status-transfer-order');
     Route::delete('/transfer-orders/void', [TransferOrderController::class, 'deleteXo'])->middleware('abilities:void-transfer-order');
     Route::delete('/transfer-orders/delete', [TransferOrderController::class, 'deleteXoItem'])->middleware('abilities:delete-transfer-order');
@@ -58,7 +58,7 @@ Route::middleware(['auth:sanctum', ])->group(function () {
 
     Route::prefix('payment-terms')->group(function () {
         Route::post('/', [PaymentTermsController::class, 'store'])->middleware('abilities:create-payment-terms');
-        Route::put('/', [PaymentTermsController::class, 'update'])->middleware('abilities:update-payment-terms');
+        Route::put('/{id}', [PaymentTermsController::class, 'update'])->middleware('abilities:update-payment-terms');
         Route::get('/', [PaymentTermsController::class, 'show'])->middleware('abilities:view-payment-terms');
         Route::delete('/', [PaymentTermsController::class, 'destroy'])->middleware('abilities:delete-payment-terms');
     });
@@ -72,28 +72,28 @@ Route::middleware(['auth:sanctum', ])->group(function () {
 
     Route::prefix('vendor')->group(function () {
         Route::post('/', [VendorController::class, 'store'])->middleware('abilities:create-vendor');
-        Route::put('/', [VendorController::class, 'update'])->middleware('abilities:update-vendor');
+        Route::put('/{id}', [VendorController::class, 'update'])->middleware('abilities:update-vendor');
         Route::get('/', [VendorController::class, 'show'])->middleware('abilities:view-vendor');
         Route::delete('/', [VendorController::class, 'destroy'])->middleware('abilities:delete-vendor');
     });
 
     Route::prefix('part')->group(function () {
         Route::post('/', [PartController::class, 'store'])->middleware('abilities:create-part');
-        Route::put('/', [PartController::class, 'update'])->middleware('abilities:update-part');
+        Route::put('/{id}', [PartController::class, 'update'])->middleware('abilities:update-part');
         Route::get('/', [PartController::class, 'show'])->middleware('abilities:view-part');
         Route::delete('/', [PartController::class, 'destroy'])->middleware('abilities:delete-part');
     });
 
     Route::prefix('purchase-order')->group(function () {
         Route::post('/', [PurchaseOrderController::class, 'store'])->middleware('abilities:create-purchase-order');
-        Route::put('/', [PurchaseOrderController::class, 'update'])->middleware('abilities:update-purchase-order');
+        Route::put('/{id}', [PurchaseOrderController::class, 'update'])->middleware('abilities:update-purchase-order');
         Route::get('/', [PurchaseOrderController::class, 'show'])->middleware('abilities:view-purchase-order');
         Route::delete('/', [PurchaseOrderController::class, 'destroy'])->middleware('abilities:delete-purchase-order');
     });
 
     Route::prefix('product')->group(function () {
         Route::post('/', [ProductController::class, 'store'])->middleware('abilities:create-product');
-        Route::put('/', [ProductController::class, 'update'])->middleware('abilities:update-product');
+        Route::put('/{id}', [ProductController::class, 'update'])->middleware('abilities:update-product');
         Route::get('/', [ProductController::class, 'show'])->middleware('abilities:view-product');
         Route::delete('/', [ProductController::class, 'destroy'])->middleware('abilities:delete-product');
     });
@@ -107,14 +107,14 @@ Route::middleware(['auth:sanctum', ])->group(function () {
 
     Route::prefix('pick')->group(function () {
         Route::post('/', [PickController::class, 'store'])->middleware('abilities:create-pick');
-        Route::put('/', [PickController::class, 'update'])->middleware('abilities:update-pick');
+        Route::put('/{id}', [PickController::class, 'update'])->middleware('abilities:update-pick');
         Route::get('/', [PickController::class, 'show'])->middleware('abilities:view-pick');
         Route::delete('/', [PickController::class, 'destroy'])->middleware('abilities:delete-pick');
     });
 
     Route::prefix('location')->group(function () {
         Route::post('/', [LocationController::class, 'store'])->middleware('abilities:create-location');
-        Route::put('/', [LocationController::class, 'update'])->middleware('abilities:update-location');
+        Route::put('/{id}', [LocationController::class, 'update'])->middleware('abilities:update-location');
         Route::get('/', [LocationController::class, 'show'])->middleware('abilities:view-location');
         Route::delete('/', [LocationController::class, 'destroy'])->middleware('abilities:delete-location');
     });
@@ -122,7 +122,7 @@ Route::middleware(['auth:sanctum', ])->group(function () {
     Route::prefix('state')->group(function () {
         Route::post('/', [CountryAndStateController::class, 'storeState'])->middleware('abilities:create-state');
         Route::get('/', [CountryAndStateController::class, 'showState'])->middleware('abilities:view-state');
-        Route::put('/', [CountryAndStateController::class, 'updateState'])->middleware('abilities:update-state');
+        Route::put('/{id}', [CountryAndStateController::class, 'updateState'])->middleware('abilities:update-state');
         Route::delete('/', [CountryAndStateController::class, 'deleteState'])->middleware('abilities:delete-state');
     });
 

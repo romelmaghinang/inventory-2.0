@@ -245,22 +245,22 @@ class ProductController extends Controller
      *     )
      * )
      */
-    public function update(UpdateProductRequest $updateProductRequest): JsonResponse
+    public function update(UpdateProductRequest $updateProductRequest, $id): JsonResponse
     {
-        $productId = $updateProductRequest->input('productId');
-        $product = Product::find($productId);
-
+        $product = Product::find($id);
+    
         if (!$product) {
             return response()->json(['message' => 'Product not found'], Response::HTTP_NOT_FOUND);
         }
-
+    
         $product->update($updateProductRequest->validated());
-
+    
         return response()->json([
             'message' => 'Product updated successfully!',
             'product' => $product,
         ], Response::HTTP_OK);
     }
+    
 
 
 

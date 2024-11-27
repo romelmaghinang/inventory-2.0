@@ -279,17 +279,17 @@ class VendorController extends Controller
      *      )
      * )
      */
-    public function update(UpdateVendorRequest $updateVendorRequest): JsonResponse
+    public function update(UpdateVendorRequest $updateVendorRequest, $id): JsonResponse
     {
-        $vendor = Vendor::findOrFail($updateVendorRequest->vendorId);
-
+        $vendor = Vendor::findOrFail($id);
+    
         $state = State::where('name', $updateVendorRequest->state)->firstOrFail();
         $country = Country::where('name', $updateVendorRequest->country)->firstOrFail();
         $currency = Currency::where('name', $updateVendorRequest->currencyName)->firstOrFail();
         $carrier = Carrier::where('name', $updateVendorRequest->defaultCarrier)->firstOrFail();
         $shipterms = ShipTerms::where('name', $updateVendorRequest->defaultShippingTerms)->firstOrFail();
         $vendorStatus = VendorStatus::where('name', $updateVendorRequest->status)->firstOrFail();
-
+    
         $address = Address::firstOrCreate(
             ['addressName' => $updateVendorRequest->addressName],
             [
@@ -303,7 +303,7 @@ class VendorController extends Controller
                 'countryId' => $country->id,
             ]
         );
-
+    
         $vendor->update(
             $updateVendorRequest->only(
                 [
@@ -322,7 +322,7 @@ class VendorController extends Controller
                 'note' => $updateVendorRequest->alertNotes,
             ]
         );
-
+    
         return response()->json(
             [
                 'message' => 'Vendor Updated Successfully!',
@@ -332,6 +332,7 @@ class VendorController extends Controller
             Response::HTTP_OK
         );
     }
+    
 
 
     /**

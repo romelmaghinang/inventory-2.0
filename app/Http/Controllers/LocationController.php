@@ -141,10 +141,9 @@ class LocationController extends Controller
      *     )
      * )
      */
-    public function update(Request $request): JsonResponse
+    public function update(Request $request, int $id): JsonResponse
     {
         $request->validate([
-            'locationId' => 'required|integer|exists:locations,id',
             'location' => 'required|string',
             'description' => 'nullable|string',
             'type' => 'nullable|string',
@@ -156,9 +155,9 @@ class LocationController extends Controller
             'receivable' => 'nullable|boolean',
             'sortOrder' => 'nullable|integer',
         ]);
-
-        $location = Location::findOrFail($request->locationId);
-
+    
+        $location = Location::findOrFail($id);
+    
         $location->update($request->only([
             'location',
             'description',
@@ -171,9 +170,16 @@ class LocationController extends Controller
             'receivable',
             'sortOrder',
         ]));
-
-        return response()->json(['message' => 'Location updated successfully!', 'location' => $location], Response::HTTP_OK);
+    
+        return response()->json(
+            [
+                'message' => 'Location updated successfully!',
+                'location' => $location,
+            ],
+            Response::HTTP_OK
+        );
     }
+    
 /**
  * @OA\Get(
  *     path="/api/location",

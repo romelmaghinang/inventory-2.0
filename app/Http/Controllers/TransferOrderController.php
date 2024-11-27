@@ -212,97 +212,97 @@ class TransferOrderController extends Controller
         ], 201);
     }
     public function update(UpdateTransferOrderRequest $request, $id): JsonResponse
-    {
-        $data = $request->validate([
-            'xoId' => 'required|integer',
-            'TO.TONum' => 'nullable|string',
-            'TO.TOType' => 'nullable|string',
-            'TO.Status' => 'nullable|string',
-            'TO.FromLocationGroup' => 'nullable|string',
-            'TO.FromAddressName' => 'nullable|string',
-            'TO.FromAddressStreet' => 'nullable|string',
-            'TO.FromAddressCity' => 'nullable|string',
-            'TO.FromAddressZip' => 'nullable|string',
-            'TO.FromAddressCountry' => 'nullable|string',
-            'TO.ToLocationGroup' => 'nullable|string',
-            'TO.ToAddressName' => 'nullable|string',
-            'TO.ToAddressStreet' => 'nullable|string',
-            'TO.ToAddressCity' => 'nullable|string',
-            'TO.ToAddressZip' => 'nullable|string',
-            'TO.ToAddressCountry' => 'nullable|string',
-            'TO.OwnerIsFrom' => 'nullable|string',
-            'TO.CarrierName' => 'nullable|string',
-            'TO.CarrierService' => 'nullable|string',
-            'TO.Note' => 'nullable|string',
-            'TO.CF' => 'nullable|string',
-        ]);
+{
+    $data = $request->validate([
+        'TO.TONum' => 'nullable|string',
+        'TO.TOType' => 'nullable|string',
+        'TO.Status' => 'nullable|string',
+        'TO.FromLocationGroup' => 'nullable|string',
+        'TO.FromAddressName' => 'nullable|string',
+        'TO.FromAddressStreet' => 'nullable|string',
+        'TO.FromAddressCity' => 'nullable|string',
+        'TO.FromAddressZip' => 'nullable|string',
+        'TO.FromAddressCountry' => 'nullable|string',
+        'TO.ToLocationGroup' => 'nullable|string',
+        'TO.ToAddressName' => 'nullable|string',
+        'TO.ToAddressStreet' => 'nullable|string',
+        'TO.ToAddressCity' => 'nullable|string',
+        'TO.ToAddressZip' => 'nullable|string',
+        'TO.ToAddressCountry' => 'nullable|string',
+        'TO.OwnerIsFrom' => 'nullable|string',
+        'TO.CarrierName' => 'nullable|string',
+        'TO.CarrierService' => 'nullable|string',
+        'TO.Note' => 'nullable|string',
+        'TO.CF' => 'nullable|string',
+    ]);
 
-        try {
-            $xo = Xo::findOrFail($data['xoId']);
-        } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'error' => 'Transfer Order not found',
-                'message' => "The Transfer Order with ID '{$data['xoId']}' was not found.",
-            ], 404);
-        }
-
-        if (isset($data['TO'])) {
-            $updatedFields = [];
-
-            if (!empty($data['TO']['Status'])) {
-                $status = XoStatus::where('name', $data['TO']['Status'])->first();
-                if ($status) {
-                    $updatedFields['statusId'] = $status->id;
-                }
-            }
-
-            if (!empty($data['TO']['TOType'])) {
-                $toType = XoType::where('name', $data['TO']['TOType'])->first();
-                if ($toType) {
-                    $updatedFields['typeId'] = $toType->id;
-                }
-            }
-
-            if (!empty($data['TO']['CarrierName'])) {
-                $carrier = Carrier::where('name', $data['TO']['CarrierName'])->first();
-                if ($carrier) {
-                    $updatedFields['carrierId'] = $carrier->id;
-                }
-            }
-
-            if (!empty($data['TO']['FromLocationGroup'])) {
-                $fromLocationGroup = LocationGroup::where('name', $data['TO']['FromLocationGroup'])->first();
-                if ($fromLocationGroup) {
-                    $updatedFields['fromLGId'] = $fromLocationGroup->id;
-                }
-            }
-
-            if (!empty($data['TO']['ToLocationGroup'])) {
-                $toLocationGroup = LocationGroup::where('name', $data['TO']['ToLocationGroup'])->first();
-                if ($toLocationGroup) {
-                    $updatedFields['shipToLGId'] = $toLocationGroup->id;
-                }
-            }
-
-            $addressFields = [
-                'fromAddress' => $data['TO']['FromAddressStreet'] ?? $xo->fromAddress,
-                'fromCity' => $data['TO']['FromAddressCity'] ?? $xo->fromCity,
-                'fromZip' => $data['TO']['FromAddressZip'] ?? $xo->fromZip,
-                'shipToAddress' => $data['TO']['ToAddressStreet'] ?? $xo->shipToAddress,
-                'shipToCity' => $data['TO']['ToAddressCity'] ?? $xo->shipToCity,
-                'shipToZip' => $data['TO']['ToAddressZip'] ?? $xo->shipToZip,
-            ];
-
-            $updatedFields = array_merge($updatedFields, $addressFields);
-
-            $xo->update($updatedFields);
-        }
-
+    try {
+        $xo = Xo::findOrFail($id); 
+    } catch (ModelNotFoundException $e) {
         return response()->json([
-            'message' => 'Transfer Order updated successfully.',
-            'xo' => $xo,
-        ], 200);
+            'error' => 'Transfer Order not found',
+            'message' => "The Transfer Order with ID '{$id}' was not found.",
+        ], 404);
     }
+
+    if (isset($data['TO'])) {
+        $updatedFields = [];
+
+        if (!empty($data['TO']['Status'])) {
+            $status = XoStatus::where('name', $data['TO']['Status'])->first();
+            if ($status) {
+                $updatedFields['statusId'] = $status->id;
+            }
+        }
+
+        if (!empty($data['TO']['TOType'])) {
+            $toType = XoType::where('name', $data['TO']['TOType'])->first();
+            if ($toType) {
+                $updatedFields['typeId'] = $toType->id;
+            }
+        }
+
+        if (!empty($data['TO']['CarrierName'])) {
+            $carrier = Carrier::where('name', $data['TO']['CarrierName'])->first();
+            if ($carrier) {
+                $updatedFields['carrierId'] = $carrier->id;
+            }
+        }
+
+        if (!empty($data['TO']['FromLocationGroup'])) {
+            $fromLocationGroup = LocationGroup::where('name', $data['TO']['FromLocationGroup'])->first();
+            if ($fromLocationGroup) {
+                $updatedFields['fromLGId'] = $fromLocationGroup->id;
+            }
+        }
+
+        if (!empty($data['TO']['ToLocationGroup'])) {
+            $toLocationGroup = LocationGroup::where('name', $data['TO']['ToLocationGroup'])->first();
+            if ($toLocationGroup) {
+                $updatedFields['shipToLGId'] = $toLocationGroup->id;
+            }
+        }
+
+        $addressFields = [
+            'fromAddress' => $data['TO']['FromAddressStreet'] ?? $xo->fromAddress,
+            'fromCity' => $data['TO']['FromAddressCity'] ?? $xo->fromCity,
+            'fromZip' => $data['TO']['FromAddressZip'] ?? $xo->fromZip,
+            'shipToAddress' => $data['TO']['ToAddressStreet'] ?? $xo->shipToAddress,
+            'shipToCity' => $data['TO']['ToAddressCity'] ?? $xo->shipToCity,
+            'shipToZip' => $data['TO']['ToAddressZip'] ?? $xo->shipToZip,
+        ];
+
+        $updatedFields = array_merge($updatedFields, $addressFields);
+
+        $xo->update($updatedFields);
+    }
+
+    return response()->json([
+        'message' => 'Transfer Order updated successfully.',
+        'xo' => $xo,
+    ], 200);
+}
+
 
         public function showXo(Request $request): JsonResponse
     {
