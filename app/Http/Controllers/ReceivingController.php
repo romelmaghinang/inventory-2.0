@@ -63,31 +63,31 @@ class ReceivingController extends Controller
     public function receiving(ReceivingRequest $request): JsonResponse
     {
         $validatedData = $request->validated();
-
+    
         try {
             $purchaseOrder = PurchaseOrder::where('num', $validatedData['PONum'])->firstOrFail();
-
+    
             $purchaseOrderItems = PurchaseOrderItem::where('poId', $purchaseOrder->id)->get();
-
+    
             if ($purchaseOrderItems->isEmpty()) {
                 return response()->json(['error' => 'No Purchase Order Items found.'], Response::HTTP_NOT_FOUND);
             }
-
+    
             foreach ($purchaseOrderItems as $poItem) {
                 $inventory = Inventory::where('partId', $poItem->partId)->first();
-
+    
                 if ($inventory) {
                     $inventory->qtyOnHand += $validatedData['Qty'];
                     $inventory->changeQty += $validatedData['Qty'];
                     $inventory->save();
                 } else {
-                    return response()->json(['error' => 'Inventory item not found for partid ' . $poItem->partid], Response::HTTP_NOT_FOUND);
+                    return response()->json(['error' => 'Inventory item not found for partid ' . $poItem->partId], Response::HTTP_NOT_FOUND);
                 }
             }
-
+    
             $receipt = Receipt::where('poId', $purchaseOrder->id)->firstOrFail();
             $receiptItem = ReceiptItem::where('receiptId', $receipt->id)->firstOrFail();
-
+    
             $receiptItem->update([
                 'qty' => $validatedData['Qty'] ?? $receiptItem->qtyReceived,
                 'statusId' => 30,
@@ -96,9 +96,7 @@ class ReceivingController extends Controller
                 'packageCount' => $validatedData['ShippingPackageCount'] ?? $receiptItem->packageCount,
                 'dateLastModified' => Carbon::now(),
             ]);
-
-          
-
+    
             if (!empty($validatedData['Location'])) {
                 $location = Location::where('name', $validatedData['Location'])->first();
                 if (!$location) {
@@ -106,33 +104,45 @@ class ReceivingController extends Controller
                 }
                 $receiptItem->locationId = $location->id;
             }
-
+    
             if (!empty($validatedData['ShippingCarrier'])) {
                 $carrier = Carrier::where('name', $validatedData['ShippingCarrier'])->first();
                 if ($carrier) {
                     $receiptItem->carrierId = $carrier->id;
                 }
             }
-
+    
             if (!empty($validatedData['ShippingCarrierService'])) {
                 $carrierService = CarrierService::where('name', $validatedData['ShippingCarrierService'])->first();
                 if ($carrierService) {
                     $receiptItem->carrierServiceId = $carrierService->id;
                 }
             }
-
+    
             $receiptItem->save();
-
+    
+            $relatedData = [
+                'purchaseOrder' => $purchaseOrder,
+                'purchaseOrderItems' => $purchaseOrderItems,
+                'receiptItems' => $receipt->items,
+                'inventory' => Inventory::whereIn('partId', $purchaseOrderItems->pluck('partId'))->get(),
+                'location' => $location ?? null,
+                'carrier' => $carrier ?? null,
+                'carrierService' => $carrierService ?? null,
+            ];
+    
             return response()->json([
                 'message' => 'Receiving successfully',
                 'receiptData' => $receipt,
                 'updatedReceiptItem' => $receiptItem->fresh(),
+                'relatedData' => $relatedData,
             ], Response::HTTP_OK);
-
+    
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'Purchase Order, Receipt, or Receipt Item not found.'], Response::HTTP_NOT_FOUND);
         }
     }
+    
 
   /**
  * @OA\Get(
@@ -191,59 +201,73 @@ class ReceivingController extends Controller
     {
         $numFromQuery = $request->query('num');
         $numFromBody = $request->input('num');
-
+    
         $createdBefore = $request->query('createdBefore');
         $createdAfter = $request->query('createdAfter');
-
+    
         $num = $numFromQuery ?? $numFromBody;
-
+    
         if ($num) {
             $request->validate([
                 'num' => 'required|string|exists:receipt,num',
             ]);
-
+    
             $receipt = Receipt::where('num', $num)->first();
-
+    
             if (!$receipt) {
                 return response()->json(['message' => 'Receipt not found.'], Response::HTTP_NOT_FOUND);
             }
-
+    
             $receiptItems = ReceiptItem::where('receiptId', $receipt->id);
-
+    
             if ($createdBefore) {
                 $request->validate(['createdBefore' => 'date|before_or_equal:today']);
                 $receiptItems->whereDate('dateCreated', '<=', $createdBefore);
             }
-
+    
             if ($createdAfter) {
                 $request->validate(['createdAfter' => 'date|before_or_equal:today']);
                 $receiptItems->whereDate('dateCreated', '>=', $createdAfter);
             }
-
+    
+            $relatedData = [
+                'receipt' => $receipt,
+                'receiptItems' => $receiptItems->get(),
+                'purchaseOrder' => PurchaseOrder::find($receipt->poId),
+                'inventory' => Inventory::whereIn('partId', $receiptItems->pluck('partId'))->get(),
+            ];
+    
             return response()->json([
                 'message' => 'Receipt items retrieved successfully.',
-                'data' => $receiptItems->get()
+                'data' => $receiptItems->get(),
+                'relatedData' => $relatedData,
             ], Response::HTTP_OK);
         }
-
+    
         $allReceiptItems = ReceiptItem::query();
-
+    
         if ($createdBefore) {
             $request->validate(['createdBefore' => 'date|before_or_equal:today']);
             $allReceiptItems->whereDate('dateCreated', '<=', $createdBefore);
         }
-
+    
         if ($createdAfter) {
             $request->validate(['createdAfter' => 'date|before_or_equal:today']);
             $allReceiptItems->whereDate('dateCreated', '>=', $createdAfter);
         }
-
+    
+        $relatedData = [
+            'allReceiptItems' => $allReceiptItems->get(),
+            'inventory' => Inventory::whereIn('partId', $allReceiptItems->pluck('partId'))->get(),
+        ];
+    
         return response()->json([
             'message' => 'All receipt items retrieved successfully.',
-            'data' => $allReceiptItems->get()
+            'data' => $allReceiptItems->get(),
+            'relatedData' => $relatedData,
         ], Response::HTTP_OK);
     }
-
+ 
     public function delete (Request $request): JsonResponse
     {
         $deleteRequest = Validator::make(

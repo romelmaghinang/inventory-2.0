@@ -91,10 +91,16 @@ class LocationController extends Controller
             [
                 'message' => 'Location Created Successfully!',
                 'location' => $location,
+                'relatedData' => [
+                    'locationType' => $locationType,
+                    'locationGroup' => $locationGroup,
+                    'customer' => $customer,
+                ],
             ],
             Response::HTTP_CREATED
         );
     }
+
     /**
      * @OA\Put(
      *     path="/api/location",
@@ -155,30 +161,55 @@ class LocationController extends Controller
             'receivable' => 'nullable|boolean',
             'sortOrder' => 'nullable|integer',
         ]);
-    
+
         $location = Location::findOrFail($id);
-    
-        $location->update($request->only([
-            'location',
-            'description',
-            'type',
-            'locationGroup',
-            'customerName',
-            'active',
-            'available',
-            'pickable',
-            'receivable',
-            'sortOrder',
-        ]));
-    
+
+        $locationType = null;
+        if ($request->has('type')) {
+            $locationType = LocationType::where('name', $request->type)->firstOrFail();
+        }
+
+        $locationGroup = null;
+        if ($request->has('locationGroup')) {
+            $locationGroup = LocationGroup::firstOrCreate(['name' => $request->locationGroup]);
+        }
+
+        $customer = null;
+        if ($request->has('customerName')) {
+            $customer = Customer::where('name', $request->customerName)->firstOrFail();
+        }
+
+        $location->update(
+            $request->only([
+                'location',
+                'description',
+                'active',
+                'available',
+                'pickable',
+                'receivable',
+                'sortOrder',
+            ]) +
+            [
+                'typeId' => $locationType?->id,
+                'locationGroupId' => $locationGroup?->id,
+                'defaultCustomerId' => $customer?->id,
+            ]
+        );
+
         return response()->json(
             [
                 'message' => 'Location updated successfully!',
                 'location' => $location,
+                'relatedData' => [
+                    'locationType' => $locationType,
+                    'locationGroup' => $locationGroup,
+                    'customer' => $customer,
+                ],
             ],
             Response::HTTP_OK
         );
     }
+
     
 /**
  * @OA\Get(

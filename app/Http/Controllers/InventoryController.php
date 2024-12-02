@@ -74,49 +74,49 @@ class InventoryController extends Controller
     public function store(StoreInventoryRequest $storeInventoryRequest): JsonResponse
     {
         $uom = UnitOfMeasure::where('name', $storeInventoryRequest->UOM)->first();
-    
+
         if (!$uom) {
             return response()->json(['message' => 'UOM not found'], Response::HTTP_BAD_REQUEST);
         }
-    
+
         $partTracking = PartTracking::where('name', $storeInventoryRequest->TrackingType)->first();
-    
+
         if (!$partTracking) {
             return response()->json(['message' => 'Part Tracking not found'], Response::HTTP_BAD_REQUEST);
         }
-    
+
         $part = Part::where('num', $storeInventoryRequest->PartNumber)->first();
-    
+
         if (!$part) {
             $part = Part::create([
                 'num' => $storeInventoryRequest->PartNumber,
                 'activeFlag' => 1,
                 'uomId' => $uom->id,
-                'typeId' => $partTracking->typeId, 
+                'typeId' => $partTracking->typeId,
             ]);
         } else {
             $part->update([
                 'uomId' => $uom->id,
-                'typeId' => $partTracking->typeId, 
+                'typeId' => $partTracking->typeId,
             ]);
         }
-    
+
         $location = Location::where('name', $storeInventoryRequest->Location)->firstOrFail();
-    
+
         $existingInventory = Inventory::where('partId', $part->id)
             ->where('begLocationId', $location->id)
             ->first();
-    
+
         if ($existingInventory) {
             $existingInventory->update([
                 'changeQty' => $storeInventoryRequest->Qty,
                 'qtyOnHand' => $existingInventory->qtyOnHand + $storeInventoryRequest->Qty,
                 'dateCreated' => $storeInventoryRequest->Date,
                 'cost' => $storeInventoryRequest->Cost,
-                'partTrackingId' => $partTracking->id, 
-                'typeId' => $partTracking->typeId, 
+                'partTrackingId' => $partTracking->id,
+                'typeId' => $partTracking->typeId,
             ]);
-    
+
             $partCost = PartCost::where('partId', $part->id)->first();
             $partCost->update([
                 'avgCost' => $storeInventoryRequest->Cost,
@@ -124,20 +124,28 @@ class InventoryController extends Controller
                 'qty' => $partCost->qty + $storeInventoryRequest->Qty,
                 'totalCost' => $partCost->totalCost + ($storeInventoryRequest->Cost * $storeInventoryRequest->Qty),
             ]);
-    
+
             $tag = Tag::where('partId', $part->id)
                 ->where('locationId', $location->id)
                 ->first();
-    
+
             $tag->update([
                 'qty' => $tag->qty + $storeInventoryRequest->Qty,
                 'dateLastModified' => now(),
             ]);
-    
+
             return response()->json(
                 [
                     'message' => 'Inventory has been updated',
-                    'inventory' => $existingInventory,
+                    'related' => [
+                        'uom' => $uom,
+                        'partTracking' => $partTracking,
+                        'part' => $part,
+                        'location' => $location,
+                        'inventory' => $existingInventory,
+                        'partCost' => $partCost,
+                        'tag' => $tag,
+                    ],
                 ],
                 Response::HTTP_OK
             );
@@ -150,12 +158,12 @@ class InventoryController extends Controller
                 'qtyOnHand' => $storeInventoryRequest->Qty,
                 'dateCreated' => $storeInventoryRequest->Date,
                 'partTrackingId' => $partTracking->id,
-                'locationGroupId' => $location->locationGroupId, 
+                'locationGroupId' => $location->locationGroupId,
                 'cost' => $storeInventoryRequest->Cost,
-                'typeId' => $partTracking->typeId, 
+                'typeId' => $partTracking->typeId,
             ]);
-    
-            PartCost::create([
+
+            $partCost = PartCost::create([
                 'avgCost' => $storeInventoryRequest->Cost,
                 'dateCreated' => $storeInventoryRequest->Date,
                 'dateLastModified' => now(),
@@ -163,7 +171,7 @@ class InventoryController extends Controller
                 'totalCost' => $storeInventoryRequest->Cost * $storeInventoryRequest->Qty,
                 'partId' => $part->id,
             ]);
-    
+
             $tag = Tag::create([
                 'dateCreated' => now(),
                 'dateLastCycleCount' => now(),
@@ -179,23 +187,23 @@ class InventoryController extends Controller
                 'typeId' => 0,
                 'locationId' => $location->id,
             ]);
-    
+
             if ($storeInventoryRequest->TrackingType === 'Serial Number') {
                 $lastSerialNum = SerialNum::where('partTrackingId', $inventory->partTrackingId)
                     ->orderBy('serialNum', 'desc')
                     ->first();
-    
+
                 $lastNum = $lastSerialNum ? (int)substr($lastSerialNum->serialNum, -5) : 0;
-    
+
                 for ($i = 1; $i <= $storeInventoryRequest->Qty; $i++) {
                     $nextNum = $lastNum + $i;
                     $serialNum = sprintf('TB-1000-%05d', $nextNum);
-    
+
                     $serial = Serial::create([
                         'committedFlag' => 0,
                         'tagId' => $tag->id,
                     ]);
-    
+
                     SerialNum::create([
                         'serialId' => $serial->id,
                         'serialNum' => $serialNum,
@@ -203,17 +211,25 @@ class InventoryController extends Controller
                     ]);
                 }
             }
-    
+
             return response()->json(
                 [
                     'message' => 'Inventory Created Successfully!',
-                    'inventory' => $inventory,
                     'input' => $storeInventoryRequest->validated(),
+                    'relatedData' => [
+                        'uom' => $uom,
+                        'partTracking' => $partTracking,
+                        'part' => $part,
+                        'location' => $location,
+                        'inventory' => $inventory,
+                        'tag' => $tag,
+                    ],
                 ],
                 Response::HTTP_CREATED
             );
         }
     }
+
 
 /**
  * @OA\Get(

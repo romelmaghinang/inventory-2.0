@@ -130,11 +130,11 @@ class SalesOrderController extends Controller
         $carrierService = CarrierService::where('name', $storeSalesOrderRequest->carrierService)->firstOrFail();
         $taxRate = TaxRate::where('name', $storeSalesOrderRequest->taxRateName)->firstOrFail();
         $shipterms = ShipTerms::where('name', $storeSalesOrderRequest->shippingTerms)->firstOrFail();
-    
+
         $customer = Customer::firstOrCreate(['name' => $storeSalesOrderRequest->customerName]);
-    
+
         $soNum = $storeSalesOrderRequest->soNum;
-    
+
         if (!empty($soNum)) {
             if (SalesOrder::where('num', $soNum)->exists()) {
                 return response()->json(['message' => 'The Sales Order number must be unique.'], Response::HTTP_CONFLICT);
@@ -142,16 +142,16 @@ class SalesOrderController extends Controller
             $newNum = $soNum;
         } else {
             $lastSalesOrder = SalesOrder::orderBy('num', 'desc')->first();
-            $nextNum = (string)((optional($lastSalesOrder)->num ?? 10000) + 1); 
-    
+            $nextNum = (string)((optional($lastSalesOrder)->num ?? 10000) + 1);
+
             while (SalesOrder::where('num', $nextNum)->exists()) {
-                $nextNum = (string)(intval($nextNum) + 1); 
+                $nextNum = (string)(intval($nextNum) + 1);
             }
             $newNum = $nextNum;
         }
-    
+
         $locationGroup = LocationGroup::where('name', $storeSalesOrderRequest->locationGroupName)->firstOrFail();
-    
+
         $salesOrder = SalesOrder::create(
             $storeSalesOrderRequest->only([
                 'customerContact',
@@ -196,14 +196,14 @@ class SalesOrderController extends Controller
                 'num' => $newNum,
             ]
         );
-    
+
         $salesOrderItems = [];
-    
+
         foreach ($storeSalesOrderRequest->validated()['items'] as $item) {
             $product = Product::where('num', $item['productNumber'])->firstOrFail();
             $qbClass = qbClass::where('name', $item['itemQuickBooksClassName'])->firstOrFail();
             $uom = UnitOfMeasure::where('name', $item['uom'])->firstOrFail();
-    
+
             $transformedItem = [
                 'note' => $item['note'],
                 'typeId' => $item['soItemTypeId'],
@@ -224,27 +224,39 @@ class SalesOrderController extends Controller
                 'qbClassId' => $qbClass->id,
                 'statusId' => 10,
             ];
-    
+
             $salesOrderItems[] = SalesOrderItems::create($transformedItem);
         }
-    
-        $pick = Pick::create(
-            [
-                'num' => $salesOrder->num,
-                'locationGroupId' => $locationGroup->id,
-            ]
-        );
-    
-        return response()->json(
-            [
-                'message' => 'Sales Order created successfully',
-                'salesOrderData' => $salesOrder,
-                'salesOrderItemData' => $salesOrderItems,
-                'pick' => $pick,
-            ],
-            Response::HTTP_CREATED
-        );
+
+        $pick = Pick::create([
+            'num' => $salesOrder->num,
+            'locationGroupId' => $locationGroup->id,
+        ]);
+
+        $relatedData = [
+            'billToCountry' => $billToCountry,
+            'billToState' => $billToState,
+            'shipToCountry' => $shipToCountry,
+            'shipToState' => $shipToState,
+            'qbClass' => $qbclass,
+            'currency' => $currency,
+            'carrier' => $carrier,
+            'carrierService' => $carrierService,
+            'taxRate' => $taxRate,
+            'shipTerms' => $shipterms,
+            'customer' => $customer,
+            'locationGroup' => $locationGroup,
+        ];
+
+        return response()->json([
+            'message' => 'Sales Order created successfully',
+            'salesOrderData' => $salesOrder,
+            'salesOrderItemData' => $salesOrderItems,
+            'pick' => $pick,
+            'relatedData' => $relatedData,
+        ], Response::HTTP_CREATED);
     }
+
     
     
     /**
@@ -450,7 +462,7 @@ class SalesOrderController extends Controller
 
         $customer = Customer::firstOrCreate(['name' => $updateSalesOrderRequest->customerName]);
 
-        $salesOrder = SalesOrder::findOrFail($updateSalesOrderRequest->soId); 
+        $salesOrder = SalesOrder::findOrFail($updateSalesOrderRequest->soId);
 
         $salesOrder->update(
             $updateSalesOrderRequest->only([
@@ -527,15 +539,31 @@ class SalesOrderController extends Controller
             $salesOrderItems[] = SalesOrderItems::create($transformedItem);
         }
 
+        $relatedData = [
+            'billToCountry' => $billToCountry,
+            'billToState' => $billToState,
+            'shipToCountry' => $shipToCountry,
+            'shipToState' => $shipToState,
+            'qbClass' => $qbclass,
+            'currency' => $currency,
+            'carrier' => $carrier,
+            'carrierService' => $carrierService,
+            'taxRate' => $taxRate,
+            'shipTerms' => $shipterms,
+            'customer' => $customer,
+        ];
+
         return response()->json(
             [
                 'message' => 'Sales Order updated successfully',
                 'salesOrderData' => $salesOrder,
                 'salesOrderItemData' => $salesOrderItems,
+                'relatedData' => $relatedData,
             ],
             Response::HTTP_OK
         );
     }
+
 
     /**
      * @OA\Delete(

@@ -88,55 +88,49 @@ class VendorController extends Controller
         $carrier = Carrier::where('name', $storeVendorRequest->defaultCarrier)->firstOrFail();
         $shipterms = ShipTerms::where('name', $storeVendorRequest->defaultShippingTerms)->firstOrFail();
         $vendorStatus = VendorStatus::where('name', $storeVendorRequest->status)->firstOrFail();
-
+    
         $address = Address::create(
-            $storeVendorRequest->only(
-                [
-                    'address',
-                    'city',
-                    'zip',
-                ]
-            )
-                +
-                [
-                    'typeId' => $storeVendorRequest->addressType,
-                    'defaultFlag' => $storeVendorRequest->isDefault,
-                    'stateId' => $state->id,
-                    'countryId' => $country->id,
-                    'name' => $storeVendorRequest->addressName,
-                ]
+            $storeVendorRequest->only(['address', 'city', 'zip']) +
+            [
+                'typeId' => $storeVendorRequest->addressType,
+                'defaultFlag' => $storeVendorRequest->isDefault,
+                'stateId' => $state->id,
+                'countryId' => $country->id,
+                'name' => $storeVendorRequest->addressName,
+            ]
         );
-
+    
         $vendor = Vendor::create(
-            $storeVendorRequest->only(
-                [
-                    'name',
-                    'currencyRate',
-                    'minOrderAmount',
-                    'url',
-                ]
-            ) +
-                [
-                    'currencyId' => $currency->id,
-                    'defaultCarrierId' => $carrier->id,
-                    'defaultShipTermsId' => $shipterms->id,
-                    'statusId' => $vendorStatus->id,
-                    'accountNum' => $storeVendorRequest->accountNumber,
-                    'activeFlag' => $storeVendorRequest->active,
-                    'note' => $storeVendorRequest->alertNotes,
-                ]
+            $storeVendorRequest->only(['name', 'currencyRate', 'minOrderAmount', 'url']) +
+            [
+                'currencyId' => $currency->id,
+                'defaultCarrierId' => $carrier->id,
+                'defaultShipTermsId' => $shipterms->id,
+                'statusId' => $vendorStatus->id,
+                'accountNum' => $storeVendorRequest->accountNumber,
+                'activeFlag' => $storeVendorRequest->active,
+                'note' => $storeVendorRequest->alertNotes,
+            ]
         );
-
+    
         return response()->json(
             [
                 'message' => 'Vendor Created Successfully!',
                 'address' => $address,
                 'vendor' => $vendor,
+                'relatedData' => [
+                    'state' => $state,
+                    'country' => $country,
+                    'currency' => $currency,
+                    'carrier' => $carrier,
+                    'shipterms' => $shipterms,
+                    'vendorStatus' => $vendorStatus,
+                ],
             ],
             Response::HTTP_CREATED
         );
     }
-
+ 
  /**
  * @OA\Get(
  *     path="/api/vendor",
@@ -279,18 +273,18 @@ class VendorController extends Controller
      *      )
      * )
      */
-    public function update(UpdateVendorRequest $updateVendorRequest, $id): JsonResponse
+        public function update(UpdateVendorRequest $updateVendorRequest, $id): JsonResponse
     {
         $vendor = Vendor::findOrFail($id);
-    
+
         $state = State::where('name', $updateVendorRequest->state)->firstOrFail();
         $country = Country::where('name', $updateVendorRequest->country)->firstOrFail();
         $currency = Currency::where('name', $updateVendorRequest->currencyName)->firstOrFail();
         $carrier = Carrier::where('name', $updateVendorRequest->defaultCarrier)->firstOrFail();
         $shipterms = ShipTerms::where('name', $updateVendorRequest->defaultShippingTerms)->firstOrFail();
         $vendorStatus = VendorStatus::where('name', $updateVendorRequest->status)->firstOrFail();
-    
-        $address = Address::firstOrCreate(
+
+        $address = Address::updateOrCreate(
             ['addressName' => $updateVendorRequest->addressName],
             [
                 'address' => $updateVendorRequest->address,
@@ -303,16 +297,9 @@ class VendorController extends Controller
                 'countryId' => $country->id,
             ]
         );
-    
+
         $vendor->update(
-            $updateVendorRequest->only(
-                [
-                    'name',
-                    'currencyRate',
-                    'minOrderAmount',
-                    'url',
-                ]
-            ) + [
+            $updateVendorRequest->only(['name', 'currencyRate', 'minOrderAmount', 'url']) + [
                 'currencyId' => $currency->id,
                 'defaultCarrierId' => $carrier->id,
                 'defaultShipTermsId' => $shipterms->id,
@@ -322,17 +309,25 @@ class VendorController extends Controller
                 'note' => $updateVendorRequest->alertNotes,
             ]
         );
-    
+
         return response()->json(
             [
                 'message' => 'Vendor Updated Successfully!',
                 'vendor' => $vendor,
                 'address' => $address,
+                'relatedData' => [
+                    'state' => $state,
+                    'country' => $country,
+                    'currency' => $currency,
+                    'carrier' => $carrier,
+                    'shipterms' => $shipterms,
+                    'vendorStatus' => $vendorStatus,
+                ],
             ],
             Response::HTTP_OK
         );
     }
-    
+
 
 
     /**

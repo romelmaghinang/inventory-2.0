@@ -204,11 +204,20 @@ class TransferOrderController extends Controller
 
 
         }
+        $relatedData = [
+            'status' => $status,
+            'fromLocationGroup' => $fromLocationGroup,
+            'toType' => $toType,
+            'carrier' => $carrier,
+            'country' => $country,
+            'toLocationGroup' => $toLocationGroup,
+        ];
 
         return response()->json([
             'message' => 'Transfer Order successfully created.',
             'xo' => $xo,
             'xoItems' => $xoItem,
+            'relatedData' => $relatedData,
         ], 201);
     }
     public function update(UpdateTransferOrderRequest $request, $id): JsonResponse
@@ -296,10 +305,18 @@ class TransferOrderController extends Controller
 
         $xo->update($updatedFields);
     }
+    $relatedData = [
+        'status' => $status,
+        'fromLocationGroup' => $fromLocationGroup,
+        'toType' => $toType,
+        'carrier' => $carrier,
+        'toLocationGroup' => $toLocationGroup,
+    ];
 
     return response()->json([
         'message' => 'Transfer Order updated successfully.',
         'xo' => $xo,
+        'relatedData' => $relatedData,
     ], 200);
 }
 

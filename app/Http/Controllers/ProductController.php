@@ -109,14 +109,24 @@ class ProductController extends Controller
                 ]
         );
 
+        $relatedPart = $part;
+        $relatedSoItem = $soItem;
+        $relatedUom = $uom;
+
         return response()->json(
             [
-                'message' => 'Product Create Successfully!',
+                'message' => 'Product Created Successfully!',
                 'product' => $product,
+                'relatedData' => [
+                    'part' => $relatedPart,
+                    'salesOrderItemType' => $relatedSoItem,
+                    'unitOfMeasure' => $relatedUom
+                ]
             ],
             Response::HTTP_CREATED
         );
     }
+
 
 /**
  * @OA\Get(
@@ -248,18 +258,58 @@ class ProductController extends Controller
     public function update(UpdateProductRequest $updateProductRequest, $id): JsonResponse
     {
         $product = Product::find($id);
-    
+
         if (!$product) {
             return response()->json(['message' => 'Product not found'], Response::HTTP_NOT_FOUND);
         }
-    
-        $product->update($updateProductRequest->validated());
-    
-        return response()->json([
-            'message' => 'Product updated successfully!',
-            'product' => $product,
-        ], Response::HTTP_OK);
+
+        $part = Part::where('num', $updateProductRequest->partNumber)->firstOrFail();
+        $soItem = SalesOrderItemType::where('name', $updateProductRequest->productSoItemType)->firstOrFail();
+        $uom = UnitOfMeasure::where('name', $updateProductRequest->uom)->firstOrFail();
+
+        $product->update(
+            $updateProductRequest->only(
+                [
+                    'price',
+                    'weight',
+                    'width',
+                    'height',
+                    'length',
+                    'alertNote',
+                    'cf'
+                ]
+            ) +
+                [
+                    'num' => $updateProductRequest->productNumber,
+                    'description' => $updateProductRequest->productDescription,
+                    'details' => $updateProductRequest->productDetails,
+                    'activeFlag' => $updateProductRequest->active,
+                    'taxableFlag' => $updateProductRequest->taxable,
+                    'showSoComboFlag' => $updateProductRequest->combo,
+                    'sellableInOtherUoms' => $updateProductRequest->allowUom,
+                    'url' => $updateProductRequest->productUrl,
+                    'upc' => $updateProductRequest->productUpc,
+                    'sku' => $updateProductRequest->productSku,
+                    'defaultSoItemType' => $soItem->id,
+                    'uomId' => $uom->id,
+                    'partId' => $part->id,
+                ]
+        );
+
+        return response()->json(
+            [
+                'message' => 'Product updated successfully!',
+                'product' => $product,
+                'relatedData' => [
+                    'part' => $part,
+                    'salesOrderItemType' => $soItem,
+                    'unitOfMeasure' => $uom
+                ]
+            ],
+            Response::HTTP_OK
+        );
     }
+
     
 
 

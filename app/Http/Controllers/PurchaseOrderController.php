@@ -178,23 +178,23 @@ class PurchaseOrderController extends Controller
     {
         $models = $this->handleFindModels($request);
         if ($models instanceof JsonResponse) return $models;
-    
+
         $taxRateId = optional(TaxRate::where('name', $request->taxRateName)->first())->id;
-    
+
         $poNum = $request->PONum;
-    
+
         if ($poNum) {
             $existingOrder = PurchaseOrder::where('num', $poNum)->first();
             if ($existingOrder) {
                 return response()->json(['error' => 'The Purchase Order number must be unique.'], Response::HTTP_CONFLICT);
             }
         }
-    
+
         $prefix = '5';
         $lastOrder = PurchaseOrder::where('num', 'like', $prefix . '%')->orderBy('num', 'desc')->first();
         $newNum = $lastOrder ? intval(substr($lastOrder->num, 1)) + 1 : 10000;
         $finalNum = $poNum ?: $prefix . str_pad($newNum, 4, '0', STR_PAD_LEFT);
-    
+
         $purchaseOrder = PurchaseOrder::create(array_merge(
             $request->only([
                 'buyer', 'dateIssued', 'dateConfirmed', 'dateCompleted', 'dateFirstShip',
@@ -225,18 +225,17 @@ class PurchaseOrderController extends Controller
                 'dateLastModified' => Carbon::now(),
             ]
         ));
-    
+
         $poId = $purchaseOrder->id;
-    
         $purchaseOrderItems = collect($request->validated()['items'])->map(function ($item) use ($poId) {
             $uom = UnitOfMeasure::where('name', $item['UOM'])->firstOrFail();
             $qbClass = qbClass::where('name', $item['QuickBooksClassName'])->firstOrFail();
-    
+
             $part = \App\Models\Part::where('num', $item['PartNumber'])->first();
             if (!$part) {
                 throw new ModelNotFoundException("Part not found for PartNumber: {$item['PartNumber']}");
             }
-    
+
             return PurchaseOrderItem::create([
                 'description' => '',
                 'note' => $item['Note'],
@@ -260,7 +259,7 @@ class PurchaseOrderController extends Controller
                 'dateLastModified' => Carbon::now(),
             ]);
         });
-    
+
         $receipt = Receipt::create([
             'locationGroupId' => $models['locationGroup']->id,
             'poId' => $poId,
@@ -269,7 +268,7 @@ class PurchaseOrderController extends Controller
             'typeId' => 10,
             'userId' => 0,
         ]);
-    
+
         $receiptItems = $purchaseOrderItems->map(function ($poItem) use ($receipt) {
             return ReceiptItem::create([
                 'receiptId' => $receipt->id,
@@ -285,15 +284,28 @@ class PurchaseOrderController extends Controller
                 'dateLastModified' => Carbon::now(),
             ]);
         });
-    
+
         return response()->json([
             'message' => 'Purchase Order successfully created',
             'purchaseOrderData' => $purchaseOrder,
             'purchaseOrderItemData' => $purchaseOrderItems,
             'receiptData' => $receipt,
             'receiptItemData' => $receiptItems,
+            'relatedData' => [
+                'locationGroup' => $models['locationGroup'],
+                'carrier' => $models['carrier'],
+                'currency' => $models['currency'],
+                'shipTerms' => $models['shipTerms'],
+                'remitCountry' => $models['remitCountry'],
+                'remitState' => $models['remitState'],
+                'shipToCountry' => $models['shipToCountry'],
+                'shipToState' => $models['shipToState'],
+                'qbClass' => $models['qbClass'],
+                'taxRate' => $taxRateId ? TaxRate::find($taxRateId) : null
+            ]
         ], Response::HTTP_CREATED);
     }
+
     
     /**
      * @OA\Get(
@@ -429,16 +441,38 @@ class PurchaseOrderController extends Controller
     public function update(UpdatePurchaseOrderRequest $request, $id): JsonResponse
     {
         $purchaseOrder = PurchaseOrder::find($id);
-    
+        
         if (!$purchaseOrder) {
             return response()->json(['message' => 'Purchase Order not found'], Response::HTTP_NOT_FOUND);
         }
-    
+        
         $purchaseOrder->status = $request->input('status');
         $purchaseOrder->save();
     
-        return response()->json(['success' => true, 'message' => 'Purchase Order updated successfully'], Response::HTTP_OK);
+        $relatedData = [
+            'locationGroup' => $purchaseOrder->locationGroup,
+            'carrier' => $purchaseOrder->carrier,
+            'currency' => $purchaseOrder->currency,
+            'shipTerms' => $purchaseOrder->shipTerms,
+            'remitCountry' => $purchaseOrder->remitCountry,
+            'remitState' => $purchaseOrder->remitState,
+            'shipToCountry' => $purchaseOrder->shipToCountry,
+            'shipToState' => $purchaseOrder->shipToState,
+            'qbClass' => $purchaseOrder->qbClass,
+            'taxRate' => $purchaseOrder->taxRate,
+            'purchaseOrderItems' => $purchaseOrder->items,
+            'receipt' => $purchaseOrder->receipt,
+            'receiptItems' => $purchaseOrder->receipt->items,
+        ];
+    
+        return response()->json([
+            'success' => true,
+            'message' => 'Purchase Order updated successfully',
+            'purchaseOrderData' => $purchaseOrder,
+            'relatedData' => $relatedData
+        ], Response::HTTP_OK);
     }
+    
     
 
     /**

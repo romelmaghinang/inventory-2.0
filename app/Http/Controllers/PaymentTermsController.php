@@ -73,10 +73,15 @@ class PaymentTermsController extends Controller
             ]
         );
 
+        $relatedPaymentTermsType = $paymentTermsType;
+
         return response()->json(
             [
-                'message' => 'Payment Terms Created Successfuly!',
-                'data' => $paymentTerms
+                'message' => 'Payment Terms Created Successfully!',
+                'data' => $paymentTerms,
+                'relatedData' => [
+                    'paymentTermsType' => $relatedPaymentTermsType
+                ]
             ],
             Response::HTTP_CREATED
         );
@@ -181,14 +186,20 @@ public function show(Request $request): JsonResponse
             ]
         );
     
+        $relatedPaymentTermsType = $paymentTermsType;
+    
         return response()->json(
             [
                 'message' => 'Payment Terms Updated Successfully!',
-                'data' => $paymentTerms
+                'data' => $paymentTerms,
+                'relatedData' => [
+                    'paymentTermsType' => $relatedPaymentTermsType
+                ]
             ],
             Response::HTTP_OK
         );
     }
+    
     /**
      * Remove the specified resource from storage.
      */

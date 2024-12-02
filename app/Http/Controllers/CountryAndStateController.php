@@ -142,7 +142,6 @@ class CountryAndStateController extends Controller
     
         $state = State::findOrFail($id);
     
-        // Update the state
         $state->update([
             'name' => $validated['stateName'],
             'code' => $validated['abbreviation'],

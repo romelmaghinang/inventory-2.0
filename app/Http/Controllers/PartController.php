@@ -72,25 +72,22 @@ class PartController extends Controller
  *     )
  * )
  */
-     public function store(StorePartRequest $storePartRequest): JsonResponse
-    {
-        $uom = UnitOfMeasure::where('name', $storePartRequest->uom)->firstOrFail();
-        $partType = PartType::where('name', $storePartRequest->partType)->firstOrFail();
-        $poItemType = PurchaseOrderItemType::where('name', $storePartRequest->poItemType)->firstOrFail();
+    public function store(StorePartRequest $storePartRequest): JsonResponse
+        {
+            $uom = UnitOfMeasure::where('name', $storePartRequest->uom)->firstOrFail();
+            $partType = PartType::where('name', $storePartRequest->partType)->firstOrFail();
+            $poItemType = PurchaseOrderItemType::where('name', $storePartRequest->poItemType)->firstOrFail();
 
-        $part = Part::create(
-            $storePartRequest->only(
-                [
+            $part = Part::create(
+                $storePartRequest->only([
                     'partDetails',
                     'upc',
                     'weight',
                     'width',
                     'consumptionRate',
                     'revision',
-                    'length'
-                ]
-            ) +
-                [
+                    'length',
+                ]) + [
                     'num' => $storePartRequest->partNumber,
                     'description' => $storePartRequest->partDescription,
                     'uomId' => $uom->id,
@@ -101,33 +98,40 @@ class PartController extends Controller
                     'url' => $storePartRequest->pictureUrl,
                     'defaultPoItemTypeId' => $poItemType->id,
                 ]
-        );
+            );
 
-        $partTracking = PartTracking::where('name', $storePartRequest->primaryTracking)->firstOrFail();
+            $partTracking = PartTracking::where('name', $storePartRequest->primaryTracking)->firstOrFail();
 
-        $partToTracking = PartToTracking::create(
-            $storePartRequest->only('nextValue') +
-                [
+            $partToTracking = PartToTracking::create(
+                $storePartRequest->only('nextValue') + [
                     'partTrackingId' => $partTracking->id,
                     'partId' => $part->id,
                 ]
-        );
+            );
 
-        if ($storePartRequest->primaryTracking === 'Serial Number') {
-            $serialNumber = SerialNumber::createUniqueSerialNumber($partToTracking->partTrackingId);
+            $serialNumber = null;
+            if ($storePartRequest->primaryTracking === 'Serial Number') {
+                $serialNumber = SerialNumber::createUniqueSerialNumber($partToTracking->partTrackingId);
+            }
+
+            return response()->json(
+                [
+                    'message' => 'Part Created Successfully!',
+                    'partData' => $part,
+                    'partTrackingData' => $partTracking,
+                    'partToTrackingData' => $partToTracking,
+                    'serialNum' => $serialNumber,
+                    'relatedData' => [
+                        'uom' => $uom,
+                        'partType' => $partType,
+                        'poItemType' => $poItemType,
+                        'partTracking' => $partTracking,
+                    ],
+                ],
+                Response::HTTP_CREATED
+            );
         }
 
-        return response()->json(
-            [
-                'message' => 'Part Created Successfully!',
-                'partData' => $part,
-                'partTrackingData' => $partTracking,
-                'partToTrackingData' => $partToTracking,
-                'serialNum' => $serialNumber ?? null,
-            ],
-            Response::HTTP_CREATED
-        );
-    }
     /**
      * @OA\Get(
      *     path="/api/part",
@@ -254,25 +258,22 @@ class PartController extends Controller
     public function update($id, UpdatePartRequest $request): JsonResponse
     {
         $part = Part::findOrFail($id);
-    
+
         $uom = UnitOfMeasure::where('name', $request->uom)->firstOrFail();
         $partType = PartType::where('name', $request->partType)->firstOrFail();
         $poItemType = PurchaseOrderItemType::where('name', $request->poItemType)->firstOrFail();
         $partTrackingType = PartTrackingType::where('name', $request->tracks)->firstOrFail();
-    
+
         $part->update(
-            $request->only(
-                [
-                    'partDetails',
-                    'upc',
-                    'weight',
-                    'width',
-                    'consumptionRate',
-                    'revision',
-                    'length'
-                ]
-            ) +
-            [
+            $request->only([
+                'partDetails',
+                'upc',
+                'weight',
+                'width',
+                'consumptionRate',
+                'revision',
+                'length',
+            ]) + [
                 'num' => $request->partNumber,
                 'description' => $request->partDescription,
                 'uomId' => $uom->id,
@@ -284,19 +285,22 @@ class PartController extends Controller
                 'defaultPoItemTypeId' => $poItemType->id,
             ]
         );
-    
-    
-    
+
         return response()->json(
             [
                 'message' => 'Product Updated Successfully!',
                 'partData' => $part,
-        
+                'relatedData' => [
+                    'uom' => $uom,
+                    'partType' => $partType,
+                    'poItemType' => $poItemType,
+                    'partTrackingType' => $partTrackingType,
+                ],
             ],
             Response::HTTP_OK
         );
     }
-    
+
  
     public function destroy(Request $request): JsonResponse
     {
