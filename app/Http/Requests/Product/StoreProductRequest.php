@@ -64,25 +64,31 @@ class StoreProductRequest extends FormRequest
     protected function failedValidation(Validator $validator)
     {
         $errors = $validator->errors();
-
+    
         $categorizedErrors = [
             'missingRequiredFields' => [],
             'invalidFormat' => [],
             'duplicateFields' => [],
+            'invalidSelection' => [], 
         ];
-
+    
         foreach ($errors->messages() as $field => $messages) {
             foreach ($messages as $message) {
                 if (str_contains($message, 'required')) {
                     $categorizedErrors['missingRequiredFields'][] = $field;
-                } elseif (str_contains($message, 'must be') || str_contains($message, 'Invalid')) {
+                }
+                elseif (str_contains($message, 'must be') || str_contains($message, 'Invalid')) {
                     $categorizedErrors['invalidFormat'][] = $field;
-                } elseif (str_contains($message, 'has already been taken')) {
+                }
+                elseif (str_contains($message, 'has already been taken')) {
                     $categorizedErrors['duplicateFields'][] = $field;
+                }
+                elseif (str_contains($message, 'is invalid')) {
+                    $categorizedErrors['invalidSelection'][] = $field;
                 }
             }
         }
-
+    
         $response = response()->json(
             [
                 'success' => false,
@@ -91,7 +97,8 @@ class StoreProductRequest extends FormRequest
             ],
             Response::HTTP_UNPROCESSABLE_ENTITY
         );
-
+    
         throw new HttpResponseException($response);
     }
+    
 }
