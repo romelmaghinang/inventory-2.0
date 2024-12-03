@@ -373,7 +373,24 @@ class PurchaseOrderController extends Controller
          $createdBefore = $request->input('createdBefore'); 
          $createdAfter = $request->input('createdAfter'); 
          $page = $request->input('page', 1);
-         $perPage = 100; 
+         $perPage = 100;
+     
+         $id = $request->input('id');
+     
+         if ($id) {
+             $request->validate([
+                 'id' => 'required|integer|exists:po,id',
+             ]);
+     
+             $purchaseOrder = PurchaseOrder::find($id);
+     
+             if (!$purchaseOrder) {
+                 return response()->json(['message' => 'Purchase Order not found'], Response::HTTP_NOT_FOUND);
+             }
+     
+             return response()->json(['success' => true, 'data' => $purchaseOrder], Response::HTTP_OK);
+         }
+     
          if ($num) {
              $request->validate([
                  'num' => 'required|integer|exists:po,num',
