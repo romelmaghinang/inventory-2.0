@@ -79,7 +79,6 @@ class StoreSalesOrderRequest extends FormRequest
 
             /*items*/
             'items' => ['required', 'array'],
-            'items.*.flag' => ['required', 'boolean'],
             'items.*.soItemTypeId' => ['required', 'integer', 'exists:soitemtype,id'], 
             'items.*.productNumber' => ['required', 'string', 'max:70', 'exists:product,num'], 
             'items.*.productDescription' => ['required', 'string', 'max:256'], 

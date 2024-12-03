@@ -17,7 +17,6 @@ class StorePurchaseOrderRequest extends FormRequest
     public function rules()
     {
         return [
-            'Flag' => 'required|string|in:PO',
             'PONum' => 'nullable|string|max:255',
             'Status' => 'required|integer',
             'VendorName' => 'nullable|string|max:255',
@@ -59,7 +58,6 @@ class StorePurchaseOrderRequest extends FormRequest
             'CF' => 'nullable|string|max:255',
 
             'items' => 'required|array|min:1',
-            'items.*.Flag' => 'required|string|in:Item',
             'items.*.POItemTypeID' => 'required|integer',
             'items.*.PartNumber' => 'nullable|string|max:255|exists:part,num',
             'items.*.VendorPartNumber' => 'nullable|string|max:255',

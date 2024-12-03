@@ -175,141 +175,141 @@ class PurchaseOrderController extends Controller
  */
 
 
-        public function store(StorePurchaseOrderRequest $request): JsonResponse
-        {
-            $models = $this->handleFindModels($request);
-            if ($models instanceof JsonResponse) return $models;
-        
-            $taxRateId = optional(TaxRate::where('name', $request->taxRateName)->first())->id;
-        
-            $poNum = $request->PONum;
-        
-            if ($poNum) {
-                $existingOrder = PurchaseOrder::where('num', $poNum)->first();
-                if ($existingOrder) {
-                    return response()->json(['error' => 'The Purchase Order number must be unique.'], Response::HTTP_CONFLICT);
-                }
+    public function store(StorePurchaseOrderRequest $request): JsonResponse
+    {
+        $models = $this->handleFindModels($request);
+        if ($models instanceof JsonResponse) return $models;
+
+        $taxRateId = optional(TaxRate::where('name', $request->taxRateName)->first())->id;
+
+        $poNum = $request->PONum;
+
+        if ($poNum) {
+            $existingOrder = PurchaseOrder::where('num', $poNum)->first();
+            if ($existingOrder) {
+                return response()->json(['error' => 'The Purchase Order number must be unique.'], Response::HTTP_CONFLICT);
             }
-        
-            $prefix = '5';
-            $lastOrder = PurchaseOrder::where('num', 'like', $prefix . '%')->orderBy('num', 'desc')->first();
-            $newNum = $lastOrder ? intval(substr($lastOrder->num, 1)) + 1 : 10000;
-            $finalNum = $poNum ?: $prefix . str_pad($newNum, 4, '0', STR_PAD_LEFT);
-        
-        
-            $purchaseOrder = PurchaseOrder::create(array_merge(
-                $request->only([
-                    'buyer', 'dateIssued', 'dateConfirmed', 'dateCompleted', 'dateFirstShip',
-                    'dateRevision', 'vendorSO', 'customerSO', 'phone', 'email', 'url', 'note',
-                    'deliverTo', 'paymentTermsId', 'fobPointId', 'remitToName', 'remitAddress',
-                    'remitCity', 'remitZip', 'shipToName', 'shipToAddress', 'shipToCity', 'shipToZip',
-                    'username',
-                ]),
-                [
-                    'buyerId' => $request->buyerId ?? 0,
-                    'num' => $finalNum,
-                    'locationGroupId' => $models['locationGroup']->id,
-                    'carrierId' => $models['carrier']->id,
-                    'currencyId' => $models['currency']->id,
-                    'currencyRate' => $request->currencyRate,
-                    'shipTermsId' => $models['shipTerms']->id,
-                    'remitCountryId' => $models['remitCountry']->id,
-                    'remitStateId' => $models['remitState']->id,
-                    'shipToCountryId' => $models['shipToCountry']->id,
-                    'shipToStateId' => $models['shipToState']->id,
-                    'qbClassId' => $models['qbClass']->id,
-                    'statusId' => $request->statusId ?? 20,
-                    'taxRateId' => $taxRateId,
-                    'totalIncludesTax' => $request->totalIncludesTax,
-                    'totalTax' => $request->totalTax,
-                    'typeId' => $request->typeId,
-                    'dateCreated' => Carbon::now(),
-                    'dateLastModified' => Carbon::now(),
-                    'customField' => '{"20": {"name": "Custom", "type": "Text"}}',  
-                ]
-            ));
-        
-            $poId = $purchaseOrder->id;
-            $purchaseOrderItems = collect($request->validated()['items'])->map(function ($item) use ($poId) {
-                $uom = UnitOfMeasure::where('name', $item['UOM'])->firstOrFail();
-                $qbClass = qbClass::where('name', $item['QuickBooksClassName'])->firstOrFail();
-        
-                $part = \App\Models\Part::where('num', $item['PartNumber'])->first();
-                if (!$part) {
-                    throw new ModelNotFoundException("Part not found for PartNumber: {$item['PartNumber']}");
-                }
-        
-                return PurchaseOrderItem::create([
-                    'description' => '',
-                    'note' => $item['Note'],
-                    'partNum' => $item['PartNumber'], 
-                    'unitCost' => '',
-                    'totalCost' => '',
-                    'qtyToFulfill' => '',
-                    'dateScheduledFulfillment' => $item['FulfillmentDate'],
-                    'revLevel' => $item['RevisionLevel'],
-                    'vendorPartNum' => $item['VendorPartNumber'],
-                    'uomId' => $uom->id,
-                    'poId' => $poId,
-                    'qbClassId' => $qbClass->id,
-                    'partId' => $part->id, 
-                    'taxId' => '',
-                    'taxRate' => '',
-                    'statusId' => '',
-                    'repairFlag' => '',
-                    'tbdCostFlag' => '',
-                    'dateCreated' => Carbon::now(),
-                    'dateLastModified' => Carbon::now(),
-                ]);
-            });
-        
-            $receipt = Receipt::create([
+        }
+
+        $prefix = '5';
+        $lastOrder = PurchaseOrder::where('num', 'like', $prefix . '%')->orderBy('num', 'desc')->first();
+        $newNum = $lastOrder ? intval(substr($lastOrder->num, 1)) + 1 : 10000;
+        $finalNum = $poNum ?: $prefix . str_pad($newNum, 4, '0', STR_PAD_LEFT);
+
+        $purchaseOrder = PurchaseOrder::create(array_merge(
+            $request->only([
+                'buyer', 'dateIssued', 'dateConfirmed', 'dateCompleted', 'dateFirstShip',
+                'dateRevision', 'vendorSO', 'customerSO', 'phone', 'email', 'url', 'note',
+                'deliverTo', 'paymentTermsId', 'fobPointId', 'remitToName', 'remitAddress',
+                'remitCity', 'remitZip', 'shipToName', 'shipToAddress', 'shipToCity', 'shipToZip',
+                'username',
+            ]),
+            [
+                'Flag' => 'PO',
+                'buyerId' => $request->buyerId ?? 0,
+                'num' => $finalNum,
                 'locationGroupId' => $models['locationGroup']->id,
+                'carrierId' => $models['carrier']->id,
+                'currencyId' => $models['currency']->id,
+                'currencyRate' => $request->currencyRate,
+                'shipTermsId' => $models['shipTerms']->id,
+                'remitCountryId' => $models['remitCountry']->id,
+                'remitStateId' => $models['remitState']->id,
+                'shipToCountryId' => $models['shipToCountry']->id,
+                'shipToStateId' => $models['shipToState']->id,
+                'qbClassId' => $models['qbClass']->id,
+                'statusId' => $request->statusId ?? 20,
+                'taxRateId' => $taxRateId,
+                'totalIncludesTax' => $request->totalIncludesTax,
+                'totalTax' => $request->totalTax,
+                'typeId' => $request->typeId,
+                'customField' => '{"19": {"name": "Custom", "type": "Text"}}', 
+                'dateCreated' => Carbon::now(),
+                'dateLastModified' => Carbon::now(),
+            ]
+        ));
+
+        $poId = $purchaseOrder->id;
+        $purchaseOrderItems = collect($request->validated()['items'])->map(function ($item) use ($poId) {
+            $uom = UnitOfMeasure::where('name', $item['UOM'])->firstOrFail();
+            $qbClass = qbClass::where('name', $item['QuickBooksClassName'])->firstOrFail();
+
+            $part = \App\Models\Part::where('num', $item['PartNumber'])->first();
+            if (!$part) {
+                throw new ModelNotFoundException("Part not found for PartNumber: {$item['PartNumber']}");
+            }
+
+            return PurchaseOrderItem::create([
+                'Flag' => 'Item',
+                'description' => '',
+                'note' => $item['Note'],
+                'partNum' => $item['PartNumber'], 
+                'unitCost' => '',
+                'totalCost' => '',
+                'qtyToFulfill' => '',
+                'dateScheduledFulfillment' => $item['FulfillmentDate'],
+                'revLevel' => $item['RevisionLevel'],
+                'vendorPartNum' => $item['VendorPartNumber'],
+                'uomId' => $uom->id,
                 'poId' => $poId,
+                'qbClassId' => $qbClass->id,
+                'partId' => $part->id, 
+                'taxId' => '',
+                'taxRate' => '',
+                'statusId' => '',
+                'repairFlag' => '',
+                'tbdCostFlag' => '',
+                'dateCreated' => Carbon::now(),
+                'dateLastModified' => Carbon::now(),
+            ]);
+        });
+
+        $receipt = Receipt::create([
+            'locationGroupId' => $models['locationGroup']->id,
+            'poId' => $poId,
+            'orderTypeId' => 10,
+            'statusId' => 10,
+            'typeId' => 10,
+            'userId' => 0,
+        ]);
+
+        $receiptItems = $purchaseOrderItems->map(function ($poItem) use ($receipt) {
+            return ReceiptItem::create([
+                'receiptId' => $receipt->id,
+                'poItemId' => $poItem->id,
+                'partId' => $poItem->partId,
+                'billVendorFlag' => 1,
                 'orderTypeId' => 10,
                 'statusId' => 10,
+                'partTypeId' => 0,
                 'typeId' => 10,
-                'userId' => 0,
+                'uomId' => 0,
+                'customFieldItem' => '{}',
+                'dateCreated' => Carbon::now(),
+                'dateLastModified' => Carbon::now(),
             ]);
-        
-            $receiptItems = $purchaseOrderItems->map(function ($poItem) use ($receipt) {
-                return ReceiptItem::create([
-                    'receiptId' => $receipt->id,
-                    'poItemId' => $poItem->id,
-                    'partId' => $poItem->partId,
-                    'billVendorFlag' => 1,
-                    'orderTypeId' => 10,
-                    'statusId' => 10,
-                    'partTypeId' => 0,
-                    'typeId' => 10,
-                    'uomId' => 0,
-                    'customFieldItem' => '{}',
-                    'dateCreated' => Carbon::now(),
-                    'dateLastModified' => Carbon::now(),
-                ]);
-            });
-        
-            return response()->json([
-                'message' => 'Purchase Order successfully created',
-                'purchaseOrderData' => $purchaseOrder,
-                'purchaseOrderItemData' => $purchaseOrderItems,
-                'receiptData' => $receipt,
-                'receiptItemData' => $receiptItems,
-                'relatedData' => [
-                    'locationGroup' => $models['locationGroup'],
-                    'carrier' => $models['carrier'],
-                    'currency' => $models['currency'],
-                    'shipTerms' => $models['shipTerms'],
-                    'remitCountry' => $models['remitCountry'],
-                    'remitState' => $models['remitState'],
-                    'shipToCountry' => $models['shipToCountry'],
-                    'shipToState' => $models['shipToState'],
-                    'qbClass' => $models['qbClass'],
-                    'taxRate' => $taxRateId ? TaxRate::find($taxRateId) : null
-                ]
-            ], Response::HTTP_CREATED);
-        }
-        
+        });
+
+        return response()->json([
+            'message' => 'Purchase Order successfully created',
+            'purchaseOrderData' => $purchaseOrder,
+            'purchaseOrderItemData' => $purchaseOrderItems,
+            'receiptData' => $receipt,
+            'receiptItemData' => $receiptItems,
+            'relatedData' => [
+                'locationGroup' => $models['locationGroup'],
+                'carrier' => $models['carrier'],
+                'currency' => $models['currency'],
+                'shipTerms' => $models['shipTerms'],
+                'remitCountry' => $models['remitCountry'],
+                'remitState' => $models['remitState'],
+                'shipToCountry' => $models['shipToCountry'],
+                'shipToState' => $models['shipToState'],
+                'qbClass' => $models['qbClass'],
+                'taxRate' => $taxRateId ? TaxRate::find($taxRateId) : null
+            ]
+        ], Response::HTTP_CREATED);
+    }
 
     
     /**
