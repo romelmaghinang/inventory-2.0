@@ -60,7 +60,7 @@ return new class extends Migration
             $table->string('vendorContact', 30)->nullable();
             $table->unsignedInteger('vendorId')->nullable();
             $table->string('vendorSO', 25)->nullable();
-
+            $table->json('customField')->nullable();
             $table->unique('num', 'u_num');
             $table->index([
                 'carrierId',
