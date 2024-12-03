@@ -7,6 +7,7 @@ use App\Http\Requests\PurchaseOrder\StorePurchaseOrderRequest;
 use App\Http\Requests\PurchaseOrder\UpdatePurchaseOrderRequest;
 use App\Models\Carrier;
 use App\Models\Country;
+use App\Models\Postatus;
 use App\Models\Currency;
 use App\Models\LocationGroup;
 use App\Models\PurchaseOrder;
@@ -365,50 +366,65 @@ class PurchaseOrderController extends Controller
      * )
      */
 
-    public function show(Request $request): JsonResponse
-    {
-        $numFromQuery = $request->input('num');
-        $numFromBody = $request->input('num');
-    
-        $createdBefore = $request->input('createdBefore');
-        $createdAfter = $request->input('createdAfter');
-    
-        $num = $numFromQuery ?? $numFromBody;
-    
-        if ($num) {
-            $request->validate([
-                'num' => 'required|integer|exists:po,num',
-            ]);
-    
-            $purchaseOrder = PurchaseOrder::where('num', $num)->first();
-    
-            if (!$purchaseOrder) {
-                return response()->json(['message' => 'Purchase Order not found'], Response::HTTP_NOT_FOUND);
-            }
-    
-            return response()->json(['success' => true, 'data' => $purchaseOrder], Response::HTTP_OK);
-        }
-    
-        $query = PurchaseOrder::query();
-    
-        if ($createdBefore) {
-            $request->validate([
-                'createdBefore' => 'date|before_or_equal:today',
-            ]);
-            $query->whereDate('dateCreated', '<=', $createdBefore);
-        }
-    
-        if ($createdAfter) {
-            $request->validate([
-                'createdAfter' => 'date|before_or_equal:today',
-            ]);
-            $query->whereDate('dateCreated', '>=', $createdAfter);
-        }
-    
-        $purchaseOrders = $query->get();
-    
-        return response()->json(['success' => true, 'data' => $purchaseOrders], Response::HTTP_OK);
-    }
+     public function show(Request $request): JsonResponse
+     {
+         $num = $request->json('num');
+         $status = $request->json('status');
+         $createdBefore = $request->input('createdBefore'); 
+         $createdAfter = $request->input('createdAfter'); 
+         $page = $request->input('page', 1);
+         $perPage = 100; 
+         if ($num) {
+             $request->validate([
+                 'num' => 'required|integer|exists:po,num',
+             ]);
+     
+             $purchaseOrder = PurchaseOrder::where('num', $num)->first();
+     
+             if (!$purchaseOrder) {
+                 return response()->json(['message' => 'Purchase Order not found'], Response::HTTP_NOT_FOUND);
+             }
+     
+             return response()->json(['success' => true, 'data' => $purchaseOrder], Response::HTTP_OK);
+         }
+     
+         $query = PurchaseOrder::query();
+     
+         if ($createdBefore) {
+             $request->validate([
+                 'createdBefore' => 'date|before_or_equal:today',
+             ]);
+             $query->whereDate('dateCreated', '<=', $createdBefore);
+         }
+     
+         if ($createdAfter) {
+             $request->validate([
+                 'createdAfter' => 'date|before_or_equal:today',
+             ]);
+             $query->whereDate('dateCreated', '>=', $createdAfter);
+         }
+     
+         if ($status) {
+             $request->validate([
+                 'status' => 'string|exists:postatus,name',
+             ]);
+     
+             $statusId = Postatus::where('name', $status)->value('id');
+             if ($statusId) {
+                 $query->where('statusId', $statusId);
+             }
+         }
+     
+         $purchaseOrders = $query->paginate($perPage, ['*'], 'page', $page);
+     
+         return response()->json([
+             'success' => true,
+             'data' => $purchaseOrders
+         ], Response::HTTP_OK);
+     }
+     
+     
+     
  
      
     /**

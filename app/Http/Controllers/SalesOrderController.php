@@ -15,6 +15,7 @@ use App\Models\Pick;
 use App\Models\Product;
 use App\Models\qbClass;
 use App\Models\SalesOrder;
+use App\Models\SalesOrderStatus;
 use App\Models\SalesOrderItems;
 use App\Models\ShipTerms;
 use App\Models\State;
@@ -325,49 +326,62 @@ class SalesOrderController extends Controller
      */
     public function show(Request $request): JsonResponse
     {
-        $numFromQuery = $request->input('num');
-        $numFromBody = $request->json('num');
-
+        $num = $request->json('num'); 
+        $status = $request->json('status');
         $createdBefore = $request->input('createdBefore');
-        $createdAfter = $request->input('createdAfter');
-
-        $num = $numFromQuery ?? $numFromBody;
-
+        $createdAfter = $request->input('createdAfter'); 
+        $page = $request->input('page', 1); 
+        $perPage = 100; 
+    
         if ($num) {
             $request->validate([
                 'num' => 'required|integer|exists:so,num',
             ]);
-
+    
             $salesOrder = SalesOrder::where('num', $num)->first();
-
+    
             if (!$salesOrder) {
                 return response()->json(['message' => 'Sales Order not found.'], Response::HTTP_NOT_FOUND);
             }
-
-            return response()->json($salesOrder, Response::HTTP_OK);
+    
+            return response()->json(['success' => true, 'data' => $salesOrder], Response::HTTP_OK);
         }
-
+    
         $query = SalesOrder::query();
-
+    
         if ($createdBefore) {
             $request->validate([
                 'createdBefore' => 'date|before_or_equal:today',
             ]);
             $query->whereDate('dateCreated', '<=', $createdBefore);
         }
-
+    
         if ($createdAfter) {
             $request->validate([
                 'createdAfter' => 'date|before_or_equal:today',
             ]);
             $query->whereDate('dateCreated', '>=', $createdAfter);
         }
-
-        $salesOrders = $query->get();
-
-        return response()->json($salesOrders, Response::HTTP_OK);
+    
+        if ($status) {
+            $request->validate([
+                'status' => 'string|exists:sales_order_statuses,name',
+            ]);
+    
+            $statusId = SalesOrderStatus::where('name', $status)->value('id');
+            if ($statusId) {
+                $query->where('statusId', $statusId);
+            }
+        }
+    
+        $salesOrders = $query->paginate($perPage, ['*'], 'page', $page);
+    
+        return response()->json([
+            'success' => true,
+            'data' => $salesOrders
+        ], Response::HTTP_OK);
     }
-
+    
 
 /**
  * @OA\Put(
