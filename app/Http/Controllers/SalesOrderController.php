@@ -144,34 +144,13 @@ class SalesOrderController extends Controller
         } else {
             $lastSalesOrder = SalesOrder::orderBy('num', 'desc')->first();
             $nextNum = (string)((optional($lastSalesOrder)->num ?? 10000) + 1);
-        
+
             while (SalesOrder::where('num', $nextNum)->exists()) {
                 $nextNum = (string)(intval($nextNum) + 1);
             }
             $newNum = $nextNum;
         }
-        
-        $customField = $storeSalesOrderRequest->customField ?? null;
-        
-        if (empty($customField)) {
-            $customField = [
-                "20" => [
-                    "name" => "Custom",
-                    "type" => "Text",
-                ],
-            ];
-        } elseif (is_string($customField)) {
-            $customField = json_decode($customField, true);
-        
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                return response()->json(['message' => 'Invalid customField format.'], Response::HTTP_BAD_REQUEST);
-            }
-        }
-        
-        if (!is_array($customField)) {
-            return response()->json(['message' => 'The customField must be an array.'], Response::HTTP_BAD_REQUEST);
-        }
-        
+
         $locationGroup = LocationGroup::where('name', $storeSalesOrderRequest->locationGroupName)->firstOrFail();
 
         $salesOrder = SalesOrder::create(
@@ -216,8 +195,7 @@ class SalesOrderController extends Controller
                 'residentialFlag' => $storeSalesOrderRequest->shipToResidential,
                 'qbClassId' => $qbclass->id,
                 'num' => $newNum,
-                'customField' => $customField, 
-
+                'customField' => $storeSalesOrderRequest->customField ?? '{"20": {"name": "Custom", "type": "Text"}}', 
             ]
         );
 
@@ -501,138 +479,123 @@ class SalesOrderController extends Controller
  *     @OA\Response(response=422, description="Validation errors")
  * )
  */
-        public function update(UpdateSalesOrderRequest $updateSalesOrderRequest): JsonResponse
-        {
-            $billToCountry = Country::where('name', $updateSalesOrderRequest->billToCountry)->firstOrFail();
-            $billToState = State::where('name', $updateSalesOrderRequest->billToState)->firstOrFail();
-            $shipToCountry = Country::where('name', $updateSalesOrderRequest->shipToCountry)->firstOrFail();
-            $shipToState = State::where('name', $updateSalesOrderRequest->shipToState)->firstOrFail();
-            $qbclass = qbClass::where('name', $updateSalesOrderRequest->quickBookClassName)->firstOrFail();
-            $currency = Currency::where('name', $updateSalesOrderRequest->currencyName)->firstOrFail();
-            $carrier = Carrier::where('name', $updateSalesOrderRequest->carrierName)->firstOrFail();
-            $carrierService = CarrierService::where('name', $updateSalesOrderRequest->carrierService)->firstOrFail();
-            $taxRate = TaxRate::where('name', $updateSalesOrderRequest->taxRateName)->firstOrFail();
-            $shipterms = ShipTerms::where('name', $updateSalesOrderRequest->shippingTerms)->firstOrFail();
+    public function update(UpdateSalesOrderRequest $updateSalesOrderRequest): JsonResponse
+    {
+        $billToCountry = Country::where('name', $updateSalesOrderRequest->billToCountry)->firstOrFail();
+        $billToState = State::where('name', $updateSalesOrderRequest->billToState)->firstOrFail();
+        $shipToCountry = Country::where('name', $updateSalesOrderRequest->shipToCountry)->firstOrFail();
+        $shipToState = State::where('name', $updateSalesOrderRequest->shipToState)->firstOrFail();
+        $qbclass = qbClass::where('name', $updateSalesOrderRequest->quickBookClassName)->firstOrFail();
+        $currency = Currency::where('name', $updateSalesOrderRequest->currencyName)->firstOrFail();
+        $carrier = Carrier::where('name', $updateSalesOrderRequest->carrierName)->firstOrFail();
+        $carrierService = CarrierService::where('name', $updateSalesOrderRequest->carrierService)->firstOrFail();
+        $taxRate = TaxRate::where('name', $updateSalesOrderRequest->taxRateName)->firstOrFail();
+        $shipterms = ShipTerms::where('name', $updateSalesOrderRequest->shippingTerms)->firstOrFail();
 
-            $customer = Customer::firstOrCreate(['name' => $updateSalesOrderRequest->customerName]);
+        $customer = Customer::firstOrCreate(['name' => $updateSalesOrderRequest->customerName]);
 
-            $salesOrder = SalesOrder::findOrFail($updateSalesOrderRequest->soId);
+        $salesOrder = SalesOrder::findOrFail($updateSalesOrderRequest->soId);
 
-            $defaultCustomField = [
-                "name" => "Custom",
-                "type" => "Text",
+        $salesOrder->update(
+            $updateSalesOrderRequest->only([
+                'customerContact',
+                'billToName',
+                'billToAddress',
+                'billToCity',
+                'billToZip',
+                'shipToName',
+                'shipToAddress',
+                'shipToCity',
+                'shipToZip',
+                'vendorPONum',
+                'date',
+                'dateExpired',
+                'salesman',
+                'priorityId',
+                'paymentTerms',
+                'fob',
+                'note',
+                'locationGroupName',
+                'phone',
+                'email',
+                'url',
+                'category',
+                'customField',
+                'currencyRate',
+            ]) + [
+                'activeFlag' => $updateSalesOrderRequest->flag,
+                'shipTermsId' => $shipterms->id,
+                'billToCountryId' => $billToCountry->id,
+                'billToStateId' => $billToState->id,
+                'shipToCountryId' => $shipToCountry->id,
+                'shipToStateId' => $shipToState->id,
+                'taxRateId' => $taxRate->id,
+                'statusId' => $updateSalesOrderRequest->status,
+                'currencyId' => $currency->id,
+                'customerId' => $customer->id,
+                'carrierId' => $carrier->id,
+                'carrierServiceId' => $carrierService->id,
+                'residentialFlag' => $updateSalesOrderRequest->shipToResidential,
+                'qbClassId' => $qbclass->id,
+            ]
+        );
+
+        $salesOrder->items()->delete();
+
+        $salesOrderItems = [];
+        foreach ($updateSalesOrderRequest->validated()['items'] as $item) {
+            $product = Product::where('num', $item['productNumber'])->firstOrFail();
+            $qbClass = qbClass::firstOrCreate(['name' => $item['itemQuickBooksClassName']]);
+
+            $transformedItem = [
+                'note' => $item['note'],
+                'typeId' => $item['soItemTypeId'],
+                'oumId' => $item['uom'],
+                'productId' => $product->id,
+                'productNum' => $item['productNumber'],
+                'showItemFlag' => $item['showItem'],
+                'taxRateCode' => $item['taxCode'],
+                'taxableFlag' => $item['taxable'],
+                'customerPartNum' => $item['customerPartNumber'],
+                'description' => $item['productDescription'],
+                'qtyOrdered' => $item['productQuantity'],
+                'unitPrice' => $item['productPrice'],
+                'dateScheduledFulfillment' => $item['itemDateScheduled'],
+                'revLevel' => $item['revisionLevel'],
+                'customFieldItem' => $item['cfi'],
+                'soId' => $salesOrder->id,
+                'qbClassId' => $qbClass->id,
+                'statusId' => $updateSalesOrderRequest->status ?? 20,
             ];
 
-            $customFields = $updateSalesOrderRequest->customField ?? [];
-            $customFields["20"] = $defaultCustomField; 
-
-            $salesOrder->update(
-                $updateSalesOrderRequest->only([
-                    'customerContact',
-                    'billToName',
-                    'billToAddress',
-                    'billToCity',
-                    'billToZip',
-                    'shipToName',
-                    'shipToAddress',
-                    'shipToCity',
-                    'shipToZip',
-                    'vendorPONum',
-                    'date',
-                    'dateExpired',
-                    'salesman',
-                    'priorityId',
-                    'paymentTerms',
-                    'fob',
-                    'note',
-                    'locationGroupName',
-                    'phone',
-                    'email',
-                    'url',
-                    'category',
-                    'customField', 
-                    'currencyRate',
-                ]) + [
-                    'activeFlag' => $updateSalesOrderRequest->flag,
-                    'shipTermsId' => $shipterms->id,
-                    'billToCountryId' => $billToCountry->id,
-                    'billToStateId' => $billToState->id,
-                    'shipToCountryId' => $shipToCountry->id,
-                    'shipToStateId' => $shipToState->id,
-                    'taxRateId' => $taxRate->id,
-                    'statusId' => $updateSalesOrderRequest->status,
-                    'currencyId' => $currency->id,
-                    'customerId' => $customer->id,
-                    'carrierId' => $carrier->id,
-                    'carrierServiceId' => $carrierService->id,
-                    'residentialFlag' => $updateSalesOrderRequest->shipToResidential,
-                    'qbClassId' => $qbclass->id,
-                ]
-            );
-
-            foreach ($customFields as $key => $cf) {
-                $cf['name'] = $cf['name'] ?? 'custom';
-                $cf['type'] = $cf['type'] ?? 'text';
-                $cf['value'] = $cf['value'] ?? '';
-
-               
-            }
-
-            $salesOrder->items()->delete();
-
-            $salesOrderItems = [];
-            foreach ($updateSalesOrderRequest->validated()['items'] as $item) {
-                $product = Product::where('num', $item['productNumber'])->firstOrFail();
-                $qbClass = qbClass::firstOrCreate(['name' => $item['itemQuickBooksClassName']]);
-
-                $transformedItem = [
-                    'note' => $item['note'],
-                    'typeId' => $item['soItemTypeId'],
-                    'oumId' => $item['uom'],
-                    'productId' => $product->id,
-                    'productNum' => $item['productNumber'],
-                    'showItemFlag' => $item['showItem'],
-                    'taxRateCode' => $item['taxCode'],
-                    'taxableFlag' => $item['taxable'],
-                    'customerPartNum' => $item['customerPartNumber'],
-                    'description' => $item['productDescription'],
-                    'qtyOrdered' => $item['productQuantity'],
-                    'unitPrice' => $item['productPrice'],
-                    'dateScheduledFulfillment' => $item['itemDateScheduled'],
-                    'revLevel' => $item['revisionLevel'],
-                    'customField' => $item['cf'], 
-                    'soId' => $salesOrder->id,
-                    'qbClassId' => $qbClass->id,
-                    'statusId' => $updateSalesOrderRequest->status ?? 20,
-                ];
-
-                $salesOrderItems[] = SalesOrderItems::create($transformedItem);
-            }
-
-            $relatedData = [
-                'billToCountry' => $billToCountry,
-                'billToState' => $billToState,
-                'shipToCountry' => $shipToCountry,
-                'shipToState' => $shipToState,
-                'qbClass' => $qbclass,
-                'currency' => $currency,
-                'carrier' => $carrier,
-                'carrierService' => $carrierService,
-                'taxRate' => $taxRate,
-                'shipTerms' => $shipterms,
-                'customer' => $customer,
-            ];
-
-            return response()->json(
-                [
-                    'message' => 'Sales Order updated successfully',
-                    'salesOrderData' => $salesOrder,
-                    'salesOrderItemData' => $salesOrderItems,
-                    'relatedData' => $relatedData,
-                ],
-                Response::HTTP_OK
-            );
+            $salesOrderItems[] = SalesOrderItems::create($transformedItem);
         }
+
+        $relatedData = [
+            'billToCountry' => $billToCountry,
+            'billToState' => $billToState,
+            'shipToCountry' => $shipToCountry,
+            'shipToState' => $shipToState,
+            'qbClass' => $qbclass,
+            'currency' => $currency,
+            'carrier' => $carrier,
+            'carrierService' => $carrierService,
+            'taxRate' => $taxRate,
+            'shipTerms' => $shipterms,
+            'customer' => $customer,
+        ];
+
+        return response()->json(
+            [
+                'message' => 'Sales Order updated successfully',
+                'salesOrderData' => $salesOrder,
+                'salesOrderItemData' => $salesOrderItems,
+                'relatedData' => $relatedData,
+            ],
+            Response::HTTP_OK
+        );
+    }
+
 
     /**
      * @OA\Delete(
