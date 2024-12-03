@@ -196,12 +196,6 @@ class PurchaseOrderController extends Controller
             $newNum = $lastOrder ? intval(substr($lastOrder->num, 1)) + 1 : 10000;
             $finalNum = $poNum ?: $prefix . str_pad($newNum, 4, '0', STR_PAD_LEFT);
         
-            $customField = $request->customField ?? [
-                "19" => [
-                    "name" => "Custom",
-                    "type" => "Text",
-                ]
-            ];
         
             $purchaseOrder = PurchaseOrder::create(array_merge(
                 $request->only([
@@ -231,7 +225,7 @@ class PurchaseOrderController extends Controller
                     'typeId' => $request->typeId,
                     'dateCreated' => Carbon::now(),
                     'dateLastModified' => Carbon::now(),
-                    'customField' => json_encode($customField),  
+                    'customField' => '{"20": {"name": "Custom", "type": "Text"}}',  
                 ]
             ));
         
@@ -289,6 +283,7 @@ class PurchaseOrderController extends Controller
                     'partTypeId' => 0,
                     'typeId' => 10,
                     'uomId' => 0,
+                    'customFieldItem' => '{}',
                     'dateCreated' => Carbon::now(),
                     'dateLastModified' => Carbon::now(),
                 ]);
