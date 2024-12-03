@@ -95,7 +95,7 @@ class StoreSalesOrderRequest extends FormRequest
             'items.*.revisionLevel' => ['required', 'string'], 
             'items.*.customerPartNumber' => ['required', 'string', 'max:70'],
             'items.*.kitItem' => ['required', 'boolean'],
-            'items.*.cfi' => ['required', 'string'],
+            'items.*.cfi' => ['nullable', 'string'],
         ];
     }
 

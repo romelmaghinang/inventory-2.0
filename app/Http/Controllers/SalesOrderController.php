@@ -221,7 +221,7 @@ class SalesOrderController extends Controller
                 'unitPrice' => $item['productPrice'],
                 'dateScheduledFulfillment' => $item['itemDateScheduled'],
                 'revLevel' => $item['revisionLevel'],
-                'customFieldItem' => $item['cfi'],
+                'customFieldItem' => '{}',
                 'soId' => $salesOrder->id,
                 'qbClassId' => $qbClass->id,
                 'statusId' => 10,
