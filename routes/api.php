@@ -71,7 +71,7 @@ Route::middleware(['auth:sanctum', ])->group(function () {
      });
 
     Route::prefix('vendor')->group(function () {
-        Route::post('/{id}', [VendorController::class, 'store'])->middleware('abilities:create-vendor');
+        Route::post('/', [VendorController::class, 'store'])->middleware('abilities:create-vendor');
         Route::put('/{id}', [VendorController::class, 'update'])->middleware('abilities:update-vendor');
         Route::get('/', [VendorController::class, 'show'])->middleware('abilities:view-vendor');
         Route::delete('/', [VendorController::class, 'destroy'])->middleware('abilities:delete-vendor');
