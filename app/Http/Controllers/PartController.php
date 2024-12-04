@@ -172,25 +172,45 @@ class PartController extends Controller
      *     )
      * )
      */
-    public function show(Request $request): JsonResponse
+    public function show(Request $request, $id = null): JsonResponse
     {
-        $num = $request->query('num');
-
-        if (!$num && $request->isJson()) {
-            $num = $request->input('num');
+        if ($id) {
+            $part = Part::find($id);
+    
+            if (!$part) {
+                return response()->json(['message' => 'Part not found'], Response::HTTP_NOT_FOUND);
+            }
+    
+            return response()->json([
+                'message' => 'Part retrieved successfully!',
+                'data' => $part
+            ], Response::HTTP_OK);
         }
-
+    
+        $num = $request->query('num') ?? $request->input('num');
+    
         if ($num) {
             $request->validate(['num' => 'integer|exists:part,num']);
-
-            $part = Part::where('num', $num)->firstOrFail();
-            return response()->json($part, Response::HTTP_OK);
+    
+            $part = Part::where('num', $num)->first();
+    
+            if (!$part) {
+                return response()->json(['message' => 'Part not found'], Response::HTTP_NOT_FOUND);
+            }
+    
+            return response()->json([
+                'message' => 'Part retrieved successfully!',
+                'data' => $part
+            ], Response::HTTP_OK);
         }
-
+    
         $parts = Part::all();
-        return response()->json($parts, Response::HTTP_OK);
+        return response()->json([
+            'message' => 'All parts retrieved successfully!',
+            'data' => $parts
+        ], Response::HTTP_OK);
     }
-
+    
 
     /**
      * Update the specified resource in storage.

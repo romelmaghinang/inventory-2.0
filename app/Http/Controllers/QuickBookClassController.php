@@ -97,38 +97,51 @@ class QuickBookClassController extends Controller
  * )
  */
 
- public function show(Request $request): JsonResponse
- {
-     $nameFromQuery = $request->input('name');
-     $nameFromBody = $request->json('name');
- 
-     if ($nameFromQuery || $nameFromBody) {
-         $name = $nameFromQuery ?? $nameFromBody;
- 
-         $request->validate([
-             'name' => 'required|string|exists:qbclass,name',
-         ]);
- 
-         $qbClass = qbClass::where('name', $name)->first();
- 
-         if (!$qbClass) {
-             return response()->json(['message' => 'QuickBook Class not found.'], Response::HTTP_NOT_FOUND);
-         }
- 
-         return response()->json([
-             'message' => 'QuickBook Class retrieved successfully!',
-             'data' => $qbClass,
-         ], Response::HTTP_OK);
-     }
- 
-     $qbClasses = qbClass::all();
- 
-     return response()->json([
-         'message' => 'All QuickBook Classes retrieved successfully!',
-         'data' => $qbClasses,
-     ], Response::HTTP_OK);
- }
- 
+ public function show(Request $request, $id = null): JsonResponse
+{
+    if ($id) {
+        $qbClass = qbClass::find($id);
+
+        if (!$qbClass) {
+            return response()->json(['message' => 'QuickBook Class not found.'], Response::HTTP_NOT_FOUND);
+        }
+
+        return response()->json([
+            'message' => 'QuickBook Class retrieved successfully!',
+            'data' => $qbClass,
+        ], Response::HTTP_OK);
+    }
+
+    $nameFromQuery = $request->input('name');
+    $nameFromBody = $request->json('name');
+
+    if ($nameFromQuery || $nameFromBody) {
+        $name = $nameFromQuery ?? $nameFromBody;
+
+        $request->validate([
+            'name' => 'required|string|exists:qbclass,name',
+        ]);
+
+        $qbClass = qbClass::where('name', $name)->first();
+
+        if (!$qbClass) {
+            return response()->json(['message' => 'QuickBook Class not found.'], Response::HTTP_NOT_FOUND);
+        }
+
+        return response()->json([
+            'message' => 'QuickBook Class retrieved successfully!',
+            'data' => $qbClass,
+        ], Response::HTTP_OK);
+    }
+
+    $qbClasses = qbClass::all();
+
+    return response()->json([
+        'message' => 'All QuickBook Classes retrieved successfully!',
+        'data' => $qbClasses,
+    ], Response::HTTP_OK);
+}
+
     
      
     /**

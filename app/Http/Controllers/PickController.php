@@ -359,7 +359,7 @@ class PickController extends Controller
      *     )
      * )
      */
-    public function show(Request $request): JsonResponse
+    public function show(Request $request, $id = null): JsonResponse
     {
         $numFromQuery = $request->query('num');
         $numFromBody = $request->input('num');
@@ -368,46 +368,52 @@ class PickController extends Controller
         $createdAfter = $request->input('createdAfter');
         
         $num = $numFromQuery ?? $numFromBody;
-
+    
+        if ($id) {
+            $pick = Pick::find($id);
+            if (!$pick) {
+                return response()->json([
+                    'message' => 'Pick not found'
+                ], Response::HTTP_NOT_FOUND);
+            }
+            return response()->json([
+                'picks' => [$pick]
+            ], Response::HTTP_OK);
+        }
+    
         if ($num) {
             $request->validate([
                 'num' => 'required|string|exists:pick,num',
             ]);
-
             $pick = Pick::where('num', $num)->firstOrFail();
-            return response()->json(
-                [
-                    'picks' => [$pick] 
-                ],
-                Response::HTTP_OK
-            );
+            return response()->json([
+                'picks' => [$pick]
+            ], Response::HTTP_OK);
         }
-
+    
         $query = Pick::query();
-
+    
         if ($createdBefore) {
             $request->validate([
                 'createdBefore' => 'date|before_or_equal:today',
             ]);
             $query->whereDate('dateCreated', '<=', $createdBefore);
         }
-
+    
         if ($createdAfter) {
             $request->validate([
                 'createdAfter' => 'date|before_or_equal:today',
             ]);
             $query->whereDate('dateCreated', '>=', $createdAfter);
         }
-
+    
         $picks = $query->get();
-
-        return response()->json(
-            [
-                'picks' => $picks,
-            ],
-            Response::HTTP_OK
-        );
+    
+        return response()->json([
+            'picks' => $picks,
+        ], Response::HTTP_OK);
     }
+    
 
     public function destroy(Request $request): JsonResponse
     {

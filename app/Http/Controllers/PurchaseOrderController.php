@@ -370,7 +370,7 @@ class PurchaseOrderController extends Controller
      * )
      */
 
-     public function show(Request $request): JsonResponse
+     public function show(Request $request, $id = null): JsonResponse
      {
          $num = $request->json('num');
          $status = $request->json('status');
@@ -379,13 +379,7 @@ class PurchaseOrderController extends Controller
          $page = $request->input('page', 1);
          $perPage = 100;
      
-         $id = $request->input('id');
-     
          if ($id) {
-             $request->validate([
-                 'id' => 'required|integer|exists:po,id',
-             ]);
-     
              $purchaseOrder = PurchaseOrder::find($id);
      
              if (!$purchaseOrder) {
@@ -394,6 +388,8 @@ class PurchaseOrderController extends Controller
      
              return response()->json(['success' => true, 'data' => $purchaseOrder], Response::HTTP_OK);
          }
+     
+         $query = PurchaseOrder::query();
      
          if ($num) {
              $request->validate([
@@ -408,8 +404,6 @@ class PurchaseOrderController extends Controller
      
              return response()->json(['success' => true, 'data' => $purchaseOrder], Response::HTTP_OK);
          }
-     
-         $query = PurchaseOrder::query();
      
          if ($createdBefore) {
              $request->validate([
@@ -444,9 +438,7 @@ class PurchaseOrderController extends Controller
          ], Response::HTTP_OK);
      }
      
-     
-     
- 
+
      
     /**
      * @OA\Put(

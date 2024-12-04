@@ -129,8 +129,21 @@ class PaymentTermsController extends Controller
  *     )
  * )
  */
-public function show(Request $request): JsonResponse
+public function show(Request $request, $id = null): JsonResponse
 {
+    if ($id) {
+        $paymentTerm = PaymentTerms::find($id);
+
+        if (!$paymentTerm) {
+            return response()->json(['message' => 'Payment Term not found.'], Response::HTTP_NOT_FOUND);
+        }
+
+        return response()->json([
+            'message' => 'Payment Term retrieved successfully!',
+            'data' => $paymentTerm,
+        ], Response::HTTP_OK);
+    }
+
     $name = $request->query('name');
 
     if (!$name && $request->isJson()) {
@@ -140,12 +153,12 @@ public function show(Request $request): JsonResponse
     if ($name) {
         $request->validate(['name' => 'string|exists:paymentterms,name']);
 
-        $paymentTerms = PaymentTerms::where('name', $name)->firstOrFail();
+        $paymentTerm = PaymentTerms::where('name', $name)->firstOrFail();
 
         return response()->json(
             [
-                'message' => 'Payment Terms retrieved successfully!',
-                'data' => $paymentTerms,
+                'message' => 'Payment Term retrieved successfully!',
+                'data' => $paymentTerm,
             ],
             Response::HTTP_OK
         );

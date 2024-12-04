@@ -166,19 +166,10 @@ class ProductController extends Controller
  * )
  */
 
- public function show(Request $request): JsonResponse
+ public function show(Request $request, $id = null): JsonResponse
  {
-     $numFromQuery = $request->input('num');
-     $numFromBody = $request->input('num'); 
- 
-     if ($numFromQuery || $numFromBody) {
-         $num = $numFromQuery ?? $numFromBody;
- 
-         $request->validate([
-             'num' => 'required|string|exists:product,num',
-         ]);
- 
-         $product = Product::where('num', $num)->first();
+     if ($id) {
+         $product = Product::find($id);
  
          if (!$product) {
              return response()->json(['message' => 'Product not found'], Response::HTTP_NOT_FOUND);
@@ -197,6 +188,7 @@ class ProductController extends Controller
          'data' => $products,
      ], Response::HTTP_OK);
  }
+ 
  
     /**
      * @OA\Put(

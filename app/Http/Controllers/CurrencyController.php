@@ -113,11 +113,32 @@ class CurrencyController extends Controller
          *     )
          * )
          */
-        public function show(Request $request): JsonResponse
+        public function show(Request $request, $id = null): JsonResponse
         {
+
+            if ($id) {
+                $currency = Currency::find($id);
+
+                if (!$currency) {
+                    return response()->json([
+                        'message' => 'Currency not found.'
+                    ], Response::HTTP_NOT_FOUND);
+                }
+
+                return response()->json(
+                    [
+                        'message' => 'Currency retrieved successfully!',
+                        'data' => $currency,
+                    ],
+                    Response::HTTP_OK
+                );
+            }
+
+
             $name = $request->query('name') ?? $request->input('name');
             
             if (empty($name)) {
+
                 $currencies = Currency::all();
                 return response()->json(
                     [
@@ -127,6 +148,7 @@ class CurrencyController extends Controller
                     Response::HTTP_OK
                 );
             }
+
 
             $request->validate([
                 'name' => 'string|exists:currency,name',

@@ -224,10 +224,24 @@ class CustomerController extends Controller
      *     @OA\Response(response=403, description="Forbidden")
      * )
      */
-    public function showCustomers(Request $request): JsonResponse
+    public function showCustomers(Request $request, $id = null): JsonResponse
     {
         $name = $request->query('name') ?? $request->input('name');
-
+    
+        if ($id) {
+            $customer = Customer::find($id);
+            if (!$customer) {
+                return response()->json([
+                    'message' => 'Customer not found.'
+                ], Response::HTTP_NOT_FOUND);
+            }
+    
+            return response()->json([
+                'message' => 'Customer retrieved successfully!',
+                'data' => $customer,
+            ], Response::HTTP_OK);
+        }
+    
         if (empty($name)) {
             $customers = Customer::all();
             return response()->json([
@@ -235,25 +249,25 @@ class CustomerController extends Controller
                 'data' => $customers,
             ], Response::HTTP_OK);
         }
-
+    
         $request->validate([
             'name' => 'string|exists:customer,name',
         ]);
-
+    
         $customer = Customer::where('name', $name)->first();
-
+    
         if (!$customer) {
             return response()->json([
                 'message' => 'Customer not found.'
             ], Response::HTTP_NOT_FOUND);
         }
-
+    
         return response()->json([
             'message' => 'Customer retrieved successfully!',
             'data' => $customer,
         ], Response::HTTP_OK);
     }
-
+    
 
     /**
      * @OA\Put(

@@ -188,7 +188,6 @@ class VendorController extends Controller
  *     )
  * )
  */
-
     public function show(Request $request, $id = null): JsonResponse
     {
         if ($id) {
@@ -219,6 +218,7 @@ class VendorController extends Controller
         $vendors = Vendor::all();
         return response()->json($vendors, Response::HTTP_OK);
     }
+
 
  
     /**

@@ -283,9 +283,22 @@ class LocationController extends Controller
  *     )
  * )
  */
-public function show(Request $request): JsonResponse
+public function show(Request $request, $id = null): JsonResponse
 {
     $name = $request->query('name') ?? $request->input('name');
+
+    if ($id) {
+        $location = Location::find($id);
+        if (!$location) {
+            return response()->json([
+                'message' => 'Location not found',
+            ], Response::HTTP_NOT_FOUND);
+        }
+        return response()->json([
+            'message' => 'Location retrieved successfully!',
+            'data' => $location,
+        ], Response::HTTP_OK);
+    }
 
     if (!empty($name)) {
         $request->validate(['name' => 'string|exists:location,name']);

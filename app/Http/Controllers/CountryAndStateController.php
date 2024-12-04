@@ -41,39 +41,30 @@ class CountryAndStateController extends Controller
         ));
     }
 
-    public function storeState(Request $request): JsonResponse
-    {
-        if (!$request->isJson()) {
-            return response()->json(
-                ['message' => 'Invalid content type, expecting application/json.'],
-                Response::HTTP_UNSUPPORTED_MEDIA_TYPE
-            );
-        }
-
-        $validated = $request->validate([
-            'stateName' => 'required|string|max:255',
-            'abbreviation' => 'required|string|max:10',
-        ]);
-
-        $state = State::create([
-            'name' => $validated['stateName'],
-            'code' => $validated['abbreviation'],
-        ]);
-
-        return response()->json(
-            [
-                'message' => 'State Created Successfully!',
-                'state' => $state,
-            ],
-            Response::HTTP_CREATED
-        );
-    }
-
-    public function showCountry(Request $request): JsonResponse
+    public function showCountry(Request $request, $id = null): JsonResponse
     {
         $filters = $request->only(['name', 'code']);
         $query = Country::query();
-
+    
+        // If an ID is provided in the URL, fetch by ID
+        if ($id) {
+            $country = Country::find($id);
+            if (!$country) {
+                return response()->json(
+                    ['message' => 'Country not found'],
+                    Response::HTTP_NOT_FOUND
+                );
+            }
+            return response()->json(
+                [
+                    'message' => 'Country retrieved successfully!',
+                    'country' => $country,
+                ],
+                Response::HTTP_OK
+            );
+        }
+    
+        // If filters are provided, apply them to the query
         if (!empty($filters)) {
             if (isset($filters['name'])) {
                 $query->where('name', $filters['name']);
@@ -82,16 +73,16 @@ class CountryAndStateController extends Controller
                 $query->where('abbreviation', $filters['code']);
             }
         }
-
+    
         $countries = $query->get();
-
+    
         if ($countries->isEmpty()) {
             return response()->json(
                 ['message' => 'No countries found matching the filters.'],
                 Response::HTTP_NOT_FOUND
             );
         }
-
+    
         return response()->json(
             [
                 'message' => 'Countries retrieved successfully!',
@@ -100,12 +91,30 @@ class CountryAndStateController extends Controller
             Response::HTTP_OK
         );
     }
+    
 
-    public function showState(Request $request): JsonResponse
+    public function showState(Request $request, $id = null): JsonResponse
     {
         $filters = $request->only(['name', 'code']);
         $query = State::query();
-
+    
+        if ($id) {
+            $state = State::find($id);
+            if (!$state) {
+                return response()->json(
+                    ['message' => 'State not found'],
+                    Response::HTTP_NOT_FOUND
+                );
+            }
+            return response()->json(
+                [
+                    'message' => 'State retrieved successfully!',
+                    'state' => $state,
+                ],
+                Response::HTTP_OK
+            );
+        }
+    
         if (!empty($filters)) {
             if (isset($filters['name'])) {
                 $query->where('name', $filters['name']);
@@ -114,16 +123,16 @@ class CountryAndStateController extends Controller
                 $query->where('code', $filters['code']);
             }
         }
-
+    
         $states = $query->get();
-
+    
         if ($states->isEmpty()) {
             return response()->json(
                 ['message' => 'No states found matching the filters.'],
                 Response::HTTP_NOT_FOUND
             );
         }
-
+    
         return response()->json(
             [
                 'message' => 'States retrieved successfully!',
@@ -132,7 +141,7 @@ class CountryAndStateController extends Controller
             Response::HTTP_OK
         );
     }
-
+    
     public function updateState(Request $request, int $id): JsonResponse
     {
         $validated = $request->validate([
