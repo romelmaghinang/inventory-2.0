@@ -271,34 +271,44 @@ class PickController extends Controller
      *     )
      * )
      */
-        public function update(Request $request, $id): JsonResponse
-        {
-            $request->validate([
-                'locationName' => 'required|string',
-                'partNum' => 'required|string',
-                'trackingInfo' => 'nullable|array',
-            ]);
-        
-            $pick = Pick::findOrFail($id);
-        
-            $pick->update($request->only(['locationName', 'partNum', 'trackingInfo']));
-        
-            $part = Part::where('num', $request->partNum)->first();
-            $location = Location::where('name', $request->locationName)->first();
-        
-            return response()->json(
-                [
-                    'message' => 'Pick updated successfully!',
-                    'pick' => $pick,
-                    'relatedData' => [
-                        'part' => $part,
-                        'location' => $location,
-                    ]
-                ],
-                Response::HTTP_OK
-            );
+    public function update(Request $request, $id): JsonResponse
+    {
+        $validationRules = [];
+    
+        if ($request->has('locationName')) {
+            $validationRules['locationName'] = 'required|string';
         }
-        
+    
+        if ($request->has('partNum')) {
+            $validationRules['partNum'] = 'required|string';
+        }
+    
+        if ($request->has('trackingInfo')) {
+            $validationRules['trackingInfo'] = 'nullable|array';
+        }
+    
+        $request->validate($validationRules);
+    
+        $pick = Pick::findOrFail($id);
+    
+        $pick->update($request->only(array_keys($validationRules)));
+    
+        $part = $request->has('partNum') ? Part::where('num', $request->partNum)->first() : null;
+        $location = $request->has('locationName') ? Location::where('name', $request->locationName)->first() : null;
+    
+        return response()->json(
+            [
+                'message' => 'Pick updated successfully!',
+                'pick' => $pick,
+                'relatedData' => [
+                    'part' => $part,
+                    'location' => $location,
+                ]
+            ],
+            Response::HTTP_OK
+        );
+    }
+    
     
     /**
      * @OA\Get(

@@ -258,44 +258,50 @@ class ProductController extends Controller
     public function update(UpdateProductRequest $updateProductRequest, $id): JsonResponse
     {
         $product = Product::find($id);
-
+    
         if (!$product) {
             return response()->json(['message' => 'Product not found'], Response::HTTP_NOT_FOUND);
         }
-
-        $part = Part::where('num', $updateProductRequest->partNumber)->firstOrFail();
-        $soItem = SalesOrderItemType::where('name', $updateProductRequest->productSoItemType)->firstOrFail();
-        $uom = UnitOfMeasure::where('name', $updateProductRequest->uom)->firstOrFail();
-
-        $product->update(
-            $updateProductRequest->only(
-                [
-                    'price',
-                    'weight',
-                    'width',
-                    'height',
-                    'length',
-                    'alertNote',
-                    'cf'
-                ]
-            ) +
-                [
-                    'num' => $updateProductRequest->productNumber,
-                    'description' => $updateProductRequest->productDescription,
-                    'details' => $updateProductRequest->productDetails,
-                    'activeFlag' => $updateProductRequest->active,
-                    'taxableFlag' => $updateProductRequest->taxable,
-                    'showSoComboFlag' => $updateProductRequest->combo,
-                    'sellableInOtherUoms' => $updateProductRequest->allowUom,
-                    'url' => $updateProductRequest->productUrl,
-                    'upc' => $updateProductRequest->productUpc,
-                    'sku' => $updateProductRequest->productSku,
-                    'defaultSoItemType' => $soItem->id,
-                    'uomId' => $uom->id,
-                    'partId' => $part->id,
-                ]
-        );
-
+    
+        $part = Part::where('num', $updateProductRequest->partNumber)->first();
+        $soItem = SalesOrderItemType::where('name', $updateProductRequest->productSoItemType)->first();
+        $uom = UnitOfMeasure::where('name', $updateProductRequest->uom)->first();
+    
+        $updateData = [];
+    
+        if ($updateProductRequest->has('price')) $updateData['price'] = $updateProductRequest->price;
+        if ($updateProductRequest->has('weight')) $updateData['weight'] = $updateProductRequest->weight;
+        if ($updateProductRequest->has('width')) $updateData['width'] = $updateProductRequest->width;
+        if ($updateProductRequest->has('height')) $updateData['height'] = $updateProductRequest->height;
+        if ($updateProductRequest->has('length')) $updateData['length'] = $updateProductRequest->length;
+        if ($updateProductRequest->has('alertNote')) $updateData['alertNote'] = $updateProductRequest->alertNote;
+        if ($updateProductRequest->has('cf')) $updateData['cf'] = $updateProductRequest->cf;
+    
+        $updateData += [
+            'num' => $updateProductRequest->productNumber ?? $product->num,
+            'description' => $updateProductRequest->productDescription ?? $product->description,
+            'details' => $updateProductRequest->productDetails ?? $product->details,
+            'activeFlag' => $updateProductRequest->active ?? $product->activeFlag,
+            'taxableFlag' => $updateProductRequest->taxable ?? $product->taxableFlag,
+            'showSoComboFlag' => $updateProductRequest->combo ?? $product->showSoComboFlag,
+            'sellableInOtherUoms' => $updateProductRequest->allowUom ?? $product->sellableInOtherUoms,
+            'url' => $updateProductRequest->productUrl ?? $product->url,
+            'upc' => $updateProductRequest->productUpc ?? $product->upc,
+            'sku' => $updateProductRequest->productSku ?? $product->sku,
+        ];
+    
+        if ($part) {
+            $updateData['partId'] = $part->id;
+        }
+        if ($soItem) {
+            $updateData['defaultSoItemType'] = $soItem->id;
+        }
+        if ($uom) {
+            $updateData['uomId'] = $uom->id;
+        }
+    
+        $product->update($updateData);
+    
         return response()->json(
             [
                 'message' => 'Product updated successfully!',
@@ -309,7 +315,7 @@ class ProductController extends Controller
             Response::HTTP_OK
         );
     }
-
+    
     
 
 

@@ -150,7 +150,7 @@ class LocationController extends Controller
     public function update(Request $request, int $id): JsonResponse
     {
         $request->validate([
-            'location' => 'required|string',
+            'location' => 'nullable|string',
             'description' => 'nullable|string',
             'type' => 'nullable|string',
             'locationGroup' => 'nullable|string',
@@ -161,41 +161,69 @@ class LocationController extends Controller
             'receivable' => 'nullable|boolean',
             'sortOrder' => 'nullable|integer',
         ]);
-
+    
         $location = Location::findOrFail($id);
-
+    
         $locationType = null;
+        $locationGroup = null;
+        $customer = null;
+    
         if ($request->has('type')) {
             $locationType = LocationType::where('name', $request->type)->firstOrFail();
         }
-
-        $locationGroup = null;
+    
         if ($request->has('locationGroup')) {
             $locationGroup = LocationGroup::firstOrCreate(['name' => $request->locationGroup]);
         }
-
-        $customer = null;
+    
         if ($request->has('customerName')) {
             $customer = Customer::where('name', $request->customerName)->firstOrFail();
         }
-
-        $location->update(
-            $request->only([
-                'location',
-                'description',
-                'active',
-                'available',
-                'pickable',
-                'receivable',
-                'sortOrder',
-            ]) +
-            [
-                'typeId' => $locationType?->id,
-                'locationGroupId' => $locationGroup?->id,
-                'defaultCustomerId' => $customer?->id,
-            ]
-        );
-
+    
+        $updateData = [];
+    
+        if ($request->has('location')) {
+            $updateData['location'] = $request->location;
+        }
+    
+        if ($request->has('description')) {
+            $updateData['description'] = $request->description;
+        }
+    
+        if ($request->has('active')) {
+            $updateData['active'] = $request->active;
+        }
+    
+        if ($request->has('available')) {
+            $updateData['available'] = $request->available;
+        }
+    
+        if ($request->has('pickable')) {
+            $updateData['pickable'] = $request->pickable;
+        }
+    
+        if ($request->has('receivable')) {
+            $updateData['receivable'] = $request->receivable;
+        }
+    
+        if ($request->has('sortOrder')) {
+            $updateData['sortOrder'] = $request->sortOrder;
+        }
+    
+        if ($locationType) {
+            $updateData['typeId'] = $locationType->id;
+        }
+    
+        if ($locationGroup) {
+            $updateData['locationGroupId'] = $locationGroup->id;
+        }
+    
+        if ($customer) {
+            $updateData['defaultCustomerId'] = $customer->id;
+        }
+    
+        $location->update($updateData);
+    
         return response()->json(
             [
                 'message' => 'Location updated successfully!',
@@ -209,7 +237,7 @@ class LocationController extends Controller
             Response::HTTP_OK
         );
     }
-
+    
     
 /**
  * @OA\Get(

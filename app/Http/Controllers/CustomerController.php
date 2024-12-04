@@ -326,26 +326,27 @@ class CustomerController extends Controller
     public function update(UpdateCustomerRequest $request, int $id): JsonResponse
     {
         $customer = Customer::findOrFail($id);
-
-        // Retrieve related models
+    
         $account = Account::findOrFail($customer->accountId);
         $address = Address::where('accountId', $customer->accountId)->firstOrFail();
-
-        $currency = Currency::where('name', $request->currencyName)->firstOrFail();
-        $customerStatus = CustomerStatus::where('name', $request->status)->firstOrFail();
-        $taxRate = TaxRate::where('name', $request->taxRate)->firstOrFail();
-        $priority = Priority::where('name', $request->defaultPriority)->firstOrFail();
-        $paymentTerms = PaymentTerms::where('name', $request->paymentTerms)->firstOrFail();
-        $carrier = Carrier::where('name', $request->carrierName)->firstOrFail();
-        $carrierService = CarrierService::where('name', $request->carrierService)->firstOrFail();
-        $shipTerms = ShipTerms::where('name', $request->shippingTerms)->firstOrFail();
-        $quickBook = QbClass::where('name', $request->quickBooksClassName)->firstOrFail();
-        $addressType = AddressType::where('name', $request->addressType)->firstOrFail();
-        $state = State::where('name', $request->state)->firstOrFail();
-        $country = Country::where('name', $request->country)->firstOrFail();
-
-        $account->update(['typeId' => $request->accountTypeId]);
-
+    
+        $currency = isset($request->currencyName) ? Currency::where('name', $request->currencyName)->firstOrFail() : null;
+        $customerStatus = isset($request->status) ? CustomerStatus::where('name', $request->status)->firstOrFail() : null;
+        $taxRate = isset($request->taxRate) ? TaxRate::where('name', $request->taxRate)->firstOrFail() : null;
+        $priority = isset($request->defaultPriority) ? Priority::where('name', $request->defaultPriority)->firstOrFail() : null;
+        $paymentTerms = isset($request->paymentTerms) ? PaymentTerms::where('name', $request->paymentTerms)->firstOrFail() : null;
+        $carrier = isset($request->carrierName) ? Carrier::where('name', $request->carrierName)->firstOrFail() : null;
+        $carrierService = isset($request->carrierService) ? CarrierService::where('name', $request->carrierService)->firstOrFail() : null;
+        $shipTerms = isset($request->shippingTerms) ? ShipTerms::where('name', $request->shippingTerms)->firstOrFail() : null;
+        $quickBook = isset($request->quickBooksClassName) ? QbClass::where('name', $request->quickBooksClassName)->firstOrFail() : null;
+        $addressType = isset($request->addressType) ? AddressType::where('name', $request->addressType)->firstOrFail() : null;
+        $state = isset($request->state) ? State::where('name', $request->state)->firstOrFail() : null;
+        $country = isset($request->country) ? Country::where('name', $request->country)->firstOrFail() : null;
+    
+        if ($request->has('accountTypeId')) {
+            $account->update(['typeId' => $request->accountTypeId]);
+        }
+    
         $customer->update(
             $request->only(
                 [
@@ -360,19 +361,17 @@ class CustomerController extends Controller
                     'toBePrinted',
                     'cf'
                 ]
-            ) +
-            [
-                'currencyId' => $currency->id,
-                'statusId' => $customerStatus->id,
-                'activeFLag' => $request->active,
-                'taxRateId' => $taxRate->id,
-                'defaultPaymentTermsId' => $paymentTerms->id,
-                'defaultCarrierId' => $carrier->id,
-                'carrierServiceId' => $carrierService->id,
-                'qbClassId' => $quickBook->id,
-            ]
+            ) + 
+            ($currency ? ['currencyId' => $currency->id] : []) +
+            ($customerStatus ? ['statusId' => $customerStatus->id] : []) +
+            ($taxRate ? ['taxRateId' => $taxRate->id] : []) +
+            ($request->has('active') ? ['activeFlag' => $request->active] : []) +
+            ($paymentTerms ? ['defaultPaymentTermsId' => $paymentTerms->id] : []) +
+            ($carrier ? ['defaultCarrierId' => $carrier->id] : []) +
+            ($carrierService ? ['carrierServiceId' => $carrierService->id] : []) +
+            ($quickBook ? ['qbClassId' => $quickBook->id] : [])
         );
-
+    
         $address->update(
             $request->only(
                 [
@@ -382,15 +381,13 @@ class CustomerController extends Controller
                     'zip',
                 ]
             ) +
-            [
-                'piplineContactNum' => $request->addressContact,
-                'typeId' => $addressType->id,
-                'activeFlag' => $request->isDefault,
-                'stateId' => $state->id,
-                'countryId' => $country->id,
-            ]
+            ($request->has('addressContact') ? ['piplineContactNum' => $request->addressContact] : []) +
+            ($addressType ? ['typeId' => $addressType->id] : []) +
+            ($request->has('isDefault') ? ['activeFlag' => $request->isDefault] : []) +
+            ($state ? ['stateId' => $state->id] : []) +
+            ($country ? ['countryId' => $country->id] : [])
         );
-
+    
         return response()->json(
             [
                 'message' => 'Customer Updated Successfully!',
@@ -414,6 +411,7 @@ class CustomerController extends Controller
             Response::HTTP_OK
         );
     }
+    
 
 
     public function destroy(Request $request): JsonResponse

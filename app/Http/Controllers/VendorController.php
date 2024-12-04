@@ -284,61 +284,61 @@ class VendorController extends Controller
      *      )
      * )
      */
-        public function update(UpdateVendorRequest $updateVendorRequest, $id): JsonResponse
+    public function update(UpdateVendorRequest $updateVendorRequest, $id): JsonResponse
     {
         $vendor = Vendor::findOrFail($id);
-
-        $state = State::where('name', $updateVendorRequest->state)->firstOrFail();
-        $country = Country::where('name', $updateVendorRequest->country)->firstOrFail();
-        $currency = Currency::where('name', $updateVendorRequest->currencyName)->firstOrFail();
-        $carrier = Carrier::where('name', $updateVendorRequest->defaultCarrier)->firstOrFail();
-        $shipterms = ShipTerms::where('name', $updateVendorRequest->defaultShippingTerms)->firstOrFail();
-        $vendorStatus = VendorStatus::where('name', $updateVendorRequest->status)->firstOrFail();
-
-        $address = Address::updateOrCreate(
-            ['addressName' => $updateVendorRequest->addressName],
-            [
-                'address' => $updateVendorRequest->address,
-                'city' => $updateVendorRequest->city,
-                'zip' => $updateVendorRequest->zip,
-                'pipelineContactNum' => $updateVendorRequest->addressContact,
-                'typeId' => $updateVendorRequest->addressType,
-                'defaultFlag' => $updateVendorRequest->isDefault,
-                'stateId' => $state->id,
-                'countryId' => $country->id,
-            ]
-        );
-
-        $vendor->update(
-            $updateVendorRequest->only(['name', 'currencyRate', 'minOrderAmount', 'url']) + [
-                'currencyId' => $currency->id,
-                'defaultCarrierId' => $carrier->id,
-                'defaultShipTermsId' => $shipterms->id,
-                'statusId' => $vendorStatus->id,
-                'accountNum' => $updateVendorRequest->accountNumber,
-                'activeFlag' => $updateVendorRequest->active,
-                'note' => $updateVendorRequest->alertNotes,
-            ]
-        );
-
+    
+        $state = $updateVendorRequest->state ? State::where('name', $updateVendorRequest->state)->firstOrFail() : null;
+        $country = $updateVendorRequest->country ? Country::where('name', $updateVendorRequest->country)->firstOrFail() : null;
+        $currency = $updateVendorRequest->currencyName ? Currency::where('name', $updateVendorRequest->currencyName)->firstOrFail() : null;
+        $carrier = $updateVendorRequest->defaultCarrier ? Carrier::where('name', $updateVendorRequest->defaultCarrier)->firstOrFail() : null;
+        $shipterms = $updateVendorRequest->defaultShippingTerms ? ShipTerms::where('name', $updateVendorRequest->defaultShippingTerms)->firstOrFail() : null;
+        $vendorStatus = $updateVendorRequest->status ? VendorStatus::where('name', $updateVendorRequest->status)->firstOrFail() : null;
+    
+        $address = null;
+        if ($updateVendorRequest->hasAny(['addressName', 'address', 'city', 'zip', 'addressContact', 'addressType', 'isDefault'])) {
+            $address = Address::updateOrCreate(
+                ['addressName' => $updateVendorRequest->addressName],
+                array_filter([
+                    'address' => $updateVendorRequest->address,
+                    'city' => $updateVendorRequest->city,
+                    'zip' => $updateVendorRequest->zip,
+                    'pipelineContactNum' => $updateVendorRequest->addressContact,
+                    'typeId' => $updateVendorRequest->addressType,
+                    'defaultFlag' => $updateVendorRequest->isDefault,
+                    'stateId' => $state?->id,
+                    'countryId' => $country?->id,
+                ])
+            );
+        }
+    
+        $updateData = $updateVendorRequest->only(['name', 'currencyRate', 'minOrderAmount', 'url', 'accountNumber', 'active', 'alertNotes']);
+    
+        if ($currency) $updateData['currencyId'] = $currency->id;
+        if ($carrier) $updateData['defaultCarrierId'] = $carrier->id;
+        if ($shipterms) $updateData['defaultShipTermsId'] = $shipterms->id;
+        if ($vendorStatus) $updateData['statusId'] = $vendorStatus->id;
+    
+        $vendor->update(array_filter($updateData));
+    
         return response()->json(
             [
                 'message' => 'Vendor Updated Successfully!',
                 'vendor' => $vendor,
                 'address' => $address,
-                'relatedData' => [
+                'relatedData' => array_filter([
                     'state' => $state,
                     'country' => $country,
                     'currency' => $currency,
                     'carrier' => $carrier,
                     'shipterms' => $shipterms,
                     'vendorStatus' => $vendorStatus,
-                ],
+                ]),
             ],
             Response::HTTP_OK
         );
     }
-
+    
 
 
     /**

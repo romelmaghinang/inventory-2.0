@@ -482,10 +482,13 @@ class PurchaseOrderController extends Controller
         if (!$purchaseOrder) {
             return response()->json(['message' => 'Purchase Order not found'], Response::HTTP_NOT_FOUND);
         }
-        
-        $purchaseOrder->status = $request->input('status');
-        $purchaseOrder->save();
     
+        $fieldsToUpdate = $request->only([
+            'status', 
+        ]);
+    
+        $purchaseOrder->update($fieldsToUpdate);
+        
         $relatedData = [
             'locationGroup' => $purchaseOrder->locationGroup,
             'carrier' => $purchaseOrder->carrier,
@@ -509,6 +512,7 @@ class PurchaseOrderController extends Controller
             'relatedData' => $relatedData
         ], Response::HTTP_OK);
     }
+    
     
     
 

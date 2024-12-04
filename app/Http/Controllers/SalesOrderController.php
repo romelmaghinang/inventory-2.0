@@ -501,52 +501,53 @@ class SalesOrderController extends Controller
 
         $salesOrder = SalesOrder::findOrFail($updateSalesOrderRequest->soId);
 
-        $salesOrder->update(
-            $updateSalesOrderRequest->only([
-                'customerContact',
-                'billToName',
-                'billToAddress',
-                'billToCity',
-                'billToZip',
-                'shipToName',
-                'shipToAddress',
-                'shipToCity',
-                'shipToZip',
-                'vendorPONum',
-                'date',
-                'dateExpired',
-                'salesman',
-                'priorityId',
-                'paymentTerms',
-                'fob',
-                'note',
-                'locationGroupName',
-                'phone',
-                'email',
-                'url',
-                'category',
-                'customField',
-                'currencyRate',
-            ]) + [
-                'activeFlag' => $updateSalesOrderRequest->flag,
-                'shipTermsId' => $shipterms->id,
-                'billToCountryId' => $billToCountry->id,
-                'billToStateId' => $billToState->id,
-                'shipToCountryId' => $shipToCountry->id,
-                'shipToStateId' => $shipToState->id,
-                'taxRateId' => $taxRate->id,
-                'statusId' => $updateSalesOrderRequest->status,
-                'currencyId' => $currency->id,
-                'customerId' => $customer->id,
-                'carrierId' => $carrier->id,
-                'carrierServiceId' => $carrierService->id,
-                'residentialFlag' => $updateSalesOrderRequest->shipToResidential,
-                'qbClassId' => $qbclass->id,
-            ]
-        );
+        $updateData = $updateSalesOrderRequest->only([
+            'customerContact',
+            'billToName',
+            'billToAddress',
+            'billToCity',
+            'billToZip',
+            'shipToName',
+            'shipToAddress',
+            'shipToCity',
+            'shipToZip',
+            'vendorPONum',
+            'date',
+            'dateExpired',
+            'salesman',
+            'priorityId',
+            'paymentTerms',
+            'fob',
+            'note',
+            'locationGroupName',
+            'phone',
+            'email',
+            'url',
+            'category',
+            'customField',
+            'currencyRate',
+        ]);
+
+        $updateData = array_merge($updateData, [
+            'activeFlag' => $updateSalesOrderRequest->flag,
+            'shipTermsId' => $shipterms->id,
+            'billToCountryId' => $billToCountry->id,
+            'billToStateId' => $billToState->id,
+            'shipToCountryId' => $shipToCountry->id,
+            'shipToStateId' => $shipToState->id,
+            'taxRateId' => $taxRate->id,
+            'statusId' => $updateSalesOrderRequest->status,
+            'currencyId' => $currency->id,
+            'customerId' => $customer->id,
+            'carrierId' => $carrier->id,
+            'carrierServiceId' => $carrierService->id,
+            'residentialFlag' => $updateSalesOrderRequest->shipToResidential,
+            'qbClassId' => $qbclass->id,
+        ]);
+
+        $salesOrder->update($updateData);
 
         $salesOrder->items()->delete();
-
         $salesOrderItems = [];
         foreach ($updateSalesOrderRequest->validated()['items'] as $item) {
             $product = Product::where('num', $item['productNumber'])->firstOrFail();

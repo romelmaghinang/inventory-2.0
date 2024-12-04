@@ -155,17 +155,11 @@ class CurrencyController extends Controller
     public function update(UpdateCurrencyRequest $updateCurrencyRequest, Currency $currency): JsonResponse
     {
         $currency->update(
-            $updateCurrencyRequest->only(
-                [
-                    'name',
-                    'code'
-                ]
-            ) + [
-                'activeFlag' => $updateCurrencyRequest->active,
-                'rate' => $updateCurrencyRequest->globalCurrencyRate,
-            ]
+            $updateCurrencyRequest->only(['name', 'code']) + 
+            ($updateCurrencyRequest->has('active') ? ['activeFlag' => $updateCurrencyRequest->active] : []) + 
+            ($updateCurrencyRequest->has('globalCurrencyRate') ? ['rate' => $updateCurrencyRequest->globalCurrencyRate] : [])
         );
-
+    
         return response()->json(
             [
                 'message' => 'Currency Update Successfully!',
@@ -174,6 +168,7 @@ class CurrencyController extends Controller
             Response::HTTP_OK
         );
     }
+    
 
     /**
      * Remove the specified resource from storage.

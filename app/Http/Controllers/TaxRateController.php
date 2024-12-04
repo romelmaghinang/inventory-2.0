@@ -153,29 +153,38 @@ public function show(Request $request): JsonResponse
      */
     public function update(UpdateTaxRateRequest $updateTaxRateRequest, TaxRate $taxRate): JsonResponse
     {
-
-        $taxRateType = TaxRateType::where(['name' => $updateTaxRateRequest->taxType])->firstOrFail();
-
-
         try {
-            // Update the tax rate fields
-            $taxRate->update(
-                $updateTaxRateRequest->only(
-                    'rate',
-                    'description',
-                    'defaultFlag',
-                    'activeFlag'
-                ) + [
-                    'name' => $updateTaxRateRequest->taxName,
-                    'code' => $updateTaxRateRequest->taxCode,
-                    'typeId' => $taxRateType->id,
-                ]
-            );
-
+            $taxRateType = TaxRateType::where(['name' => $updateTaxRateRequest->taxType])->firstOrFail();
+    
+            $fieldsToUpdate = [];
+    
+            if ($updateTaxRateRequest->has('rate')) {
+                $fieldsToUpdate['rate'] = $updateTaxRateRequest->rate;
+            }
+            if ($updateTaxRateRequest->has('description')) {
+                $fieldsToUpdate['description'] = $updateTaxRateRequest->description;
+            }
+            if ($updateTaxRateRequest->has('defaultFlag')) {
+                $fieldsToUpdate['defaultFlag'] = $updateTaxRateRequest->defaultFlag;
+            }
+            if ($updateTaxRateRequest->has('activeFlag')) {
+                $fieldsToUpdate['activeFlag'] = $updateTaxRateRequest->activeFlag;
+            }
+            if ($updateTaxRateRequest->has('taxName')) {
+                $fieldsToUpdate['name'] = $updateTaxRateRequest->taxName;
+            }
+            if ($updateTaxRateRequest->has('taxCode')) {
+                $fieldsToUpdate['code'] = $updateTaxRateRequest->taxCode;
+            }
+    
+            $fieldsToUpdate['typeId'] = $taxRateType->id;
+    
+            $taxRate->update($fieldsToUpdate);
+    
             return response()->json(
                 [
                     'message' => 'Tax Rate Updated Successfully!',
-                    'data' => $taxRate
+                    'data' => $taxRate,
                 ],
                 Response::HTTP_OK
             );
@@ -185,6 +194,7 @@ public function show(Request $request): JsonResponse
             return response()->json(['error' => 'An error occurred while updating the tax rate'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+    
 
     /**
      * Remove the specified resource from storage.

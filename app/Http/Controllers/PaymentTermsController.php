@@ -167,27 +167,34 @@ public function show(Request $request): JsonResponse
     public function update(UpdatePaymentTermsRequest $updatePaymentTermsRequest, PaymentTerms $paymentTerms, $id): JsonResponse
     {
         $paymentTerms = PaymentTerms::findOrFail($id);
-    
+
         $paymentTermsType = PaymentTermsType::where('name', $updatePaymentTermsRequest->termsType)->firstOrFail();
-    
-        $paymentTerms->update(
-            $updatePaymentTermsRequest->only(
-                [
-                    'netDays',
-                    'discount',
-                    'discountDays',
-                    'nextMonth'
-                ]
-            ) + [
-                'name' => $updatePaymentTermsRequest->termsName,
-                'typeId' => $paymentTermsType->id,
-                'defaultTerms' => $updatePaymentTermsRequest->default,
-                'activeFlag' => $updatePaymentTermsRequest->active,
-            ]
-        );
-    
+
+        $updateData = $updatePaymentTermsRequest->only([
+            'netDays', 
+            'discount', 
+            'discountDays', 
+            'nextMonth', 
+            'termsName', 
+            'default', 
+            'active'
+        ]);
+
+        $updateData = array_filter($updateData, function($value) {
+            return !is_null($value);
+        });
+
+        $updateData = array_merge($updateData, [
+            'name' => $updatePaymentTermsRequest->termsName,
+            'typeId' => $paymentTermsType->id,
+            'defaultTerms' => $updatePaymentTermsRequest->default,
+            'activeFlag' => $updatePaymentTermsRequest->active,
+        ]);
+
+        $paymentTerms->update($updateData);
+
         $relatedPaymentTermsType = $paymentTermsType;
-    
+
         return response()->json(
             [
                 'message' => 'Payment Terms Updated Successfully!',
@@ -199,6 +206,7 @@ public function show(Request $request): JsonResponse
             Response::HTTP_OK
         );
     }
+
     
     /**
      * Remove the specified resource from storage.

@@ -258,34 +258,63 @@ class PartController extends Controller
     public function update($id, UpdatePartRequest $request): JsonResponse
     {
         $part = Part::findOrFail($id);
-
+    
         $uom = UnitOfMeasure::where('name', $request->uom)->firstOrFail();
         $partType = PartType::where('name', $request->partType)->firstOrFail();
         $poItemType = PurchaseOrderItemType::where('name', $request->poItemType)->firstOrFail();
         $partTrackingType = PartTrackingType::where('name', $request->tracks)->firstOrFail();
-
-        $part->update(
-            $request->only([
-                'partDetails',
-                'upc',
-                'weight',
-                'width',
-                'consumptionRate',
-                'revision',
-                'length',
-            ]) + [
-                'num' => $request->partNumber,
-                'description' => $request->partDescription,
-                'uomId' => $uom->id,
-                'typeId' => $partType->id,
-                'activeFlag' => $request->active,
-                'weightUomId' => $request->weightUom,
-                'sizeUomId' => $request->sizeUom,
-                'url' => $request->pictureUrl,
-                'defaultPoItemTypeId' => $poItemType->id,
-            ]
-        );
-
+    
+        $updateData = [];
+    
+        if ($request->has('partDetails')) {
+            $updateData['partDetails'] = $request->partDetails;
+        }
+        if ($request->has('upc')) {
+            $updateData['upc'] = $request->upc;
+        }
+        if ($request->has('weight')) {
+            $updateData['weight'] = $request->weight;
+        }
+        if ($request->has('width')) {
+            $updateData['width'] = $request->width;
+        }
+        if ($request->has('consumptionRate')) {
+            $updateData['consumptionRate'] = $request->consumptionRate;
+        }
+        if ($request->has('revision')) {
+            $updateData['revision'] = $request->revision;
+        }
+        if ($request->has('length')) {
+            $updateData['length'] = $request->length;
+        }
+    
+        if ($request->has('partNumber')) {
+            $updateData['num'] = $request->partNumber;
+        }
+        if ($request->has('partDescription')) {
+            $updateData['description'] = $request->partDescription;
+        }
+        if ($request->has('active')) {
+            $updateData['activeFlag'] = $request->active;
+        }
+        if ($request->has('weightUom')) {
+            $updateData['weightUomId'] = $request->weightUom;
+        }
+        if ($request->has('sizeUom')) {
+            $updateData['sizeUomId'] = $request->sizeUom;
+        }
+        if ($request->has('pictureUrl')) {
+            $updateData['url'] = $request->pictureUrl;
+        }
+        if ($request->has('tracks')) {
+            $updateData['partTrackingTypeId'] = $partTrackingType->id;
+        }
+        if ($request->has('poItemType')) {
+            $updateData['defaultPoItemTypeId'] = $poItemType->id;
+        }
+    
+        $part->update($updateData);
+    
         return response()->json(
             [
                 'message' => 'Product Updated Successfully!',
@@ -300,7 +329,7 @@ class PartController extends Controller
             Response::HTTP_OK
         );
     }
-
+    
  
     public function destroy(Request $request): JsonResponse
     {
