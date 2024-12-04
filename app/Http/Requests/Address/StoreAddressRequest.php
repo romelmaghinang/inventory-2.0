@@ -25,16 +25,16 @@ class StoreAddressRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'accountId' => ['required', 'integer', 'min:0'],
-            'name' => ['required', 'string', 'max:41'],
+            'accountId' => ['nullable', 'integer', 'min:0'],
+            'name' => ['nullable', 'string', 'max:41'],
             'city' => ['nullable', 'string', 'max:30'],
             'countryId' => ['nullable', 'integer', 'min:0'],
-            'defaultFlag' => ['required', 'boolean'],
+            'defaultFlag' => ['nullable', 'boolean'],
             'locationGroupId' => ['nullable', 'integer', 'min:0'],
             'addressName' => ['nullable', 'string', 'max:90', 'unique:table_name,addressName'],
             'pipelineContactNum' => ['nullable', 'integer'],
             'stateId' => ['nullable', 'integer', 'min:0'],
-            'address' => ['required', 'string', 'max:90'],
+            'address' => ['nullable', 'string', 'max:90'],
             'typeID' => ['nullable', 'integer', 'min:0'],
             'zip' => ['nullable', 'string', 'max:10'],
         ];
@@ -64,7 +64,6 @@ class StoreAddressRequest extends FormRequest
             }
         }
 
-        // Return the categorized errors in a structured response
         throw new HttpResponseException(response()->json(
             [
                 'success' => false,

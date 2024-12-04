@@ -58,7 +58,6 @@ class StoreCarrierRequest extends FormRequest
             }
         }
 
-        // Return the categorized errors in a structured response
         throw new HttpResponseException(response()->json(
             [
                 'success' => false,
