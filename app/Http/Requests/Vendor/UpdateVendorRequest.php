@@ -65,7 +65,7 @@ class UpdateVendorRequest extends FormRequest
     protected function failedValidation(Validator $validator)
     {
         $categorizedErrors = [];
-
+    
         foreach ($validator->errors()->toArray() as $field => $messages) {
             foreach ($messages as $message) {
                 if (str_contains($message, 'required')) {
@@ -78,7 +78,15 @@ class UpdateVendorRequest extends FormRequest
                 } elseif (str_contains($message, 'has already been taken')) {
                     $categorizedErrors['duplicateFields'][] = $field;
                 } elseif (str_contains($message, 'exists')) {
-                    $categorizedErrors['relatedFieldErrors'][] = $field;
+                    // Check for "no query result" errors
+                    if (str_contains($message, 'no query results')) {
+                        $categorizedErrors['noQueryResults'][] = [
+                            'field' => $field,
+                            'message' => $message,
+                        ];
+                    } else {
+                        $categorizedErrors['relatedFieldErrors'][] = $field;
+                    }
                 } else {
                     $categorizedErrors['otherErrors'][] = [
                         'field' => $field,
@@ -87,7 +95,7 @@ class UpdateVendorRequest extends FormRequest
                 }
             }
         }
-
+    
         throw new HttpResponseException(response()->json(
             [
                 'success' => false,

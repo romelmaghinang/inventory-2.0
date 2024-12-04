@@ -189,26 +189,37 @@ class VendorController extends Controller
  * )
  */
 
- public function show(Request $request): JsonResponse
- {
-     $vendorNameFromQuery = $request->input('name');
-     $vendorNameFromBody = $request->json('name');
- 
-     if ($vendorNameFromQuery || $vendorNameFromBody) {
-         $vendorName = $vendorNameFromQuery ?? $vendorNameFromBody;
- 
-         $vendor = Vendor::where('name', $vendorName)->first();
- 
-         if (!$vendor) {
-             return response()->json(['message' => 'Vendor not found'], Response::HTTP_NOT_FOUND);
-         }
- 
-         return response()->json($vendor, Response::HTTP_OK);
-     }
- 
-     $vendors = Vendor::all();
-     return response()->json($vendors, Response::HTTP_OK);
- }
+    public function show(Request $request, $id = null): JsonResponse
+    {
+        if ($id) {
+            $vendor = Vendor::find($id);
+
+            if (!$vendor) {
+                return response()->json(['message' => 'Vendor not found'], Response::HTTP_NOT_FOUND);
+            }
+
+            return response()->json($vendor, Response::HTTP_OK);
+        }
+
+        $vendorNameFromQuery = $request->input('name');
+        $vendorNameFromBody = $request->json('name');
+
+        if ($vendorNameFromQuery || $vendorNameFromBody) {
+            $vendorName = $vendorNameFromQuery ?? $vendorNameFromBody;
+
+            $vendor = Vendor::where('name', $vendorName)->first();
+
+            if (!$vendor) {
+                return response()->json(['message' => 'Vendor not found'], Response::HTTP_NOT_FOUND);
+            }
+
+            return response()->json($vendor, Response::HTTP_OK);
+        }
+
+        $vendors = Vendor::all();
+        return response()->json($vendors, Response::HTTP_OK);
+    }
+
  
     /**
      * @OA\Put(
@@ -366,7 +377,7 @@ class VendorController extends Controller
 
         if (!$vendor) {
             return response()->json([
-                'message' => 'Vendor not found.'
+                'message' => 'Missing vendor ID.'
             ], Response::HTTP_NOT_FOUND);
         }
 
