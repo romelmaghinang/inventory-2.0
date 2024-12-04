@@ -25,17 +25,18 @@ class UpdatePickRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'pickNum' => ['required', 'numeric'],
-            'locationName' => ['required', 'string', 'max:255', 'exists:location,name'],
-            'partNum' => ['required', 'string', 'max:255', 'exists:part,num'],
-            'partTrackingType' => ['required', 'string', 'exists:parttracking,name'],
+            'pickNum' => ['nullable', 'numeric'],
+            'locationName' => ['nullable', 'string', 'max:255', 'exists:location,name'],
+            'partNum' => ['nullable', 'string', 'max:255', 'exists:part,num'],
+            'partTrackingType' => ['nullable', 'string', 'exists:parttracking,name'],
             'trackingInfo' => ['nullable'],
-            'priority' => ['required', 'integer', 'exists:priority,id'],
-            'pickStatusId' => ['required', 'integer', 'exists:pickstatus,id'], // statusId
-            'pickTypeId' => ['required', 'integer', 'exists:picktype,id'], // typeId
-            'uniqueField' => ['required', 'string', 'unique:pick,unique_field,' . $this->route('pick')], // Example field with unique validation
+            'priority' => ['nullable', 'integer', 'exists:priority,id'],
+            'pickStatusId' => ['nullable', 'integer', 'exists:pickstatus,id'], // statusId
+            'pickTypeId' => ['nullable', 'integer', 'exists:picktype,id'], // typeId
+            'uniqueField' => ['nullable', 'string', 'unique:pick,unique_field,' . $this->route('pick')], // Example field with unique validation
         ];
     }
+    
 
     /**
      * Handle a failed validation attempt.

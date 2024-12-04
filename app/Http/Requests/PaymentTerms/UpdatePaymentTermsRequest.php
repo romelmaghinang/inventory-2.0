@@ -26,18 +26,19 @@ class UpdatePaymentTermsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'termsName' => ['required', 'string', 'unique:paymentterms,name,' . $this->route('payment_term')], 
-            'termsType' => ['required', 'string', 'exists:paymenttermstype,name'], // typeId
-            'netDays' => ['required', 'numeric'],
-            'discount' => ['required', 'numeric'],
-            'discountDays' => ['required', 'numeric'],
-            'dueDate' => ['required', 'date'],
-            'nextMonth' => ['required', 'date'],
-            'discountDate' => ['required', 'date'],
-            'default' => ['required', 'boolean'], // defaultTerms
-            'active' => ['required', 'boolean'], // activeFlag
+            'termsName' => ['nullable', 'string', 'unique:paymentterms,name,' . $this->route('payment_term')], 
+            'termsType' => ['nullable', 'string', 'exists:paymenttermstype,name'], // typeId
+            'netDays' => ['nullable', 'numeric'],
+            'discount' => ['nullable', 'numeric'],
+            'discountDays' => ['nullable', 'numeric'],
+            'dueDate' => ['nullable', 'date'],
+            'nextMonth' => ['nullable', 'date'],
+            'discountDate' => ['nullable', 'date'],
+            'default' => ['nullable', 'boolean'], // defaultTerms
+            'active' => ['nullable', 'boolean'], // activeFlag
         ];
     }
+    
 
     /**
      * Handle failed validation.

@@ -25,19 +25,20 @@ class UpdateLocationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'location' => ['required', 'string', 'max:30'],
-            'description' => ['required', 'string', 'max:90'],
-            'type' => ['required', 'string', 'exists:locationtype,name'],
-            'locationGroup' => ['required', 'string', 'max:30'],
+            'location' => ['nullable', 'string', 'max:30'],
+            'description' => ['nullable', 'string', 'max:90'],
+            'type' => ['nullable', 'string', 'exists:locationtype,name'],
+            'locationGroup' => ['nullable', 'string', 'max:30'],
             'locationNum' => ['nullable', 'numeric'],
             'customerName' => ['nullable', 'string', 'max:30'],
-            'active' => ['required', 'boolean'],
-            'available' => ['required', 'boolean'],
-            'pickable' => ['required', 'boolean'],
-            'receivable' => ['required', 'boolean'],
+            'active' => ['nullable', 'boolean'],
+            'available' => ['nullable', 'boolean'],
+            'pickable' => ['nullable', 'boolean'],
+            'receivable' => ['nullable', 'boolean'],
             'sortOrder' => ['nullable', 'numeric'],
         ];
     }
+    
 
     /**
      * Handle failed validation.

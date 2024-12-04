@@ -29,25 +29,26 @@ class UpdateTaxRateRequest extends FormRequest
         return [
             // TAX RATE
             'taxName' => [
-                'required',
+                'nullable',
                 'string',
                 'max:31',
                 "unique:taxrate,name,{$taxRateId}" 
             ],
             'taxCode' => [
-                'required',
+                'nullable',
                 'string',
                 'max:5',
                 "unique:taxrate,code,{$taxRateId}" 
             ],
-            'taxType' => ['required', 'string', 'exists:taxratetype,name'],
-            'description' => ['required', 'string', 'max:255'],
-            'rate' => ['required', 'numeric'],
-            'amount' => ['required', 'numeric'],
-            'taxAgencyName' => ['required', 'string'],
-            'defaultFlag' => ['required', 'boolean'],
-            'activeFlag' => ['required', 'boolean'],
+            'taxType' => ['nullable', 'string', 'exists:taxratetype,name'],
+            'description' => ['nullable', 'string', 'max:255'],
+            'rate' => ['nullable', 'numeric'],
+            'amount' => ['nullable', 'numeric'],
+            'taxAgencyName' => ['nullable', 'string'],
+            'defaultFlag' => ['nullable', 'boolean'],
+            'activeFlag' => ['nullable', 'boolean'],
         ];
+        
     }
 
     /**

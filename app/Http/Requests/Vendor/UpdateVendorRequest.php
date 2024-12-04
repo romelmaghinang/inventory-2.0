@@ -25,10 +25,10 @@ class UpdateVendorRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:41'],
-            'addressName' => ['required', 'string', 'max:90', 'unique:address,name'],
-            'addressContact' => ['string', 'max:41'],
-            'addressType' => ['required', 'integer', 'in:10,20,30,40,50', 'exists:addresstype,id'],
+            'name' => ['nullable', 'string', 'max:41'],
+            'addressName' => ['nullable', 'string', 'max:90', 'unique:address,name'],
+            'addressContact' => ['nullable', 'string', 'max:41'],
+            'addressType' => ['nullable', 'integer', 'in:10,20,30,40,50', 'exists:addresstype,id'],
             'isDefault' => ['nullable', 'boolean'],
             'address' => ['nullable', 'string', 'max:90'],
             'city' => ['nullable', 'string', 'max:30'],
@@ -57,6 +57,7 @@ class UpdateVendorRequest extends FormRequest
             'url' => ['nullable', 'url', 'max:256'],
             'cf' => ['nullable', 'string', 'max:30'],
         ];
+        
     }
 
     /**
@@ -78,7 +79,6 @@ class UpdateVendorRequest extends FormRequest
                 } elseif (str_contains($message, 'has already been taken')) {
                     $categorizedErrors['duplicateFields'][] = $field;
                 } elseif (str_contains($message, 'exists')) {
-                    // Check for "no query result" errors
                     if (str_contains($message, 'no query results')) {
                         $categorizedErrors['noQueryResults'][] = [
                             'field' => $field,

@@ -18,9 +18,9 @@ class UpdatePurchaseOrderRequest extends FormRequest
     public function rules()
     {
         return [
-            'Flag' => 'required|boolean',
+            'Flag' => 'nullable|boolean',
             'PONum' => 'nullable|string|max:255',
-            'Status' => 'required|integer',
+            'Status' => 'nullable|integer',
             'VendorName' => 'nullable|string|max:255',
             'VendorContact' => 'nullable|string|max:255',
             'RemitToName' => 'nullable|string|max:255',
@@ -54,21 +54,21 @@ class UpdatePurchaseOrderRequest extends FormRequest
             'LocationGroupName' => 'nullable|string|max:255',
             'URL' => 'nullable|url|max:255',
             'CurrencyName' => 'nullable|string|max:255',
-            'CurrencyRate' => 'required|numeric|min:0',
+            'CurrencyRate' => 'nullable|numeric|min:0',
             'Phone' => 'nullable|string|max:20',
             'Email' => 'nullable|email|max:255',
             'CF' => 'nullable|string|max:255',
-
-            'items' => 'required|array|min:1',
-            'items.*.Flag' => 'required|boolean',
-            'items.*.POItemTypeID' => 'required|integer',
+        
+            'items' => 'nullable|array|min:1',
+            'items.*.Flag' => 'nullable|boolean',
+            'items.*.POItemTypeID' => 'nullable|integer',
             'items.*.PartNumber' => 'nullable|string|max:255',
             'items.*.VendorPartNumber' => 'nullable|string|max:255',
-            'items.*.PartQuantity' => 'required|integer|min:0',
+            'items.*.PartQuantity' => 'nullable|integer|min:0',
             'items.*.FulfilledQuantity' => 'nullable|integer|min:0',
             'items.*.PickedQuantity' => 'nullable|integer|min:0',
             'items.*.UOM' => 'nullable|string|max:255',
-            'items.*.PartPrice' => 'required|numeric|min:0',
+            'items.*.PartPrice' => 'nullable|numeric|min:0',
             'items.*.FulfillmentDate' => 'nullable|date',
             'items.*.RevisionLevel' => 'nullable|string|max:10',
             'items.*.CustomerJob' => 'nullable|string|max:255',
@@ -76,6 +76,7 @@ class UpdatePurchaseOrderRequest extends FormRequest
             'items.*.QuickBooksClassName' => 'nullable|string|max:255',
             'items.*.CFI' => 'nullable|string|max:255',
         ];
+        
     }
 
     protected function failedValidation(Validator $validator)

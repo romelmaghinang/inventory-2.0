@@ -25,12 +25,13 @@ class UpdateCurrencyRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255', 'unique:currency,name'],
-            'code' => ['required', 'string', 'max:255'],
-            'active' => ['required', 'boolean'],
+            'name' => ['nullable', 'string', 'max:255', 'unique:currency,name'],
+            'code' => ['nullable', 'string', 'max:255'],
+            'active' => ['nullable', 'boolean'],
             'quickBookCurrencyRate' => ['nullable', 'numeric'],
-            'globalCurrencyRate' => ['required', 'numeric'],
+            'globalCurrencyRate' => ['nullable', 'numeric'],
         ];
+        
     }
 
     /**
