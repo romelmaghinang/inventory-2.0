@@ -11,6 +11,7 @@ use App\Models\Country;
 use App\Models\Currency;
 use App\Models\ShipTerms;
 use App\Models\State;
+use App\Models\TaxRate;
 use App\Models\Vendor;
 use App\Models\VendorStatus;
 use Illuminate\Http\JsonResponse;
@@ -188,6 +189,7 @@ class VendorController extends Controller
  *     )
  * )
  */
+
     public function show(Request $request, $id = null): JsonResponse
     {
         if ($id) {
@@ -197,7 +199,45 @@ class VendorController extends Controller
                 return response()->json(['message' => 'Vendor not found'], Response::HTTP_NOT_FOUND);
             }
 
-            return response()->json($vendor, Response::HTTP_OK);
+            $state = State::find($vendor->stateId) ?: null;
+            $country = Country::find($vendor->countryId) ?: null;
+            $currency = Currency::find($vendor->currencyId) ?: null;
+            $carrier = Carrier::find($vendor->defaultCarrierId) ?: null;
+            $shipterms = ShipTerms::find($vendor->defaultShipTermsId) ?: null;
+            $vendorStatus = VendorStatus::find($vendor->statusId) ?: null;
+            $taxRate = TaxRate::find($vendor->taxRateId) ?: null;  // Added taxRate
+
+            $vendorData = $vendor->toArray();
+            $vendorData['status'] = [
+                'id' => $vendor->statusId,
+                'name' => $vendorStatus ? $vendorStatus->name : null
+            ];
+            $vendorData['currency'] = [
+                'id' => $vendor->currencyId,
+                'name' => $currency ? $currency->name : null
+            ];
+            $vendorData['carrier'] = [
+                'id' => $vendor->defaultCarrierId,
+                'name' => $carrier ? $carrier->name : null
+            ];
+            $vendorData['shipTerms'] = [
+                'id' => $vendor->defaultShipTermsId,
+                'name' => $shipterms ? $shipterms->name : null
+            ];
+            $vendorData['state'] = [
+                'id' => $vendor->stateId,
+                'name' => $state ? $state->name : null
+            ];
+            $vendorData['country'] = [
+                'id' => $vendor->countryId,
+                'name' => $country ? $country->name : null
+            ];
+            $vendorData['taxRate'] = [
+                'id' => $vendor->taxRateId,
+                'name' => $taxRate ? $taxRate->name : null
+            ];
+
+            return response()->json($vendorData, Response::HTTP_OK);
         }
 
         $vendorNameFromQuery = $request->input('name');
@@ -205,23 +245,91 @@ class VendorController extends Controller
 
         if ($vendorNameFromQuery || $vendorNameFromBody) {
             $vendorName = $vendorNameFromQuery ?? $vendorNameFromBody;
-
             $vendor = Vendor::where('name', $vendorName)->first();
 
             if (!$vendor) {
                 return response()->json(['message' => 'Vendor not found'], Response::HTTP_NOT_FOUND);
             }
 
-            return response()->json($vendor, Response::HTTP_OK);
+            $state = State::find($vendor->stateId) ?: null;
+            $country = Country::find($vendor->countryId) ?: null;
+            $currency = Currency::find($vendor->currencyId) ?: null;
+            $carrier = Carrier::find($vendor->defaultCarrierId) ?: null;
+            $shipterms = ShipTerms::find($vendor->defaultShipTermsId) ?: null;
+            $vendorStatus = VendorStatus::find($vendor->statusId) ?: null;
+            $taxRate = TaxRate::find($vendor->taxRateId) ?: null;  
+
+            $vendorData = $vendor->toArray();
+            $vendorData['status'] = [
+                'id' => $vendor->statusId,
+                'name' => $vendorStatus ? $vendorStatus->name : null
+            ];
+            $vendorData['currency'] = [
+                'id' => $vendor->currencyId,
+                'name' => $currency ? $currency->name : null
+            ];
+            $vendorData['carrier'] = [
+                'id' => $vendor->defaultCarrierId,
+                'name' => $carrier ? $carrier->name : null
+            ];
+            $vendorData['shipTerms'] = [
+                'id' => $vendor->defaultShipTermsId,
+                'name' => $shipterms ? $shipterms->name : null
+            ];
+            $vendorData['state'] = [
+                'id' => $vendor->stateId,
+                'name' => $state ? $state->name : null
+            ];
+            $vendorData['country'] = [
+                'id' => $vendor->countryId,
+                'name' => $country ? $country->name : null
+            ];
+            $vendorData['taxRate'] = [
+                'id' => $vendor->taxRateId,
+                'name' => $taxRate ? $taxRate->name : null  
+            ];
+
+            return response()->json($vendorData, Response::HTTP_OK);
         }
 
         $perPage = $request->input('per_page', 100);
 
         $vendors = Vendor::paginate($perPage);
 
+        $vendorsData = $vendors->items();
+        foreach ($vendorsData as &$vendor) {
+
+            $currency = Currency::find($vendor['currencyId']) ?: null;
+            $carrier = Carrier::find($vendor['defaultCarrierId']) ?: null;
+            $shipterms = ShipTerms::find($vendor['defaultShipTermsId']) ?: null;
+            $vendorStatus = VendorStatus::find($vendor['statusId']) ?: null;
+            $taxRate = TaxRate::find($vendor['taxRateId']) ?: null;  
+
+            $vendor['status'] = [
+                'id' => $vendor['statusId'],
+                'name' => $vendorStatus ? $vendorStatus->name : null
+            ];
+            $vendor['currency'] = [
+                'id' => $vendor['currencyId'],
+                'name' => $currency ? $currency->name : null
+            ];
+            $vendor['carrier'] = [
+                'id' => $vendor['defaultCarrierId'],
+                'name' => $carrier ? $carrier->name : null
+            ];
+            $vendor['shipTerms'] = [
+                'id' => $vendor['defaultShipTermsId'],
+                'name' => $shipterms ? $shipterms->name : null
+            ];
+            $vendor['taxRate'] = [
+                'id' => $vendor['taxRateId'],
+                'name' => $taxRate ? $taxRate->name : null  
+            ];
+        }
+
         return response()->json([
             'message' => 'Vendors retrieved successfully!',
-            'data' => $vendors->items(),
+            'data' => $vendorsData,
             'pagination' => [
                 'total' => $vendors->total(),
                 'per_page' => $vendors->perPage(),
