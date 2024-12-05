@@ -41,6 +41,7 @@ class Customer extends Model
         'toBeEmailed', 
         'toBePrinted', 
         'url', // nullable
+        'mobile',
         'issuableStatusId', // nullable
         'carrierServiceId', // nullable
     ];

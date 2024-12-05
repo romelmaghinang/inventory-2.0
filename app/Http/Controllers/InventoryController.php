@@ -280,44 +280,67 @@ class InventoryController extends Controller
  *     )
  * )
  */
-public function showInventories(Request $request): JsonResponse
-{
-    $num = $request->input('num') ?? $request->json('num');
-    $name = $request->input('name') ?? $request->json('name');
+            public function showInventories(Request $request, $id = null): JsonResponse
+            {
+                if ($id) {
+                    $inventory = Inventory::find($id);
 
-    if ($num && $name) {
-        return response()->json(['message' => 'Invalid parameters. Only one filter is allowed.'], Response::HTTP_BAD_REQUEST);
-    }
+                    if (!$inventory) {
+                        return response()->json(['message' => 'Inventory not found.'], Response::HTTP_NOT_FOUND);
+                    }
 
-    $query = Inventory::query();
+                    return response()->json([
+                        'message' => 'Inventory item retrieved successfully!',
+                        'data' => $inventory,
+                    ], Response::HTTP_OK);
+                }
 
-    if ($num) {
-        $request->validate([
-            'num' => 'string|exists:part,number',
-        ]);
-        $query->whereHas('part', function($subQuery) use ($num) {
-            $subQuery->where('number', $num);
-        });
-    } elseif ($name) {
-        $request->validate([
-            'name' => 'string|exists:locationgroup,name',
-        ]);
-        $query->whereHas('locationGroup', function($subQuery) use ($name) {
-            $subQuery->where('name', $name);
-        });
-    }
+                $num = $request->input('num') ?? $request->json('num');
+                $name = $request->input('name') ?? $request->json('name');
 
-    $inventories = $query->get();
+                if ($num && $name) {
+                    return response()->json(['message' => 'Invalid parameters. Only one filter is allowed.'], Response::HTTP_BAD_REQUEST);
+                }
 
-    if ($inventories->isEmpty()) {
-        return response()->json(['message' => 'No inventory found for the specified filters.'], Response::HTTP_NOT_FOUND);
-    }
+                $query = Inventory::query();
 
-    return response()->json([
-        'message' => 'Inventory items retrieved successfully!',
-        'data' => $inventories,
-    ], Response::HTTP_OK);
-}
+                if ($num) {
+                    $request->validate([
+                        'num' => 'string|exists:part,number',
+                    ]);
+                    $query->whereHas('part', function ($subQuery) use ($num) {
+                        $subQuery->where('number', $num);
+                    });
+                } elseif ($name) {
+                    $request->validate([
+                        'name' => 'string|exists:locationgroup,name',
+                    ]);
+                    $query->whereHas('locationGroup', function ($subQuery) use ($name) {
+                        $subQuery->where('name', $name);
+                    });
+                }
+
+                $perPage = $request->input('per_page', 100);
+                $inventories = $query->paginate($perPage);
+
+                if ($inventories->isEmpty()) {
+                    return response()->json(['message' => 'No inventory found.'], Response::HTTP_NOT_FOUND);
+                }
+
+                return response()->json([
+                    'message' => 'Inventory items retrieved successfully!',
+                    'data' => $inventories->items(), 
+                    'pagination' => [
+                        'total' => $inventories->total(),
+                        'per_page' => $inventories->perPage(),
+                        'current_page' => $inventories->currentPage(),
+                        'last_page' => $inventories->lastPage(),
+                        'next_page_url' => $inventories->nextPageUrl(),
+                        'prev_page_url' => $inventories->previousPageUrl(),
+                    ],
+                ], Response::HTTP_OK);
+            }
+
 
     }
     

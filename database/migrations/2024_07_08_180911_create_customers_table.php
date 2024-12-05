@@ -39,7 +39,7 @@ return new class extends Migration
             $table->boolean('toBePrinted')->default(true);
             $table->string('url', 30)->nullable();
             $table->string('cf')->nullable();
-
+            $table->json('mobiles')->nullable();
             $table->foreignId('qbClassId')->nullable()->constrained('qbclass');
             $table->foreignId('defaultShipTermsId')->nullable()->constrained('shipterms');
             $table->foreignId('currencyId')->nullable()->constrained('currency');

@@ -215,9 +215,24 @@ class VendorController extends Controller
             return response()->json($vendor, Response::HTTP_OK);
         }
 
-        $vendors = Vendor::all();
-        return response()->json($vendors, Response::HTTP_OK);
+        $perPage = $request->input('per_page', 100);
+
+        $vendors = Vendor::paginate($perPage);
+
+        return response()->json([
+            'message' => 'Vendors retrieved successfully!',
+            'data' => $vendors->items(),
+            'pagination' => [
+                'total' => $vendors->total(),
+                'per_page' => $vendors->perPage(),
+                'current_page' => $vendors->currentPage(),
+                'last_page' => $vendors->lastPage(),
+                'next_page_url' => $vendors->nextPageUrl(),
+                'prev_page_url' => $vendors->previousPageUrl(),
+            ],
+        ], Response::HTTP_OK);
     }
+
 
 
  

@@ -40,6 +40,8 @@ Route::middleware(['auth:sanctum', ])->group(function () {
     Route::delete('/transfer-orders/delete', [TransferOrderController::class, 'deleteXoItem'])->middleware('abilities:delete-transfer-order');
     Route::get('/transfer-orders/xo', [TransferOrderController::class, 'showXo'])->middleware('abilities:show-transfer-order');
     Route::get('transfer-orders/xoitem', [TransferOrderController::class, 'showXoItem'])->middleware('abilities:item-show-transfer-order');
+    Route::get('/transfer-orders/xo/{id}', [TransferOrderController::class, 'showXo'])->middleware('abilities:show-transfer-order');
+    Route::get('transfer-orders/xoitem{id]', [TransferOrderController::class, 'showXoItem'])->middleware('abilities:item-show-transfer-order');
 
     Route::prefix('qbclass')->group(function () {
         
@@ -162,7 +164,9 @@ Route::middleware(['auth:sanctum', ])->group(function () {
     Route::post('ship', [ShipController::class, 'store'])->middleware('abilities:ship');
     Route::post('inventory', [InventoryController::class, 'store'])->middleware('abilities:inventory');
     Route::get('inventory', [InventoryController::class, 'showInventories'])->middleware('abilities:inventory');
+    Route::get('/inventory/{id}', [InventoryController::class, 'showInventories']);
+
     Route::post('/receiving', [ReceivingController::class, 'receiving'])->middleware('abilities:receiving');
-    Route::get('/receiving', [ReceivingController::class, 'show'])->middleware('abilities:receiving');
+    Route::get('/receiving', [ReceivingController::class, 'getReceiptItemsByTrackingNum'])->middleware('abilities:receiving');
     Route::delete('receipt-void', [ReceivingController::class, 'delete'])->middleware('abilities:receipt-void');
 });

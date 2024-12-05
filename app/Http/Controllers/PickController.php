@@ -363,21 +363,21 @@ class PickController extends Controller
     {
         $numFromQuery = $request->query('num');
         $numFromBody = $request->input('num');
-        
+    
         $createdBefore = $request->input('createdBefore');
         $createdAfter = $request->input('createdAfter');
-        
+    
         $num = $numFromQuery ?? $numFromBody;
     
         if ($id) {
             $pick = Pick::find($id);
             if (!$pick) {
                 return response()->json([
-                    'message' => 'Pick not found'
+                    'message' => 'Pick not found',
                 ], Response::HTTP_NOT_FOUND);
             }
             return response()->json([
-                'picks' => [$pick]
+                'picks' => [$pick],
             ], Response::HTTP_OK);
         }
     
@@ -387,7 +387,7 @@ class PickController extends Controller
             ]);
             $pick = Pick::where('num', $num)->firstOrFail();
             return response()->json([
-                'picks' => [$pick]
+                'picks' => [$pick],
             ], Response::HTTP_OK);
         }
     
@@ -407,12 +407,22 @@ class PickController extends Controller
             $query->whereDate('dateCreated', '>=', $createdAfter);
         }
     
-        $picks = $query->get();
+        $perPage = $request->input('per_page', 100); 
+        $picks = $query->paginate($perPage);
     
         return response()->json([
-            'picks' => $picks,
+            'picks' => $picks->items(),
+            'pagination' => [
+                'total' => $picks->total(),
+                'per_page' => $picks->perPage(),
+                'current_page' => $picks->currentPage(),
+                'last_page' => $picks->lastPage(),
+                'next_page_url' => $picks->nextPageUrl(),
+                'prev_page_url' => $picks->previousPageUrl(),
+            ],
         ], Response::HTTP_OK);
     }
+    
     
 
     public function destroy(Request $request): JsonResponse

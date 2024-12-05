@@ -96,52 +96,62 @@ class QuickBookClassController extends Controller
  *     )
  * )
  */
+    public function show(Request $request, $id = null): JsonResponse
+    {
+        if ($id) {
+            $qbClass = qbClass::find($id);
 
- public function show(Request $request, $id = null): JsonResponse
-{
-    if ($id) {
-        $qbClass = qbClass::find($id);
+            if (!$qbClass) {
+                return response()->json(['message' => 'QuickBook Class not found.'], Response::HTTP_NOT_FOUND);
+            }
 
-        if (!$qbClass) {
-            return response()->json(['message' => 'QuickBook Class not found.'], Response::HTTP_NOT_FOUND);
+            return response()->json([
+                'message' => 'QuickBook Class retrieved successfully!',
+                'data' => $qbClass,
+            ], Response::HTTP_OK);
         }
 
+        $nameFromQuery = $request->input('name');
+        $nameFromBody = $request->json('name');
+
+        if ($nameFromQuery || $nameFromBody) {
+            $name = $nameFromQuery ?? $nameFromBody;
+
+            $request->validate([
+                'name' => 'required|string|exists:qbclass,name',
+            ]);
+
+            $qbClass = qbClass::where('name', $name)->first();
+
+            if (!$qbClass) {
+                return response()->json(['message' => 'QuickBook Class not found.'], Response::HTTP_NOT_FOUND);
+            }
+
+            return response()->json([
+                'message' => 'QuickBook Class retrieved successfully!',
+                'data' => $qbClass,
+            ], Response::HTTP_OK);
+        }
+
+        $perPage = $request->input('per_page', 100);
+
+        $qbClasses = qbClass::paginate($perPage);
+
         return response()->json([
-            'message' => 'QuickBook Class retrieved successfully!',
-            'data' => $qbClass,
+            'message' => 'All QuickBook Classes retrieved successfully!',
+            'data' => $qbClasses->items(),
+            'pagination' => [
+                'total' => $qbClasses->total(),
+                'per_page' => $qbClasses->perPage(),
+                'current_page' => $qbClasses->currentPage(),
+                'last_page' => $qbClasses->lastPage(),
+                'next_page_url' => $qbClasses->nextPageUrl(),
+                'prev_page_url' => $qbClasses->previousPageUrl(),
+            ],
         ], Response::HTTP_OK);
     }
 
-    $nameFromQuery = $request->input('name');
-    $nameFromBody = $request->json('name');
-
-    if ($nameFromQuery || $nameFromBody) {
-        $name = $nameFromQuery ?? $nameFromBody;
-
-        $request->validate([
-            'name' => 'required|string|exists:qbclass,name',
-        ]);
-
-        $qbClass = qbClass::where('name', $name)->first();
-
-        if (!$qbClass) {
-            return response()->json(['message' => 'QuickBook Class not found.'], Response::HTTP_NOT_FOUND);
-        }
-
-        return response()->json([
-            'message' => 'QuickBook Class retrieved successfully!',
-            'data' => $qbClass,
-        ], Response::HTTP_OK);
-    }
-
-    $qbClasses = qbClass::all();
-
-    return response()->json([
-        'message' => 'All QuickBook Classes retrieved successfully!',
-        'data' => $qbClasses,
-    ], Response::HTTP_OK);
-}
-
+   
     
      
     /**

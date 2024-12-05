@@ -129,50 +129,50 @@ class PaymentTermsController extends Controller
  *     )
  * )
  */
-public function show(Request $request, $id = null): JsonResponse
-{
-    if ($id) {
-        $paymentTerm = PaymentTerms::find($id);
+    public function show(Request $request, $id = null): JsonResponse
+    {
+        if ($id) {
+            $paymentTerm = PaymentTerms::find($id);
 
-        if (!$paymentTerm) {
-            return response()->json(['message' => 'Payment Term not found.'], Response::HTTP_NOT_FOUND);
+            if (!$paymentTerm) {
+                return response()->json(['message' => 'Payment Term not found.'], Response::HTTP_NOT_FOUND);
+            }
+
+            return response()->json([
+                'message' => 'Payment Term retrieved successfully!',
+                'data' => $paymentTerm,
+            ], Response::HTTP_OK);
         }
 
+        $name = $request->query('name') ?? $request->input('name');
+        if ($name) {
+            $request->validate(['name' => 'string|exists:paymentterms,name']);
+
+            $paymentTerm = PaymentTerms::where('name', $name)->firstOrFail();
+
+            return response()->json([
+                'message' => 'Payment Term retrieved successfully!',
+                'data' => $paymentTerm,
+            ], Response::HTTP_OK);
+        }
+
+        $perPage = $request->input('per_page', 100); 
+        $paymentTerms = PaymentTerms::paginate($perPage);
+
         return response()->json([
-            'message' => 'Payment Term retrieved successfully!',
-            'data' => $paymentTerm,
+            'message' => 'All Payment Terms retrieved successfully!',
+            'data' => $paymentTerms->items(), 
+            'pagination' => [
+                'total' => $paymentTerms->total(),
+                'per_page' => $paymentTerms->perPage(),
+                'current_page' => $paymentTerms->currentPage(),
+                'last_page' => $paymentTerms->lastPage(),
+                'next_page_url' => $paymentTerms->nextPageUrl(),
+                'prev_page_url' => $paymentTerms->previousPageUrl(),
+            ],
         ], Response::HTTP_OK);
     }
 
-    $name = $request->query('name');
-
-    if (!$name && $request->isJson()) {
-        $name = $request->input('name');
-    }
-
-    if ($name) {
-        $request->validate(['name' => 'string|exists:paymentterms,name']);
-
-        $paymentTerm = PaymentTerms::where('name', $name)->firstOrFail();
-
-        return response()->json(
-            [
-                'message' => 'Payment Term retrieved successfully!',
-                'data' => $paymentTerm,
-            ],
-            Response::HTTP_OK
-        );
-    }
-
-    $paymentTerms = PaymentTerms::all();
-    return response()->json(
-        [
-            'message' => 'All Payment Terms retrieved successfully!',
-            'data' => $paymentTerms,
-        ],
-        Response::HTTP_OK
-    );
-}
 
     /**
      * Update the specified resource in storage.

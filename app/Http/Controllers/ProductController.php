@@ -166,28 +166,46 @@ class ProductController extends Controller
  * )
  */
 
- public function show(Request $request, $id = null): JsonResponse
- {
-     if ($id) {
-         $product = Product::find($id);
+        public function show(Request $request, $id = null): JsonResponse
+        {
+            if ($id) {
+                $product = Product::find($id);
+        
+                if (!$product) {
+                    return response()->json(['message' => 'Product not found'], Response::HTTP_NOT_FOUND);
+                }
+        
+                return response()->json([
+                    'message' => 'Product retrieved successfully',
+                    'data' => [$product],
+                ], Response::HTTP_OK);
+            }
+        
+            $query = Product::query();
+        
+            $num = $request->query('num');
+            if ($num) {
+                $request->validate([
+                    'num' => 'string|exists:product,num',
+                ]);
+                $query->where('num', $num);
+            }
+        
+            $perPage = $request->query('per_page', 100); 
+            $products = $query->paginate($perPage);
+        
+            return response()->json([
+                'message' => 'Products retrieved successfully',
+                'data' => $products->items(), 
+                'pagination' => [
+                    'total' => $products->total(),
+                    'per_page' => $products->perPage(),
+                    'current_page' => $products->currentPage(),
+                    'last_page' => $products->lastPage(),
+                ],
+            ], Response::HTTP_OK);
+        }
  
-         if (!$product) {
-             return response()->json(['message' => 'Product not found'], Response::HTTP_NOT_FOUND);
-         }
- 
-         return response()->json([
-             'message' => 'Product retrieved successfully',
-             'data' => [$product], 
-         ], Response::HTTP_OK);
-     }
- 
-     $products = Product::all();
- 
-     return response()->json([
-         'message' => 'Products retrieved successfully',
-         'data' => $products,
-     ], Response::HTTP_OK);
- }
  
  
     /**

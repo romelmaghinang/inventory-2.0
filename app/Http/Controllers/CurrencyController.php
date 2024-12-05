@@ -113,18 +113,17 @@ class CurrencyController extends Controller
          *     )
          * )
          */
-        public function show(Request $request, $id = null): JsonResponse
+        public function showCurrencies(Request $request, $id = null): JsonResponse
         {
-
             if ($id) {
                 $currency = Currency::find($id);
-
+        
                 if (!$currency) {
                     return response()->json([
                         'message' => 'Currency not found.'
                     ], Response::HTTP_NOT_FOUND);
                 }
-
+        
                 return response()->json(
                     [
                         'message' => 'Currency retrieved successfully!',
@@ -133,43 +132,40 @@ class CurrencyController extends Controller
                     Response::HTTP_OK
                 );
             }
-
-
+        
             $name = $request->query('name') ?? $request->input('name');
             
-            if (empty($name)) {
-
-                $currencies = Currency::all();
-                return response()->json(
-                    [
-                        'message' => 'All currencies retrieved successfully!',
-                        'data' => $currencies,
-                    ],
-                    Response::HTTP_OK
-                );
+            $query = Currency::query();
+        
+            if (!empty($name)) {
+                $request->validate([
+                    'name' => 'string|exists:currency,name',
+                ]);
+                
+                $query->where('name', 'like', '%' . $name . '%');
             }
-
-
-            $request->validate([
-                'name' => 'string|exists:currency,name',
-            ]);
-
-            $currency = Currency::where('name', $name)->first();
-
-            if (!$currency) {
-                return response()->json([
-                    'message' => 'Currency not found.'
-                ], Response::HTTP_NOT_FOUND);
-            }
-
+        
+            $perPage = $request->input('per_page', 100);
+        
+            $currencies = $query->paginate($perPage);
+        
             return response()->json(
                 [
-                    'message' => 'Currency retrieved successfully!',
-                    'data' => $currency,
+                    'message' => 'Currencies retrieved successfully!',
+                    'data' => $currencies->items(),
+                    'pagination' => [
+                        'total' => $currencies->total(),
+                        'per_page' => $currencies->perPage(),
+                        'current_page' => $currencies->currentPage(),
+                        'last_page' => $currencies->lastPage(),
+                        'next_page_url' => $currencies->nextPageUrl(),
+                        'prev_page_url' => $currencies->previousPageUrl(),
+                    ],
                 ],
                 Response::HTTP_OK
             );
         }
+        
 
     /**
      * Update the specified resource in storage.

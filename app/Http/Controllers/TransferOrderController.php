@@ -346,36 +346,39 @@ class TransferOrderController extends Controller
     
 
 
-        public function showXo(Request $request): JsonResponse
+    public function showXo(Request $request, $xoId = null): JsonResponse
     {
-        $xoId = $request->input('xoId');
-
+        $perPage = $request->input('perPage', 100); 
+        $page = $request->input('page', 1);
+    
         if ($xoId) {
-            $data = Xo::where('id', $xoId)->get();
+            $data = Xo::where('id', $xoId)->paginate($perPage, ['*'], 'page', $page);
         } else {
-            $data = Xo::all();
+            $data = Xo::paginate($perPage, ['*'], 'page', $page);
         }
-
+    
         return response()->json($data);
     }
+    
 
-    public function showXoItem(Request $request): JsonResponse
-    {
-        $xoId = $request->input('xoId');
-        $partNum = $request->input('partNum');
+    public function showXoItem(Request $request, $xoId = null, $partNum = null): JsonResponse
+        {
+            $perPage = $request->input('perPage', 100); 
+            $page = $request->input('page', 1); 
 
-        if ($xoId && $partNum) {
-            $data = XoItem::where('xoId', $xoId)
-                ->where('partNum', $partNum)
-                ->get();
-        } elseif ($xoId) {
-            $data = XoItem::where('xoId', $xoId)->get();
-        } else {
-            $data = XoItem::all();
+            if ($xoId && $partNum) {
+                $data = XoItem::where('xoId', $xoId)
+                    ->where('partNum', $partNum)
+                    ->paginate($perPage, ['*'], 'page', $page);
+            } elseif ($xoId) {
+                $data = XoItem::where('xoId', $xoId)->paginate($perPage, ['*'], 'page', $page);
+            } else {
+                $data = XoItem::paginate($perPage, ['*'], 'page', $page);
+            }
+
+            return response()->json($data);
         }
 
-        return response()->json($data);
-    }
 
 
     public function markAsFulfilled(Request $request): JsonResponse

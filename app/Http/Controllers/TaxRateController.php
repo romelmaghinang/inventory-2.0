@@ -115,51 +115,61 @@ class TaxRateController extends Controller
  * )
  */
 
- public function show(Request $request, $id = null): JsonResponse
- {
-     if ($id) {
-         $taxRate = TaxRate::find($id);
- 
-         if (!$taxRate) {
-             return response()->json(['message' => 'Tax Rate not found.'], Response::HTTP_NOT_FOUND);
-         }
- 
-         return response()->json([
-             'message' => 'Tax Rate retrieved successfully!',
-             'data' => $taxRate,
-         ], Response::HTTP_OK);
-     }
- 
-     $nameFromQuery = $request->input('name');
-     $nameFromBody = $request->json('name');
- 
-     if ($nameFromQuery || $nameFromBody) {
-         $name = $nameFromQuery ?? $nameFromBody;
- 
-         $request->validate([
-             'name' => 'required|string|exists:taxrate,name',
-         ]);
- 
-         $taxRate = TaxRate::where('name', $name)->first();
- 
-         if (!$taxRate) {
-             return response()->json(['message' => 'Tax Rate not found.'], Response::HTTP_NOT_FOUND);
-         }
- 
-         return response()->json([
-             'message' => 'Tax Rate retrieved successfully!',
-             'data' => $taxRate,
-         ], Response::HTTP_OK);
-     }
- 
-     $taxRates = TaxRate::all();
- 
-     return response()->json([
-         'message' => 'All Tax Rates retrieved successfully!',
-         'data' => $taxRates,
-     ], Response::HTTP_OK);
- }
- 
+    public function show(Request $request, $id = null): JsonResponse
+    {
+        if ($id) {
+            $taxRate = TaxRate::find($id);
+    
+            if (!$taxRate) {
+                return response()->json(['message' => 'Tax Rate not found.'], Response::HTTP_NOT_FOUND);
+            }
+    
+            return response()->json([
+                'message' => 'Tax Rate retrieved successfully!',
+                'data' => $taxRate,
+            ], Response::HTTP_OK);
+        }
+    
+        $nameFromQuery = $request->input('name');
+        $nameFromBody = $request->json('name');
+    
+        if ($nameFromQuery || $nameFromBody) {
+            $name = $nameFromQuery ?? $nameFromBody;
+    
+            $request->validate([
+                'name' => 'required|string|exists:taxrate,name',
+            ]);
+    
+            $taxRate = TaxRate::where('name', $name)->first();
+    
+            if (!$taxRate) {
+                return response()->json(['message' => 'Tax Rate not found.'], Response::HTTP_NOT_FOUND);
+            }
+    
+            return response()->json([
+                'message' => 'Tax Rate retrieved successfully!',
+                'data' => $taxRate,
+            ], Response::HTTP_OK);
+        }
+    
+        $perPage = $request->input('per_page', 100);
+    
+        $taxRates = TaxRate::paginate($perPage);
+    
+        return response()->json([
+            'message' => 'All Tax Rates retrieved successfully!',
+            'data' => $taxRates->items(),
+            'pagination' => [
+                'total' => $taxRates->total(),
+                'per_page' => $taxRates->perPage(),
+                'current_page' => $taxRates->currentPage(),
+                'last_page' => $taxRates->lastPage(),
+                'next_page_url' => $taxRates->nextPageUrl(),
+                'prev_page_url' => $taxRates->previousPageUrl(),
+            ],
+        ], Response::HTTP_OK);
+    }
+    
 
 
     /**

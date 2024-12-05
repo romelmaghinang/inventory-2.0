@@ -283,39 +283,52 @@ class LocationController extends Controller
  *     )
  * )
  */
-public function show(Request $request, $id = null): JsonResponse
-{
-    $name = $request->query('name') ?? $request->input('name');
+    public function show(Request $request, $id = null): JsonResponse
+    {
+        $name = $request->query('name') ?? $request->input('name');
 
-    if ($id) {
-        $location = Location::find($id);
-        if (!$location) {
+        if ($id) {
+            $location = Location::find($id);
+
+            if (!$location) {
+                return response()->json([
+                    'message' => 'Location not found',
+                ], Response::HTTP_NOT_FOUND);
+            }
+
             return response()->json([
-                'message' => 'Location not found',
-            ], Response::HTTP_NOT_FOUND);
+                'message' => 'Location retrieved successfully!',
+                'data' => $location,
+            ], Response::HTTP_OK);
         }
+
+        if (!empty($name)) {
+            $request->validate(['name' => 'string|exists:location,name']);
+            
+            $location = Location::where('name', $name)->firstOrFail();
+            return response()->json([
+                'message' => 'Location retrieved successfully!',
+                'data' => $location,
+            ], Response::HTTP_OK);
+        }
+
+        $perPage = $request->input('per_page', 100); 
+        $locations = Location::paginate($perPage);
+
         return response()->json([
-            'message' => 'Location retrieved successfully!',
-            'data' => $location,
+            'message' => 'All locations retrieved successfully!',
+            'data' => $locations->items(),
+            'pagination' => [
+                'total' => $locations->total(),
+                'per_page' => $locations->perPage(),
+                'current_page' => $locations->currentPage(),
+                'last_page' => $locations->lastPage(),
+                'next_page_url' => $locations->nextPageUrl(),
+                'prev_page_url' => $locations->previousPageUrl(),
+            ],
         ], Response::HTTP_OK);
     }
 
-    if (!empty($name)) {
-        $request->validate(['name' => 'string|exists:location,name']);
-        
-        $location = Location::where('name', $name)->firstOrFail();
-        return response()->json([
-            'message' => 'Location retrieved successfully!',
-            'data' => $location,
-        ], Response::HTTP_OK);
-    }
-
-    $locations = Location::all();
-    return response()->json([
-        'message' => 'All locations retrieved successfully!',
-        'data' => $locations,
-    ], Response::HTTP_OK);
-}
 
 
     public function destroy(Request $request): JsonResponse

@@ -183,12 +183,11 @@ class PartController extends Controller
     
             return response()->json([
                 'message' => 'Part retrieved successfully!',
-                'data' => $part
+                'data' => $part,
             ], Response::HTTP_OK);
         }
     
         $num = $request->query('num') ?? $request->input('num');
-    
         if ($num) {
             $request->validate(['num' => 'integer|exists:part,num']);
     
@@ -200,16 +199,27 @@ class PartController extends Controller
     
             return response()->json([
                 'message' => 'Part retrieved successfully!',
-                'data' => $part
+                'data' => $part,
             ], Response::HTTP_OK);
         }
     
-        $parts = Part::all();
+        $perPage = $request->input('per_page', 100); 
+        $parts = Part::paginate($perPage);
+    
         return response()->json([
             'message' => 'All parts retrieved successfully!',
-            'data' => $parts
+            'data' => $parts->items(), 
+            'pagination' => [
+                'total' => $parts->total(),
+                'per_page' => $parts->perPage(),
+                'current_page' => $parts->currentPage(),
+                'last_page' => $parts->lastPage(),
+                'next_page_url' => $parts->nextPageUrl(),
+                'prev_page_url' => $parts->previousPageUrl(),
+            ],
         ], Response::HTTP_OK);
     }
+    
     
 
     /**

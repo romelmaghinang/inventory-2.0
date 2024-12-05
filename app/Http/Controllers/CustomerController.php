@@ -111,6 +111,7 @@ class CustomerController extends Controller
         $account = Account::create([
             'typeId' => 10, 
         ]);
+        $mobiles = $storeCustomerRequest->has('mobile') ? $storeCustomerRequest->mobile : [];
 
         $customer = Customer::create(
             $storeCustomerRequest->only(
@@ -124,7 +125,7 @@ class CustomerController extends Controller
                     'url',
                     'toBeEmailed',
                     'toBePrinted',
-                    'cf'
+                    'cf',
                 ]
             ) +
             [
@@ -138,6 +139,7 @@ class CustomerController extends Controller
                 'qbClassId' => $quickBook->id,
                 'defaultShipTermsId' => $shipTerms->id,
                 'accountId' => $account->id, 
+                'mobiles' => json_encode($mobiles),
             ]
         );
 
@@ -160,6 +162,7 @@ class CustomerController extends Controller
                 'accountId' => $account->id, 
             ]
         );
+        
 
         return response()->json(
             [
@@ -184,6 +187,7 @@ class CustomerController extends Controller
             Response::HTTP_CREATED
         );
     }
+
 
 
     /**
@@ -227,7 +231,7 @@ class CustomerController extends Controller
     public function showCustomers(Request $request, $id = null): JsonResponse
     {
         $name = $request->query('name') ?? $request->input('name');
-    
+        
         if ($id) {
             $customer = Customer::find($id);
             if (!$customer) {
@@ -242,31 +246,34 @@ class CustomerController extends Controller
             ], Response::HTTP_OK);
         }
     
-        if (empty($name)) {
-            $customers = Customer::all();
-            return response()->json([
-                'message' => 'All customers retrieved successfully!',
-                'data' => $customers,
-            ], Response::HTTP_OK);
+        $query = Customer::query();
+    
+        if (!empty($name)) {
+            $request->validate([
+                'name' => 'string|exists:customer,name',
+            ]);
+    
+            $query->where('name', 'like', '%' . $name . '%');
         }
     
-        $request->validate([
-            'name' => 'string|exists:customer,name',
-        ]);
+        $perPage = $request->input('per_page', 100);
     
-        $customer = Customer::where('name', $name)->first();
-    
-        if (!$customer) {
-            return response()->json([
-                'message' => 'Customer not found.'
-            ], Response::HTTP_NOT_FOUND);
-        }
+        $customers = $query->paginate($perPage);
     
         return response()->json([
-            'message' => 'Customer retrieved successfully!',
-            'data' => $customer,
+            'message' => 'Customers retrieved successfully!',
+            'data' => $customers->items(),
+            'pagination' => [
+                'total' => $customers->total(),
+                'per_page' => $customers->perPage(),
+                'current_page' => $customers->currentPage(),
+                'last_page' => $customers->lastPage(),
+                'next_page_url' => $customers->nextPageUrl(),
+                'prev_page_url' => $customers->previousPageUrl(),
+            ],
         ], Response::HTTP_OK);
     }
+    
     
 
     /**

@@ -46,7 +46,6 @@ class CountryAndStateController extends Controller
         $filters = $request->only(['name', 'code']);
         $query = Country::query();
     
-        // If an ID is provided in the URL, fetch by ID
         if ($id) {
             $country = Country::find($id);
             if (!$country) {
@@ -64,7 +63,6 @@ class CountryAndStateController extends Controller
             );
         }
     
-        // If filters are provided, apply them to the query
         if (!empty($filters)) {
             if (isset($filters['name'])) {
                 $query->where('name', $filters['name']);
@@ -74,7 +72,8 @@ class CountryAndStateController extends Controller
             }
         }
     
-        $countries = $query->get();
+        $perPage = $request->get('per_page', 100); 
+        $countries = $query->paginate($perPage);
     
         if ($countries->isEmpty()) {
             return response()->json(
@@ -91,6 +90,7 @@ class CountryAndStateController extends Controller
             Response::HTTP_OK
         );
     }
+    
     
 
     public function showState(Request $request, $id = null): JsonResponse
@@ -124,7 +124,8 @@ class CountryAndStateController extends Controller
             }
         }
     
-        $states = $query->get();
+        $perPage = $request->get('per_page', 100);
+        $states = $query->paginate($perPage);
     
         if ($states->isEmpty()) {
             return response()->json(
@@ -141,6 +142,7 @@ class CountryAndStateController extends Controller
             Response::HTTP_OK
         );
     }
+    
     
     public function updateState(Request $request, int $id): JsonResponse
     {
