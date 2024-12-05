@@ -205,8 +205,7 @@ class VendorController extends Controller
             $carrier = Carrier::find($vendor->defaultCarrierId) ?: null;
             $shipterms = ShipTerms::find($vendor->defaultShipTermsId) ?: null;
             $vendorStatus = VendorStatus::find($vendor->statusId) ?: null;
-            $taxRate = TaxRate::find($vendor->taxRateId) ?: null;  // Added taxRate
-
+            $taxRate = TaxRate::find($vendor->taxRateId) ?: null;  
             $vendorData = $vendor->toArray();
             $vendorData['status'] = [
                 'id' => $vendor->statusId,
