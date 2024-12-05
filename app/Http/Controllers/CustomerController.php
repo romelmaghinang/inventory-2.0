@@ -240,9 +240,22 @@ class CustomerController extends Controller
                 ], Response::HTTP_NOT_FOUND);
             }
     
+            $qbClass = QBClass::find($customer->qbClassId);
+            $currency = Currency::find($customer->currencyId);
+            $paymentTerms = PaymentTerms::find($customer->defaultPaymentTermsId);
+            $carrier = Carrier::find($customer->defaultCarrierId);
+            $taxRate = TaxRate::find($customer->taxRateId);
+    
+            $customerData = $customer->toArray();
+            $customerData['qbClass'] = $qbClass ? ['id' => $qbClass->id, 'name' => $qbClass->name] : null;
+            $customerData['currency'] = $currency ? ['id' => $currency->id, 'name' => $currency->name] : null;
+            $customerData['paymentTerms'] = $paymentTerms ? ['id' => $paymentTerms->id, 'name' => $paymentTerms->name] : null;
+            $customerData['carrier'] = $carrier ? ['id' => $carrier->id, 'name' => $carrier->name] : null;
+            $customerData['taxRate'] = $taxRate ? ['id' => $taxRate->id, 'name' => $taxRate->name] : null;
+    
             return response()->json([
                 'message' => 'Customer retrieved successfully!',
-                'data' => $customer,
+                'data' => $customerData,
             ], Response::HTTP_OK);
         }
     
@@ -250,7 +263,7 @@ class CustomerController extends Controller
     
         if (!empty($name)) {
             $request->validate([
-                'name' => 'string|exists:customer,name',
+                'name' => 'string|exists:customers,name',
             ]);
     
             $query->where('name', 'like', '%' . $name . '%');
@@ -260,9 +273,24 @@ class CustomerController extends Controller
     
         $customers = $query->paginate($perPage);
     
+        $customersData = $customers->items();
+        foreach ($customersData as &$customer) {
+            $qbClass = QBClass::find($customer['qbClassId']);
+            $currency = Currency::find($customer['currencyId']);
+            $paymentTerms = PaymentTerms::find($customer['defaultPaymentTermsId']);
+            $carrier = Carrier::find($customer['defaultCarrierId']);
+            $taxRate = TaxRate::find($customer['taxRateId']);
+    
+            $customer['qbClass'] = $qbClass ? ['id' => $qbClass->id, 'name' => $qbClass->name] : null;
+            $customer['currency'] = $currency ? ['id' => $currency->id, 'name' => $currency->name] : null;
+            $customer['paymentTerms'] = $paymentTerms ? ['id' => $paymentTerms->id, 'name' => $paymentTerms->name] : null;
+            $customer['carrier'] = $carrier ? ['id' => $carrier->id, 'name' => $carrier->name] : null;
+            $customer['taxRate'] = $taxRate ? ['id' => $taxRate->id, 'name' => $taxRate->name] : null;
+        }
+    
         return response()->json([
             'message' => 'Customers retrieved successfully!',
-            'data' => $customers->items(),
+            'data' => $customersData,
             'pagination' => [
                 'total' => $customers->total(),
                 'per_page' => $customers->perPage(),

@@ -283,51 +283,92 @@ class LocationController extends Controller
  *     )
  * )
  */
-    public function show(Request $request, $id = null): JsonResponse
-    {
-        $name = $request->query('name') ?? $request->input('name');
+public function show(Request $request, $id = null): JsonResponse 
+{
+    $type = $request->query('type');
+    $name = $request->query('name');
 
-        if ($id) {
-            $location = Location::find($id);
+    if ($id) {
+        $location = Location::find($id);
 
-            if (!$location) {
-                return response()->json([
-                    'message' => 'Location not found',
-                ], Response::HTTP_NOT_FOUND);
-            }
-
+        if (!$location) {
             return response()->json([
-                'message' => 'Location retrieved successfully!',
-                'data' => $location,
-            ], Response::HTTP_OK);
+                'message' => 'Location not found',
+            ], Response::HTTP_NOT_FOUND);
         }
 
-        if (!empty($name)) {
-            $request->validate(['name' => 'string|exists:location,name']);
-            
-            $location = Location::where('name', $name)->firstOrFail();
-            return response()->json([
-                'message' => 'Location retrieved successfully!',
-                'data' => $location,
-            ], Response::HTTP_OK);
-        }
+        $locationType = LocationType::find($location->typeId);
 
-        $perPage = $request->input('per_page', 100); 
-        $locations = Location::paginate($perPage);
+        $locationGroup = LocationGroup::find($location->locationGroupId);
+
+        $locationData = $location->toArray();
+        $locationData['type'] = $locationType ? [
+            'id' => $locationType->id,
+            'name' => $locationType->name,
+        ] : null;
+        $locationData['locationGroup'] = $locationGroup ? [
+            'id' => $locationGroup->id,
+            'name' => $locationGroup->name,
+        ] : null;
 
         return response()->json([
-            'message' => 'All locations retrieved successfully!',
-            'data' => $locations->items(),
-            'pagination' => [
-                'total' => $locations->total(),
-                'per_page' => $locations->perPage(),
-                'current_page' => $locations->currentPage(),
-                'last_page' => $locations->lastPage(),
-                'next_page_url' => $locations->nextPageUrl(),
-                'prev_page_url' => $locations->previousPageUrl(),
-            ],
+            'message' => 'Location retrieved successfully!',
+            'data' => $locationData,
         ], Response::HTTP_OK);
     }
+
+    $query = Location::query();
+
+    if ($type) {
+        $request->validate(['type' => 'string|exists:locationtype,name']);
+        
+        $locationType = LocationType::where('name', $type)->first();
+        
+        if ($locationType) {
+            $query->where('typeId', $locationType->id);
+        } else {
+            return response()->json([
+                'message' => 'LocationType with the provided name not found',
+            ], Response::HTTP_NOT_FOUND);
+        }
+    }
+
+    if ($name) {
+        $query->where('name', 'like', '%' . $name . '%');
+    }
+
+    $perPage = $request->input('per_page', 100);
+    $locations = $query->paginate($perPage);
+
+    $locationsData = $locations->items();
+    foreach ($locationsData as &$location) {
+        $locationType = LocationType::find($location['typeId']);
+        $location['type'] = $locationType ? [
+            'id' => $locationType->id,
+            'name' => $locationType->name,
+        ] : null;
+
+        $locationGroup = LocationGroup::find($location['locationGroupId']);
+        $location['locationGroup'] = $locationGroup ? [
+            'id' => $locationGroup->id,
+            'name' => $locationGroup->name,
+        ] : null;
+    }
+
+    return response()->json([
+        'message' => 'All locations retrieved successfully!',
+        'data' => $locationsData,
+        'pagination' => [
+            'total' => $locations->total(),
+            'per_page' => $locations->perPage(),
+            'current_page' => $locations->currentPage(),
+            'last_page' => $locations->lastPage(),
+            'next_page_url' => $locations->nextPageUrl(),
+            'prev_page_url' => $locations->previousPageUrl(),
+        ],
+    ], Response::HTTP_OK);
+}
+
 
 
 

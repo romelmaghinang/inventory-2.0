@@ -172,7 +172,7 @@ class PartController extends Controller
      *     )
      * )
      */
-    public function show(Request $request, $id = null): JsonResponse
+    public function show(Request $request, $id = null): JsonResponse 
     {
         if ($id) {
             $part = Part::find($id);
@@ -181,15 +181,38 @@ class PartController extends Controller
                 return response()->json(['message' => 'Part not found'], Response::HTTP_NOT_FOUND);
             }
     
+            $partType = PartType::find($part->typeId);
+            $sizeUom = UnitOfMeasure::find($part->sizeUomId);
+            $weightUom = UnitOfMeasure::find($part->weightUomId);
+            $uom = UnitOfMeasure::find($part->uomId);
+    
+            $partData = $part->toArray();
+            $partData['type'] = $partType ? [
+                'id' => $partType->id,
+                'name' => $partType->name,
+            ] : null;
+            $partData['sizeUom'] = $sizeUom ? [
+                'id' => $sizeUom->id,
+                'name' => $sizeUom->name,
+            ] : null;
+            $partData['weightUom'] = $weightUom ? [
+                'id' => $weightUom->id,
+                'name' => $weightUom->name,
+            ] : null;
+            $partData['uom'] = $uom ? [
+                'id' => $uom->id,
+                'name' => $uom->name,
+            ] : null;
+    
             return response()->json([
                 'message' => 'Part retrieved successfully!',
-                'data' => $part,
+                'data' => $partData,
             ], Response::HTTP_OK);
         }
     
         $num = $request->query('num') ?? $request->input('num');
         if ($num) {
-            $request->validate(['num' => 'integer|exists:part,num']);
+            $request->validate(['num' => 'string|exists:part,num']);
     
             $part = Part::where('num', $num)->first();
     
@@ -197,18 +220,85 @@ class PartController extends Controller
                 return response()->json(['message' => 'Part not found'], Response::HTTP_NOT_FOUND);
             }
     
+            $partType = PartType::find($part->typeId);
+            $sizeUom = UnitOfMeasure::find($part->sizeUomId);
+            $weightUom = UnitOfMeasure::find($part->weightUomId);
+            $uom = UnitOfMeasure::find($part->uomId);
+    
+            $partData = $part->toArray();
+            $partData['type'] = $partType ? [
+                'id' => $partType->id,
+                'name' => $partType->name,
+            ] : null;
+            $partData['sizeUom'] = $sizeUom ? [
+                'id' => $sizeUom->id,
+                'name' => $sizeUom->name,
+            ] : null;
+            $partData['weightUom'] = $weightUom ? [
+                'id' => $weightUom->id,
+                'name' => $weightUom->name,
+            ] : null;
+            $partData['uom'] = $uom ? [
+                'id' => $uom->id,
+                'name' => $uom->name,
+            ] : null;
+    
             return response()->json([
                 'message' => 'Part retrieved successfully!',
-                'data' => $part,
+                'data' => $partData,
             ], Response::HTTP_OK);
         }
     
-        $perPage = $request->input('per_page', 100); 
-        $parts = Part::paginate($perPage);
+        $query = Part::query();
+    
+        if ($request->query('num')) {
+            $query->where('num', $request->query('num'));
+        }
+    
+        if ($request->query('type')) {
+            $partTypeName = $request->query('type');
+            $partType = PartType::where('name', $partTypeName)->first();
+            
+            if ($partType) {
+                $query->where('typeId', $partType->id);
+            } else {
+                return response()->json(['message' => 'PartType not found'], Response::HTTP_NOT_FOUND);
+            }
+        }
+    
+        $perPage = $request->input('per_page', 100);
+        $parts = $query->paginate($perPage);
+    
+        $partsData = $parts->items();
+        foreach ($partsData as &$part) {
+            $partType = PartType::find($part['typeId']);
+            $part['type'] = $partType ? [
+                'id' => $partType->id,
+                'name' => $partType->name,
+            ] : null;
+    
+            $sizeUom = UnitOfMeasure::find($part['sizeUomId']);
+            $part['sizeUom'] = $sizeUom ? [
+                'id' => $sizeUom->id,
+                'name' => $sizeUom->name,
+            ] : null;
+    
+            $weightUom = UnitOfMeasure::find($part['weightUomId']);
+            $part['weightUom'] = $weightUom ? [
+                'id' => $weightUom->id,
+                'name' => $weightUom->name,
+            ] : null;
+    
+            $uom = UnitOfMeasure::find($part['uomId']);
+            $part['uom'] = $uom ? [
+                'id' => $uom->id,
+                'name' => $uom->name,
+            ] : null;
+        }
     
         return response()->json([
             'message' => 'All parts retrieved successfully!',
-            'data' => $parts->items(), 
+            'data' => $partsData,
             'pagination' => [
                 'total' => $parts->total(),
                 'per_page' => $parts->perPage(),
@@ -219,6 +309,7 @@ class PartController extends Controller
             ],
         ], Response::HTTP_OK);
     }
+    
     
     
 

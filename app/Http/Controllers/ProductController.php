@@ -7,6 +7,8 @@ use App\Http\Requests\Product\StoreProductRequest;
 use App\Http\Requests\Product\UpdateProductRequest;
 use App\Models\Part;
 use App\Models\Product;
+use App\Models\Tax;
+use App\Models\qbClass;
 use App\Models\SalesOrderItemType;
 use App\Models\UnitOfMeasure;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -166,45 +168,109 @@ class ProductController extends Controller
  * )
  */
 
-        public function show(Request $request, $id = null): JsonResponse
-        {
-            if ($id) {
-                $product = Product::find($id);
-        
-                if (!$product) {
-                    return response()->json(['message' => 'Product not found'], Response::HTTP_NOT_FOUND);
-                }
-        
-                return response()->json([
-                    'message' => 'Product retrieved successfully',
-                    'data' => [$product],
-                ], Response::HTTP_OK);
-            }
-        
-            $query = Product::query();
-        
-            $num = $request->query('num');
-            if ($num) {
-                $request->validate([
-                    'num' => 'string|exists:product,num',
-                ]);
-                $query->where('num', $num);
-            }
-        
-            $perPage = $request->query('per_page', 100); 
-            $products = $query->paginate($perPage);
-        
-            return response()->json([
-                'message' => 'Products retrieved successfully',
-                'data' => $products->items(), 
-                'pagination' => [
-                    'total' => $products->total(),
-                    'per_page' => $products->perPage(),
-                    'current_page' => $products->currentPage(),
-                    'last_page' => $products->lastPage(),
-                ],
-            ], Response::HTTP_OK);
-        }
+ public function show(Request $request, $id = null): JsonResponse
+ {
+     if ($id) {
+         $product = Product::find($id);
+ 
+         if (!$product) {
+             return response()->json(['message' => 'Product not found'], Response::HTTP_NOT_FOUND);
+         }
+ 
+         $uom = UnitOfMeasure::find($product->uomId) ?: null;
+         $tax = Tax::find($product->taxId) ?: null; 
+         $part = Part::find($product->partId) ?: null;
+         $qbClass = QBClass::find($product->qbClassId) ?: null;
+ 
+         $productData = $product->toArray();
+         $productData['uom'] = [
+             'id' => $product->uomId,
+             'name' => $uom ? $uom->name : null
+         ];
+
+         $productData['part'] = [
+             'id' => $product->partId,
+             'name' => $part ? $part->name : null
+         ];
+         $productData['qbClass'] = [
+             'id' => $product->qbClassId,
+             'name' => $qbClass ? $qbClass->name : null
+         ];
+ 
+         return response()->json($productData, Response::HTTP_OK);
+     }
+ 
+     $productNameFromQuery = $request->input('name');
+     $productNameFromBody = $request->json('name');
+ 
+     if ($productNameFromQuery || $productNameFromBody) {
+         $productName = $productNameFromQuery ?? $productNameFromBody;
+         $product = Product::where('name', $productName)->first();
+ 
+         if (!$product) {
+             return response()->json(['message' => 'Product not found'], Response::HTTP_NOT_FOUND);
+         }
+ 
+         $uom = UnitOfMeasure::find($product->uomId) ?: null;
+         $part = Part::find($product->partId) ?: null;
+         $qbClass = QBClass::find($product->qbClassId) ?: null;
+ 
+         $productData = $product->toArray();
+         $productData['uom'] = [
+             'id' => $product->uomId,
+             'name' => $uom ? $uom->name : null
+         ];
+ 
+         $productData['part'] = [
+             'id' => $product->partId,
+             'name' => $part ? $part->name : null
+         ];
+         $productData['qbClass'] = [
+             'id' => $product->qbClassId,
+             'name' => $qbClass ? $qbClass->name : null
+         ];
+ 
+         return response()->json($productData, Response::HTTP_OK);
+     }
+ 
+     $perPage = $request->input('per_page', 100);
+ 
+     $products = Product::paginate($perPage);
+ 
+     $productsData = $products->items();
+     foreach ($productsData as &$product) {
+         $uom = UnitOfMeasure::find($product['uomId']) ?: null;
+         $part = Part::find($product['partId']) ?: null;
+         $qbClass = QBClass::find($product['qbClassId']) ?: null;
+ 
+         $product['uom'] = [
+             'id' => $product['uomId'],
+             'name' => $uom ? $uom->name : null
+         ];
+ 
+         $product['part'] = [
+             'id' => $product['partId'],
+             'name' => $part ? $part->name : null
+         ];
+         $product['qbClass'] = [
+             'id' => $product['qbClassId'],
+             'name' => $qbClass ? $qbClass->name : null
+         ];
+     }
+ 
+     return response()->json([
+         'message' => 'Products retrieved successfully',
+         'data' => $productsData,
+         'pagination' => [
+             'total' => $products->total(),
+             'per_page' => $products->perPage(),
+             'current_page' => $products->currentPage(),
+             'last_page' => $products->lastPage(),
+             'next_page_url' => $products->nextPageUrl(),
+             'prev_page_url' => $products->previousPageUrl(),
+         ],
+     ], Response::HTTP_OK);
+ }
  
  
  

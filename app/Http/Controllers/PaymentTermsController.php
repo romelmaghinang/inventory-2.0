@@ -129,49 +129,83 @@ class PaymentTermsController extends Controller
  *     )
  * )
  */
-    public function show(Request $request, $id = null): JsonResponse
-    {
-        if ($id) {
-            $paymentTerm = PaymentTerms::find($id);
+public function show(Request $request, $id = null): JsonResponse
+{
+    if ($id) {
+        $paymentTerm = PaymentTerms::find($id);
 
-            if (!$paymentTerm) {
-                return response()->json(['message' => 'Payment Term not found.'], Response::HTTP_NOT_FOUND);
-            }
-
-            return response()->json([
-                'message' => 'Payment Term retrieved successfully!',
-                'data' => $paymentTerm,
-            ], Response::HTTP_OK);
+        if (!$paymentTerm) {
+            return response()->json(['message' => 'Payment Term not found.'], Response::HTTP_NOT_FOUND);
         }
 
-        $name = $request->query('name') ?? $request->input('name');
-        if ($name) {
-            $request->validate(['name' => 'string|exists:paymentterms,name']);
-
-            $paymentTerm = PaymentTerms::where('name', $name)->firstOrFail();
-
-            return response()->json([
-                'message' => 'Payment Term retrieved successfully!',
-                'data' => $paymentTerm,
-            ], Response::HTTP_OK);
-        }
-
-        $perPage = $request->input('per_page', 100); 
-        $paymentTerms = PaymentTerms::paginate($perPage);
+        $paymentTermType = PaymentTermsType::find($paymentTerm->typeId);
+        $paymentTerm->paymentTermType = $paymentTermType ? [
+            'id' => $paymentTermType->id,
+            'name' => $paymentTermType->name,
+        ] : null;
 
         return response()->json([
-            'message' => 'All Payment Terms retrieved successfully!',
-            'data' => $paymentTerms->items(), 
-            'pagination' => [
-                'total' => $paymentTerms->total(),
-                'per_page' => $paymentTerms->perPage(),
-                'current_page' => $paymentTerms->currentPage(),
-                'last_page' => $paymentTerms->lastPage(),
-                'next_page_url' => $paymentTerms->nextPageUrl(),
-                'prev_page_url' => $paymentTerms->previousPageUrl(),
-            ],
+            'message' => 'Payment Term retrieved successfully!',
+            'data' => $paymentTerm,
         ], Response::HTTP_OK);
     }
+
+    $name = $request->query('name') ?? $request->input('name');
+    if ($name) {
+        $request->validate(['name' => 'string|exists:paymentterms,name']);
+
+        $paymentTerm = PaymentTerms::where('name', $name)->firstOrFail();
+
+        $paymentTermType = PaymentTermsType::find($paymentTerm->typeId);
+        $paymentTerm->paymentTermType = $paymentTermType ? [
+            'id' => $paymentTermType->id,
+            'name' => $paymentTermType->name,
+        ] : null;
+
+        return response()->json([
+            'message' => 'Payment Term retrieved successfully!',
+            'data' => $paymentTerm,
+        ], Response::HTTP_OK);
+    }
+
+    if ($request->query('type')) {
+        $paymentTermTypeName = $request->query('type');
+        $paymentTermType = PaymentTermsType::where('name', $paymentTermTypeName)->first();
+
+        if ($paymentTermType) {
+            $query = PaymentTerms::where('typeId', $paymentTermType->id);
+        } else {
+            return response()->json(['message' => 'PaymentTermType not found'], Response::HTTP_NOT_FOUND);
+        }
+    } else {
+        $query = PaymentTerms::query();
+    }
+
+    $perPage = $request->input('per_page', 100); 
+    $paymentTerms = $query->paginate($perPage);
+
+    foreach ($paymentTerms->items() as $paymentTerm) {
+        $paymentTermType = PaymentTermsType::find($paymentTerm->typeId);
+        $paymentTerm->paymentTermType = $paymentTermType ? [
+            'id' => $paymentTermType->id,
+            'name' => $paymentTermType->name,
+        ] : null;
+    }
+
+    return response()->json([
+        'message' => 'All Payment Terms retrieved successfully!',
+        'data' => $paymentTerms->items(),
+        'pagination' => [
+            'total' => $paymentTerms->total(),
+            'per_page' => $paymentTerms->perPage(),
+            'current_page' => $paymentTerms->currentPage(),
+            'last_page' => $paymentTerms->lastPage(),
+            'next_page_url' => $paymentTerms->nextPageUrl(),
+            'prev_page_url' => $paymentTerms->previousPageUrl(),
+        ],
+    ], Response::HTTP_OK);
+}
+
 
 
     /**
