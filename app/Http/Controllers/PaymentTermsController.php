@@ -180,9 +180,9 @@ class PaymentTermsController extends Controller
     public function update(UpdatePaymentTermsRequest $updatePaymentTermsRequest, PaymentTerms $paymentTerms, $id): JsonResponse
     {
         $paymentTerms = PaymentTerms::findOrFail($id);
-
+    
         $paymentTermsType = PaymentTermsType::where('name', $updatePaymentTermsRequest->termsType)->firstOrFail();
-
+    
         $updateData = $updatePaymentTermsRequest->only([
             'netDays', 
             'discount', 
@@ -192,33 +192,40 @@ class PaymentTermsController extends Controller
             'default', 
             'active'
         ]);
-
-        $updateData = array_filter($updateData, function($value) {
+    
+        $updateData = array_filter($updateData, function ($value) {
             return !is_null($value);
         });
-
-        $updateData = array_merge($updateData, [
-            'name' => $updatePaymentTermsRequest->termsName,
-            'typeId' => $paymentTermsType->id,
-            'defaultTerms' => $updatePaymentTermsRequest->default,
-            'activeFlag' => $updatePaymentTermsRequest->active,
-        ]);
-
+    
+        if (isset($updateData['termsName'])) {
+            $updateData['name'] = $updateData['termsName'];
+            unset($updateData['termsName']);
+        }
+        if (isset($updateData['default'])) {
+            $updateData['defaultTerms'] = $updateData['default'];
+            unset($updateData['default']);
+        }
+        if (isset($updateData['active'])) {
+            $updateData['activeFlag'] = $updateData['active'];
+            unset($updateData['active']);
+        }
+    
+        $updateData['typeId'] = $paymentTermsType->id;
+    
         $paymentTerms->update($updateData);
-
-        $relatedPaymentTermsType = $paymentTermsType;
-
+    
         return response()->json(
             [
                 'message' => 'Payment Terms Updated Successfully!',
                 'data' => $paymentTerms,
                 'relatedData' => [
-                    'paymentTermsType' => $relatedPaymentTermsType
+                    'paymentTermsType' => $paymentTermsType
                 ]
             ],
             Response::HTTP_OK
         );
     }
+    
 
     
     /**
