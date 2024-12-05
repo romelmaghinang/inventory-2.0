@@ -275,14 +275,6 @@ class VendorController extends Controller
                 'id' => $vendor->defaultShipTermsId,
                 'name' => $shipterms ? $shipterms->name : null
             ];
-            $vendorData['state'] = [
-                'id' => $vendor->stateId,
-                'name' => $state ? $state->name : null
-            ];
-            $vendorData['country'] = [
-                'id' => $vendor->countryId,
-                'name' => $country ? $country->name : null
-            ];
             $vendorData['taxRate'] = [
                 'id' => $vendor->taxRateId,
                 'name' => $taxRate ? $taxRate->name : null  
