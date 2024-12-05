@@ -223,14 +223,6 @@ class VendorController extends Controller
                 'id' => $vendor->defaultShipTermsId,
                 'name' => $shipterms ? $shipterms->name : null
             ];
-            $vendorData['state'] = [
-                'id' => $vendor->stateId,
-                'name' => $state ? $state->name : null
-            ];
-            $vendorData['country'] = [
-                'id' => $vendor->countryId,
-                'name' => $country ? $country->name : null
-            ];
             $vendorData['taxRate'] = [
                 'id' => $vendor->taxRateId,
                 'name' => $taxRate ? $taxRate->name : null
@@ -250,8 +242,7 @@ class VendorController extends Controller
                 return response()->json(['message' => 'Vendor not found'], Response::HTTP_NOT_FOUND);
             }
 
-            $state = State::find($vendor->stateId) ?: null;
-            $country = Country::find($vendor->countryId) ?: null;
+        
             $currency = Currency::find($vendor->currencyId) ?: null;
             $carrier = Carrier::find($vendor->defaultCarrierId) ?: null;
             $shipterms = ShipTerms::find($vendor->defaultShipTermsId) ?: null;
