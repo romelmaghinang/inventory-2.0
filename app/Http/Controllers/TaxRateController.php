@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\TaxRate\StoreTaxRateRequest;
 use App\Http\Requests\TaxRate\UpdateTaxRateRequest;
 use App\Models\TaxRate;
+use App\Models\Vendor;
+use App\Models\OrderType;
 use App\Models\TaxRateType;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
@@ -124,9 +126,31 @@ class TaxRateController extends Controller
                 return response()->json(['message' => 'Tax Rate not found.'], Response::HTTP_NOT_FOUND);
             }
     
+            $vendor = $taxRate->vendorId ? Vendor::find($taxRate->vendorId) : null;
+            $type = $taxRate->typeId ? TaxRateType::find($taxRate->typeId) : null;
+            $orderType = $taxRate->orderTypeId ? OrderType::find($taxRate->orderTypeId) : null;
+    
             return response()->json([
                 'message' => 'Tax Rate retrieved successfully!',
-                'data' => $taxRate,
+                'data' => [
+                    'id' => $taxRate->id,
+                    'accountingHash' => $taxRate->accountingHash,
+                    'accountingId' => $taxRate->accountingId,
+                    'activeFlag' => $taxRate->activeFlag,
+                    'code' => $taxRate->code,
+                    'dateCreated' => $taxRate->dateCreated,
+                    'dateLastModified' => $taxRate->dateLastModified,
+                    'defaultFlag' => $taxRate->defaultFlag,
+                    'description' => $taxRate->description,
+                    'name' => $taxRate->name,
+                    'rate' => $taxRate->rate,
+                    'taxAccountId' => $taxRate->taxAccountId,
+                    'typeCode' => $taxRate->typeCode,
+                    'unitCost' => $taxRate->unitCost,
+                    'vendorId' => $vendor ? ['id' => $vendor->id, 'name' => $vendor->name] : null,
+                    'typeId' => $type ? ['id' => $type->id, 'name' => $type->name] : null,
+                    'orderTypeId' => $orderType ? ['id' => $orderType->id, 'name' => $orderType->name] : null,
+                ],
             ], Response::HTTP_OK);
         }
     
@@ -146,9 +170,31 @@ class TaxRateController extends Controller
                 return response()->json(['message' => 'Tax Rate not found.'], Response::HTTP_NOT_FOUND);
             }
     
+            $vendor = $taxRate->vendorId ? Vendor::find($taxRate->vendorId) : null;
+            $type = $taxRate->typeId ? TaxRateType::find($taxRate->typeId) : null;
+            $orderType = $taxRate->orderTypeId ? OrderType::find($taxRate->orderTypeId) : null;
+    
             return response()->json([
                 'message' => 'Tax Rate retrieved successfully!',
-                'data' => $taxRate,
+                'data' => [
+                    'id' => $taxRate->id,
+                    'accountingHash' => $taxRate->accountingHash,
+                    'accountingId' => $taxRate->accountingId,
+                    'activeFlag' => $taxRate->activeFlag,
+                    'code' => $taxRate->code,
+                    'dateCreated' => $taxRate->dateCreated,
+                    'dateLastModified' => $taxRate->dateLastModified,
+                    'defaultFlag' => $taxRate->defaultFlag,
+                    'description' => $taxRate->description,
+                    'name' => $taxRate->name,
+                    'rate' => $taxRate->rate,
+                    'taxAccountId' => $taxRate->taxAccountId,
+                    'typeCode' => $taxRate->typeCode,
+                    'unitCost' => $taxRate->unitCost,
+                    'vendorId' => $vendor ? ['id' => $vendor->id, 'name' => $vendor->name] : null,
+                    'typeId' => $type ? ['id' => $type->id, 'name' => $type->name] : null,
+                    'orderTypeId' => $orderType ? ['id' => $orderType->id, 'name' => $orderType->name] : null,
+                ],
             ], Response::HTTP_OK);
         }
     
@@ -156,9 +202,36 @@ class TaxRateController extends Controller
     
         $taxRates = TaxRate::paginate($perPage);
     
+        $taxRatesData = collect($taxRates->items())->map(function ($taxRate) {
+            $vendor = $taxRate->vendorId ? Vendor::find($taxRate->vendorId) : null;
+            $type = $taxRate->typeId ? TaxRateType::find($taxRate->typeId) : null;
+            $orderType = $taxRate->orderTypeId ? OrderType::find($taxRate->orderTypeId) : null;
+        
+            return [
+                'id' => $taxRate->id,
+                'accountingHash' => $taxRate->accountingHash,
+                'accountingId' => $taxRate->accountingId,
+                'activeFlag' => $taxRate->activeFlag,
+                'code' => $taxRate->code,
+                'dateCreated' => $taxRate->dateCreated,
+                'dateLastModified' => $taxRate->dateLastModified,
+                'defaultFlag' => $taxRate->defaultFlag,
+                'description' => $taxRate->description,
+                'name' => $taxRate->name,
+                'rate' => $taxRate->rate,
+                'taxAccountId' => $taxRate->taxAccountId,
+                'typeCode' => $taxRate->typeCode,
+                'unitCost' => $taxRate->unitCost,
+                'vendorId' => $vendor ? ['id' => $vendor->id, 'name' => $vendor->name] : null,
+                'typeId' => $type ? ['id' => $type->id, 'name' => $type->name] : null,
+                'orderTypeId' => $orderType ? ['id' => $orderType->id, 'name' => $orderType->name] : null,
+            ];
+        });
+        
+    
         return response()->json([
             'message' => 'All Tax Rates retrieved successfully!',
-            'data' => $taxRates->items(),
+            'data' => $taxRatesData,
             'pagination' => [
                 'total' => $taxRates->total(),
                 'per_page' => $taxRates->perPage(),
@@ -169,7 +242,7 @@ class TaxRateController extends Controller
             ],
         ], Response::HTTP_OK);
     }
-    
+ 
 
 
     /**
