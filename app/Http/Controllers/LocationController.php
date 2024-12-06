@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Location\StoreLocationRequest;
 use App\Http\Requests\Location\UpdateLocationRequest;
 use App\Models\Customer;
+use App\Models\qbClass;
 use App\Models\Location;
 use App\Models\LocationGroup;
 use App\Models\LocationType;
@@ -65,7 +66,14 @@ class LocationController extends Controller
     public function store(StoreLocationRequest $storeLocationRequest): JsonResponse
     {
         $locationType = LocationType::where('name', $storeLocationRequest->type)->firstOrFail();
-        $locationGroup = LocationGroup::firstOrCreate(['name' => $storeLocationRequest->locationGroup]);
+        $locationGroup = LocationGroup::firstOrCreate(
+            ['name' => $storeLocationRequest->locationGroup],
+            ['qbClassId' => 1] 
+        );
+        
+        $qbClass = qbClass::find(1);
+
+
         $customer = Customer::where('name', $storeLocationRequest->customerName)->firstOrFail();
 
         $location = Location::create(
@@ -76,15 +84,15 @@ class LocationController extends Controller
                     'receivable',
                     'sortOrder'
                 ]
-            ) +
-                [
-                    'name' => $storeLocationRequest->location,
-                    'typeId' => $locationType->id,
-                    'locationGroupId' => $locationGroup->id,
-                    'defaultCustomerId' => $customer->id,
-                    'activeFlag' => $storeLocationRequest->active,
-                    'countedAsAvailable' => $storeLocationRequest->available,
-                ]
+            ) + 
+            [
+                'name' => $storeLocationRequest->location,
+                'typeId' => $locationType->id,
+                'locationGroupId' => $locationGroup->id,
+                'defaultCustomerId' => $customer->id,
+                'activeFlag' => $storeLocationRequest->active,
+                'countedAsAvailable' => $storeLocationRequest->available,
+            ]
         );
 
         return response()->json(
@@ -95,11 +103,13 @@ class LocationController extends Controller
                     'locationType' => $locationType,
                     'locationGroup' => $locationGroup,
                     'customer' => $customer,
+                    'qbClass' => $qbClass, 
                 ],
             ],
             Response::HTTP_CREATED
         );
     }
+
 
     /**
      * @OA\Put(
@@ -306,10 +316,9 @@ public function show(Request $request, $id = null): JsonResponse
             'id' => $locationType->id,
             'name' => $locationType->name,
         ] : null;
-        $locationData['locationGroup'] = $locationGroup ? [
-            'id' => $locationGroup->id,
-            'name' => $locationGroup->name,
-        ] : null;
+        $locationGroup = LocationGroup::find($location['locationGroupId']);
+        $location['locationGroup'] = $locationGroup ? $locationGroup->toArray() : null;
+        
 
         return response()->json([
             'message' => 'Location retrieved successfully!',
@@ -349,10 +358,8 @@ public function show(Request $request, $id = null): JsonResponse
         ] : null;
 
         $locationGroup = LocationGroup::find($location['locationGroupId']);
-        $location['locationGroup'] = $locationGroup ? [
-            'id' => $locationGroup->id,
-            'name' => $locationGroup->name,
-        ] : null;
+        $location['locationGroup'] = $locationGroup ? $locationGroup->toArray() : null;
+        
     }
 
     return response()->json([

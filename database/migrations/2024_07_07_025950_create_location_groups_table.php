@@ -16,7 +16,7 @@ return new class extends Migration
             $table->boolean('activeFlag')->default(true);
             $table->dateTime('dateLastModified')->nullable();
             $table->string('name', 30)->unique();
-            $table->unsignedBigInteger('qbClassId')->nullable();
+            $table->unsignedBigInteger('qbClassId')->default(true);
         });
     }
 
