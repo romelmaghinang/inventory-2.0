@@ -191,15 +191,33 @@ class CurrencyController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Currency $currency): JsonResponse
+    public function destroy(Request $request): JsonResponse
     {
+        $request->validate([
+            'code' => 'required|string',
+        ]);
+    
+        $code = $request->input('code') ?? $request->code;
+    
+        $currency = Currency::where('code', $code)->first();
+    
+        if (!$currency) {
+            return response()->json(
+                [
+                    'message' => 'Currency not found.'
+                ],
+                Response::HTTP_NOT_FOUND
+            );
+        }
+    
         $currency->delete();
-
+    
         return response()->json(
             [
-                'message' => 'Currency Deleted Succesfully!'
+                'message' => 'Currency Deleted Successfully!'
             ],
             Response::HTTP_OK
         );
     }
+    
 }

@@ -196,77 +196,100 @@ class ReceivingController extends Controller
  *     )
  * )
  */
-
     public function getReceiptItemsByTrackingNum(Request $request): JsonResponse
     {
         $numFromQuery = $request->query('num');
         $numFromBody = $request->input('num');
-    
+        
         $createdBefore = $request->query('createdBefore');
         $createdAfter = $request->query('createdAfter');
-    
+        $perPage = $request->query('perPage', 100); 
+
+        $idFromQuery = $request->query('id');
+
         $num = $numFromQuery ?? $numFromBody;
-    
+
+        if ($idFromQuery) {
+            $receiptItem = ReceiptItem::find($idFromQuery);
+
+            if (!$receiptItem) {
+                return response()->json(['message' => 'Receipt item not found.'], Response::HTTP_NOT_FOUND);
+            }
+
+            $relatedData = [
+                'receiptItem' => $receiptItem,
+                'inventory' => Inventory::where('partId', $receiptItem->partId)->get(),
+            ];
+
+            return response()->json([
+                'message' => 'Receipt item retrieved successfully.',
+                'data' => $receiptItem,
+                'relatedData' => $relatedData,
+            ], Response::HTTP_OK);
+        }
+
         if ($num) {
             $request->validate([
                 'num' => 'required|string|exists:receipt,num',
             ]);
-    
+
             $receipt = Receipt::where('num', $num)->first();
-    
+
             if (!$receipt) {
                 return response()->json(['message' => 'Receipt not found.'], Response::HTTP_NOT_FOUND);
             }
-    
+
             $receiptItems = ReceiptItem::where('receiptId', $receipt->id);
-    
+
             if ($createdBefore) {
                 $request->validate(['createdBefore' => 'date|before_or_equal:today']);
                 $receiptItems->whereDate('dateCreated', '<=', $createdBefore);
             }
-    
+
             if ($createdAfter) {
                 $request->validate(['createdAfter' => 'date|before_or_equal:today']);
                 $receiptItems->whereDate('dateCreated', '>=', $createdAfter);
             }
-    
+
             $relatedData = [
                 'receipt' => $receipt,
-                'receiptItems' => $receiptItems->get(),
+                'receiptItems' => $receiptItems->paginate($perPage),
                 'purchaseOrder' => PurchaseOrder::find($receipt->poId),
                 'inventory' => Inventory::whereIn('partId', $receiptItems->pluck('partId'))->get(),
             ];
-    
+
             return response()->json([
                 'message' => 'Receipt items retrieved successfully.',
-                'data' => $receiptItems->get(),
+                'data' => $receiptItems->paginate($perPage),
                 'relatedData' => $relatedData,
             ], Response::HTTP_OK);
         }
-    
+
         $allReceiptItems = ReceiptItem::query();
-    
+
         if ($createdBefore) {
             $request->validate(['createdBefore' => 'date|before_or_equal:today']);
             $allReceiptItems->whereDate('dateCreated', '<=', $createdBefore);
         }
-    
+
         if ($createdAfter) {
             $request->validate(['createdAfter' => 'date|before_or_equal:today']);
             $allReceiptItems->whereDate('dateCreated', '>=', $createdAfter);
         }
-    
+
         $relatedData = [
-            'allReceiptItems' => $allReceiptItems->get(),
+            'allReceiptItems' => $allReceiptItems->paginate($perPage),
             'inventory' => Inventory::whereIn('partId', $allReceiptItems->pluck('partId'))->get(),
         ];
-    
+
         return response()->json([
             'message' => 'All receipt items retrieved successfully.',
-            'data' => $allReceiptItems->get(),
+            'data' => $allReceiptItems->paginate($perPage),
             'relatedData' => $relatedData,
         ], Response::HTTP_OK);
     }
+
+ 
  
     public function delete (Request $request): JsonResponse
     {

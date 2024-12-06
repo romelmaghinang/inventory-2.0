@@ -168,5 +168,6 @@ Route::middleware(['auth:sanctum', ])->group(function () {
 
     Route::post('/receiving', [ReceivingController::class, 'receiving'])->middleware('abilities:receiving');
     Route::get('/receiving', [ReceivingController::class, 'getReceiptItemsByTrackingNum'])->middleware('abilities:receiving');
+    Route::get('/receiving{id}', [ReceivingController::class, 'getReceiptItemsByTrackingNum'])->middleware('abilities:receiving');
     Route::delete('receipt-void', [ReceivingController::class, 'delete'])->middleware('abilities:receipt-void');
 });
