@@ -263,7 +263,7 @@ class CustomerController extends Controller
     
         if (!empty($name)) {
             $request->validate([
-                'name' => 'string|exists:customers,name',
+                'name' => 'string|exists:customer,name',
             ]);
     
             $query->where('name', 'like', '%' . $name . '%');

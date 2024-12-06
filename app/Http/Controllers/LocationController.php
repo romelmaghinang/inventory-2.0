@@ -183,7 +183,7 @@ class LocationController extends Controller
         $updateData = [];
     
         if ($request->has('location')) {
-            $updateData['location'] = $request->location;
+            $updateData['name'] = $request->location;
         }
     
         if ($request->has('description')) {
