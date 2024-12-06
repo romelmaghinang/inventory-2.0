@@ -12,6 +12,7 @@ use App\Models\Part;
 use App\Models\Pick;
 use App\Models\PartTracking;
 use App\Models\PickItem;
+use App\Models\PickType;
 use App\Models\Product;
 use App\Models\SerialNumber;
 use App\Models\TrackingInfo;
@@ -366,6 +367,7 @@ class PickController extends Controller
     
         $createdBefore = $request->input('createdBefore');
         $createdAfter = $request->input('createdAfter');
+        $type = $request->query('type');
     
         $num = $numFromQuery ?? $numFromBody;
     
@@ -376,18 +378,44 @@ class PickController extends Controller
                     'message' => 'Pick not found',
                 ], Response::HTTP_NOT_FOUND);
             }
+    
+            $pickType = PickType::find($pick->typeId);
+    
             return response()->json([
-                'picks' => [$pick],
+                'picks' => [
+                    array_merge(
+                        $pick->toArray(),
+                        [
+                            'PickType' => $pickType ? [
+                                'id' => $pickType->id,
+                                'name' => $pickType->name,
+                            ] : null,
+                        ]
+                    ),
+                ],
             ], Response::HTTP_OK);
         }
     
         if ($num) {
             $request->validate([
-                'num' => 'required|string|exists:pick,num',
+                'num' => 'required|string|exists:picks,num',
             ]);
             $pick = Pick::where('num', $num)->firstOrFail();
+    
+            $pickType = PickType::find($pick->typeId);
+    
             return response()->json([
-                'picks' => [$pick],
+                'picks' => [
+                    array_merge(
+                        $pick->toArray(),
+                        [
+                            'PickType' => $pickType ? [
+                                'id' => $pickType->id,
+                                'name' => $pickType->name,
+                            ] : null,
+                        ]
+                    ),
+                ],
             ], Response::HTTP_OK);
         }
     
@@ -407,11 +435,40 @@ class PickController extends Controller
             $query->whereDate('dateCreated', '>=', $createdAfter);
         }
     
-        $perPage = $request->input('per_page', 100); 
+        if ($type) {
+            $request->validate([
+                'type' => 'string|exists:picktype,name',
+            ]);
+    
+            $pickType = PickType::where('name', $type)->first();
+    
+            if ($pickType) {
+                $query->where('typeId', $pickType->id);
+            } else {
+                return response()->json([
+                    'message' => 'Invalid type provided',
+                ], Response::HTTP_BAD_REQUEST);
+            }
+        }
+    
+        $perPage = $request->input('per_page', 100);
         $picks = $query->paginate($perPage);
     
+        $picksWithType = collect($picks->items())->map(function ($pick) {
+            $pickType = PickType::find($pick->typeId);
+            return array_merge(
+                $pick->toArray(),
+                [
+                    'PickType' => $pickType ? [
+                        'id' => $pickType->id,
+                        'name' => $pickType->name,
+                    ] : null,
+                ]
+            );
+        });
+    
         return response()->json([
-            'picks' => $picks->items(),
+            'picks' => $picksWithType,
             'pagination' => [
                 'total' => $picks->total(),
                 'per_page' => $picks->perPage(),
@@ -422,6 +479,7 @@ class PickController extends Controller
             ],
         ], Response::HTTP_OK);
     }
+    
     
     
 

@@ -71,8 +71,8 @@ Route::middleware(['auth:sanctum', ])->group(function () {
     Route::prefix('currency')->group(function () {
         Route::post('/', [CurrencyController::class, 'store'])->middleware('abilities:create-currency');
         Route::put('/', [CurrencyController::class, 'update'])->middleware('abilities:update-currency');
-        Route::get('/{id}', [CurrencyController::class, 'show'])->middleware('abilities:view-currency');
-        Route::get('/', [CurrencyController::class, 'show'])->middleware('abilities:view-currency');
+        Route::get('/{id}', [CurrencyController::class, 'showCurrencies'])->middleware('abilities:view-currency');
+        Route::get('/', [CurrencyController::class, 'showCurrencies'])->middleware('abilities:view-currency');
         Route::delete('/', [CurrencyController::class, 'destroy'])->middleware('abilities:delete-currency');
      });
 

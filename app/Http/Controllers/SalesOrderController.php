@@ -325,15 +325,48 @@ class SalesOrderController extends Controller
      *     )
      * )
      */
-    public function show(Request $request, $id = null): JsonResponse
+    public function show(Request $request, $id, $query = null): JsonResponse
     {
-        $num = $request->json('num');
-        $status = $request->json('status');
-        $createdBefore = $request->input('createdBefore');
-        $createdAfter = $request->input('createdAfter');
-        $customField = $request->input('customField');
-        $page = $request->input('page', 1);
-        $perPage = 100;
+        $num = $request->query('num');  
+        $status = $request->query('status');
+        $createdBefore = $request->query('createdBefore');  
+        $createdAfter = $request->query('createdAfter');  
+        $customField = $request->query('customField');  
+        $page = $request->query('page', 1);  
+        $perPage = $request->query('perPage', 100); 
+    
+        $fetchRelatedData = function ($salesOrder) {
+            $relations = [
+                'currencyId' => 'Currency',
+                'billToCountryId' => 'Country',
+                'billToStateId' => 'State',
+                'carrierId' => 'Carrier',
+                'carrierServiceId' => 'CarrierService',
+                'customerId' => 'Customer',
+                'locationGroupId' => 'LocationGroup',
+                'paymentTermsId' => 'PaymentTerms',
+                'shipTermsId' => 'ShipTerms',
+                'priorityId' => 'Priority',
+                'qbClassId' => 'QbClass',
+                'shipToCountryId' => 'Country',
+                'shipToStateId' => 'State',
+                'statusId' => 'SalesOrderStatus',
+                'taxRateId' => 'TaxRate',
+            ];
+    
+            foreach ($relations as $field => $model) {
+                if ($salesOrder->$field) {
+                    $relatedModel = "App\\Models\\$model";
+                    $relatedData = $relatedModel::find($salesOrder->$field);
+    
+                    $salesOrder->$field = $relatedData
+                        ? ['id' => $relatedData->id, 'name' => $relatedData->name ?? $relatedData->title ?? $relatedData->description]
+                        : null;
+                }
+            }
+    
+            return $salesOrder;
+        };
     
         if ($id) {
             if (!is_numeric($id) || !SalesOrder::find($id)) {
@@ -341,6 +374,7 @@ class SalesOrderController extends Controller
             }
     
             $salesOrder = SalesOrder::find($id);
+            $salesOrder = $fetchRelatedData($salesOrder);
     
             return response()->json(['success' => true, 'data' => $salesOrder], Response::HTTP_OK);
         }
@@ -355,6 +389,8 @@ class SalesOrderController extends Controller
             if (!$salesOrder) {
                 return response()->json(['message' => 'Sales Order not found.'], Response::HTTP_NOT_FOUND);
             }
+    
+            $salesOrder = $fetchRelatedData($salesOrder);
     
             return response()->json(['success' => true, 'data' => $salesOrder], Response::HTTP_OK);
         }
@@ -392,11 +428,23 @@ class SalesOrderController extends Controller
     
         $salesOrders = $query->paginate($perPage, ['*'], 'page', $page);
     
+        $transformedSalesOrders = $salesOrders->items(); 
+        $transformedSalesOrders = collect($transformedSalesOrders)->map(function ($salesOrder) use ($fetchRelatedData) {
+            return $fetchRelatedData($salesOrder);
+        });
+    
         return response()->json([
             'success' => true,
-            'data' => $salesOrders
+            'data' => [
+                'data' => $transformedSalesOrders,
+                'current_page' => $salesOrders->currentPage(),
+                'per_page' => $salesOrders->perPage(),
+                'total' => $salesOrders->total(),
+                'last_page' => $salesOrders->lastPage(),
+            ]
         ], Response::HTTP_OK);
     }
+    
     
 
 /**

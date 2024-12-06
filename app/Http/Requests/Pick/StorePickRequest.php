@@ -29,7 +29,7 @@ class StorePickRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'pickNum' => ['required', 'numeric', 'exists:so,num', 'unique:pick,pickNum'], // Added unique rule for duplicate check
+            'pickNum' => ['required', 'numeric', 'exists:so,num', 'unique:pick,num'],
             'locationName' => ['required', 'string', 'max:255', 'exists:location,name'],
             'partNum' => ['required', 'string', 'max:255', 'exists:part,num'],
             'partTrackingType' => ['required', 'string', 'exists:parttracking,name'],

@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Models\Xo;
+use App\Models\State;
+use App\Models\Location;
+use App\Models\XoItemType;
 use App\Models\XoItem;
 use App\Models\Part;
 use App\Models\UnitOfMeasure;
@@ -348,35 +351,95 @@ class TransferOrderController extends Controller
 
     public function showXo(Request $request, $xoId = null): JsonResponse
     {
-        $perPage = $request->input('perPage', 100); 
+        $perPage = $request->input('perPage', 100);
         $page = $request->input('page', 1);
+        $type = $request->input('type'); 
+    
+        $query = Xo::query();
     
         if ($xoId) {
-            $data = Xo::where('id', $xoId)->paginate($perPage, ['*'], 'page', $page);
-        } else {
-            $data = Xo::paginate($perPage, ['*'], 'page', $page);
+            $query->where('id', $xoId);
         }
     
-        return response()->json($data);
+        if ($type) {
+            $typeId = XoType::where('name', $type)->value('id');
+            if ($typeId) {
+                $query->where('typeId', $typeId);
+            }
+        }
+    
+        $picks = $query->paginate($perPage, ['*'], 'page', $page);
+    
+        $data = collect($picks->items())->map(function ($xo) {
+            return [
+                'xoData' => $xo,
+                'relatedData' => [
+                    'type' => XoType::select('id', 'name')->find($xo->typeId),
+                    'fromCountry' => Country::select('id', 'name')->find($xo->fromCountryId),
+                    'shipToCountry' => Country::select('id', 'name')->find($xo->shipToCountryId),
+                    'fromState' => State::select('id', 'name')->find($xo->fromStateId),
+                    'shipToState' => State::select('id', 'name')->find($xo->shipToStateId),
+                    'locationTag' => Location::select('id', 'name')->find($xo->mainLocationTagId),
+                    'status' => XoStatus::select('id', 'name')->find($xo->statusId),
+                ],
+            ];
+        });
+    
+        return response()->json([
+            'data' => $data,
+            'total' => $picks->total(),
+            'perPage' => $picks->perPage(),
+            'currentPage' => $picks->currentPage(),
+            'lastPage' => $picks->lastPage(),
+        ]);
     }
+    
+    
     
 
     public function showXoItem(Request $request, $xoId = null, $partNum = null): JsonResponse
         {
-            $perPage = $request->input('perPage', 100); 
-            $page = $request->input('page', 1); 
+            $perPage = $request->input('perPage', 100);
+            $page = $request->input('page', 1);
+            $type = $request->input('type'); 
 
-            if ($xoId && $partNum) {
-                $data = XoItem::where('xoId', $xoId)
-                    ->where('partNum', $partNum)
-                    ->paginate($perPage, ['*'], 'page', $page);
-            } elseif ($xoId) {
-                $data = XoItem::where('xoId', $xoId)->paginate($perPage, ['*'], 'page', $page);
-            } else {
-                $data = XoItem::paginate($perPage, ['*'], 'page', $page);
+            $query = XoItem::query();
+
+            if ($xoId) {
+                $query->where('xoId', $xoId);
             }
 
-            return response()->json($data);
+            if ($partNum) {
+                $query->where('partNum', $partNum);
+            }
+
+            if ($type) {
+                $typeId = XoItemType::where('name', $type)->value('id');
+                if ($typeId) {
+                    $query->where('typeId', $typeId);
+                }
+            }
+
+            $picks = $query->paginate($perPage, ['*'], 'page', $page);
+
+            $formattedData = collect($salesOrders->items())->map(function ($item) {
+                return [
+                    'xoItemData' => $item,
+                    'relatedData' => [
+                        'type' => XoItemType::select('id', 'name')->find($item->typeId),
+                        'status' => XoItemStatus::select('id', 'name')->find($item->statusId),
+                        'uom' => UnitOfMeasure::select('id', 'name')->find($item->uomId),
+                    ],
+                ];
+            });
+
+            return response()->json([
+                'data' => $data,
+                'total' => $picks->total(),
+                'perPage' => $picks->perPage(),
+                'currentPage' => $picks->currentPage(),
+                'lastPage' => $picks->lastPage(),
+            ]);
         }
 
 
