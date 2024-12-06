@@ -296,15 +296,34 @@ class TaxRateController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(TaxRate $taxRate): JsonResponse
-    {
-        $taxRate->delete();
 
+    public function destroy(Request $request): JsonResponse
+    {
+        $request->validate([
+            'code' => 'required|string',
+        ]);
+    
+        $code = $request->input('code') ?? $request->code;
+    
+        $taxRate = TaxRate::where('code', $code)->first();
+    
+        if (!$taxRate) {
+            return response()->json(
+                [
+                    'message' => 'Tax Rate not found.'
+                ],
+                Response::HTTP_NOT_FOUND
+            );
+        }
+    
+        $taxRate->delete();
+    
         return response()->json(
             [
-                'message' => 'Tax Rate Deleted Successfully!',
+                'message' => 'Tax Rate Deleted Successfully!'
             ],
             Response::HTTP_OK
         );
     }
+    
 }
