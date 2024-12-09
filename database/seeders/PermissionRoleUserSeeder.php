@@ -35,7 +35,9 @@ class PermissionRoleUserSeeder extends Seeder
             'create-customer', 'view-customer', 'update-customer', 'delete-customer',
             'pick-start', 'pick-finish', 'receipt-reconciled', 'receipt-fulfilled', 'pack', 'ship', 'inventory', 
             'receiving', 'receipt-void', 'create-transfer-order', 'update-status-transfer-order',
-            'void-transfer-order', 'delete-transfer-order', 'update-transfer-order', 'show-transfer-order', 'item-show-transfer-order'
+            'void-transfer-order', 'delete-transfer-order', 'update-transfer-order', 'show-transfer-order', 'item-show-transfer-order',
+            'create-vendorparts','view-vendorparts','update-vendorparts','delete-vendorparts'
+
         ];
 
         foreach ($permissions as $permission) {
@@ -85,7 +87,8 @@ class PermissionRoleUserSeeder extends Seeder
             'create-customer', 'view-customer', 'update-customer', 'delete-customer',
             'pick-start', 'pick-finish', 'receipt-reconciled', 'receipt-fulfilled', 'pack', 'ship', 'inventory', 
             'receiving', 'receipt-void', 'create-transfer-order', 'update-status-transfer-order',
-            'void-transfer-order', 'delete-transfer-order', 'update-transfer-order', 'show-transfer-order', 'item-show-transfer-order'
+            'void-transfer-order', 'delete-transfer-order', 'update-transfer-order', 'show-transfer-order', 'item-show-transfer-order',
+            'create-vendorparts','view-vendorparts','update-vendorparts','delete-vendorparts'
 
         ];
 

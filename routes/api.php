@@ -7,6 +7,7 @@ use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\PartController;
 use App\Http\Controllers\PaymentTermsController;
+use App\Http\Controllers\VendorPartController;
 use App\Http\Controllers\PickController;
 use App\Http\Controllers\PickStatus\FinishController;
 use App\Http\Controllers\PickStatus\StartController;
@@ -151,6 +152,13 @@ Route::middleware(['auth:sanctum', ])->group(function () {
         Route::get('/{id}', [CustomerController::class, 'showCustomers'])->middleware('abilities:view-customer');
         Route::put('/{id}', [CustomerController::class, 'update'])->middleware('abilities:update-customer');
         Route::delete('/', [CustomerController::class, 'destroy'])->middleware('abilities:delete-customer');
+    });
+    Route::prefix('vendorpart')->group(function () {
+        Route::post('/', [VendorPartController::class, 'store'])->middleware('abilities:create-vendorparts');
+        Route::get('/', [VendorPartController::class, 'show'])->middleware('abilities:view-vendorparts');
+        Route::get('/{id}', [VendorPartController::class, 'show'])->middleware('abilities:view-vendorparts');
+        Route::put('/{id}', [VendorPartController::class, 'update'])->middleware('abilities:update-vendorparts');
+        Route::delete('/', [VendorPartController::class, 'destroy'])->middleware('abilities:delete-vendorparts');
     });
     Route::post('/create-role', [UserController::class, 'createRole']);
     Route::post('/assign-role', [UserController::class, 'assignRole']);
