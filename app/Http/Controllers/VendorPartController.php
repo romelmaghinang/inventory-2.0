@@ -320,16 +320,25 @@ class VendorPartController extends Controller
     /**
      * Delete a vendor part.
      */
-    public function destroy($id)
+    public function destroy(Request $request)
     {
-        $vendorPart = VendorPart::find($id);
-
+        $id = $request->input('id');
+        $vendorPartNumber = $request->input('VendorPartNumber');
+    
+        $vendorPart = null;
+        if ($id) {
+            $vendorPart = VendorPart::find($id);
+        } elseif ($vendorPartNumber) {
+            $vendorPart = VendorPart::where('VendorPartNumber', $vendorPartNumber)->first();
+        }
+    
         if (!$vendorPart) {
             return response()->json(['error' => 'Vendor part not found.'], 404);
         }
-
+    
         $vendorPart->delete();
-
+    
         return response()->json(['message' => 'Vendor part deleted successfully.']);
     }
+    
 }

@@ -293,10 +293,14 @@ class LocationController extends Controller
  *     )
  * )
  */
-public function show(Request $request, $id = null): JsonResponse 
+public function show(Request $request, $id = null): JsonResponse  
 {
     $type = $request->query('type');
     $name = $request->query('name');
+    $pickable = $request->query('pickable');
+    $receivable = $request->query('receivable');
+    $activeFlag = $request->query('activeFlag');
+    $locationGroup = $request->query('locationGroup');
 
     if ($id) {
         $location = Location::find($id);
@@ -308,7 +312,6 @@ public function show(Request $request, $id = null): JsonResponse
         }
 
         $locationType = LocationType::find($location->typeId);
-
         $locationGroup = LocationGroup::find($location->locationGroupId);
 
         $locationData = $location->toArray();
@@ -316,9 +319,7 @@ public function show(Request $request, $id = null): JsonResponse
             'id' => $locationType->id,
             'name' => $locationType->name,
         ] : null;
-        $locationGroup = LocationGroup::find($location['locationGroupId']);
-        $location['locationGroup'] = $locationGroup ? $locationGroup->toArray() : null;
-        
+        $locationData['locationGroup'] = $locationGroup ? $locationGroup->toArray() : null;
 
         return response()->json([
             'message' => 'Location retrieved successfully!',
@@ -346,6 +347,30 @@ public function show(Request $request, $id = null): JsonResponse
         $query->where('name', 'like', '%' . $name . '%');
     }
 
+    if ($pickable !== null) {
+        $query->where('pickable', filter_var($pickable, FILTER_VALIDATE_BOOLEAN) ? 1 : 0);
+    }
+
+    if ($receivable !== null) {
+        $query->where('receivable', filter_var($receivable, FILTER_VALIDATE_BOOLEAN) ? 1 : 0);
+    }
+
+    if ($activeFlag !== null) {
+        $query->where('activeFlag', filter_var($activeFlag, FILTER_VALIDATE_BOOLEAN) ? 1 : 0);
+    }
+
+    if ($locationGroup) {
+        $group = LocationGroup::where('name', $locationGroup)->first();
+
+        if ($group) {
+            $query->where('locationGroupId', $group->id);
+        } else {
+            return response()->json([
+                'message' => 'LocationGroup with the provided name not found',
+            ], Response::HTTP_NOT_FOUND);
+        }
+    }
+
     $perPage = $request->input('per_page', 100);
     $locations = $query->paginate($perPage);
 
@@ -359,7 +384,6 @@ public function show(Request $request, $id = null): JsonResponse
 
         $locationGroup = LocationGroup::find($location['locationGroupId']);
         $location['locationGroup'] = $locationGroup ? $locationGroup->toArray() : null;
-        
     }
 
     return response()->json([
@@ -375,6 +399,7 @@ public function show(Request $request, $id = null): JsonResponse
         ],
     ], Response::HTTP_OK);
 }
+
 
 
 
