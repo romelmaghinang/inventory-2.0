@@ -197,7 +197,18 @@ class TaxRateController extends Controller
                 ],
             ], Response::HTTP_OK);
         }
+        $typeName = $request->query('type');
+        $query = TaxRate::query();
     
+        if ($typeName) {
+            $type = TaxRateType::where('name', $typeName)->first();
+    
+            if (!$type) {
+                return response()->json(['message' => 'Type not found.'], Response::HTTP_NOT_FOUND);
+            }
+    
+            $query->where('typeId', $type->id);
+        }
         $perPage = $request->input('per_page', 100);
     
         $taxRates = TaxRate::paginate($perPage);
