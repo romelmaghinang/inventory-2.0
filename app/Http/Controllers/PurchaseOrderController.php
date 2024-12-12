@@ -17,6 +17,7 @@ use App\Models\ShipTerms;
 use App\Models\State;
 use App\Models\TaxRate;
 use App\Models\Receipt;
+use App\Models\Pick;
 use App\Models\ReceiptItem;
 use App\Models\UnitOfMeasure;
 use App\Models\Vendor;
@@ -264,6 +265,11 @@ class PurchaseOrderController extends Controller
             ]);
         });
 
+        $pick = Pick::create([
+            'num' => $models['locationGroup']->id,
+            'locationGroupId' => $models['locationGroup']->id,
+        ]);
+        
         $receipt = Receipt::create([
             'locationGroupId' => $models['locationGroup']->id,
             'poId' => $poId,
@@ -272,6 +278,8 @@ class PurchaseOrderController extends Controller
             'typeId' => 10,
             'userId' => 0,
         ]);
+
+  
 
         $receiptItems = $purchaseOrderItems->map(function ($poItem) use ($receipt) {
             return ReceiptItem::create([
@@ -296,6 +304,7 @@ class PurchaseOrderController extends Controller
             'purchaseOrderItemData' => $purchaseOrderItems,
             'receiptData' => $receipt,
             'receiptItemData' => $receiptItems,
+            'pickData' => $pick,
             'relatedData' => [
                 'locationGroup' => $models['locationGroup'],
                 'carrier' => $models['carrier'],

@@ -47,7 +47,7 @@ Route::middleware(['auth:sanctum', ])->group(function () {
     Route::prefix('qbclass')->group(function () {
         
         Route::post('/', [QuickBookClassController::class, 'store'])->middleware('abilities:create-qbclass');
-        Route::put('/', [QuickBookClassController::class, 'update'])->middleware('abilities:update-qbclass');
+        Route::put('/{id}', [QuickBookClassController::class, 'update'])->middleware('abilities:update-qbclass');
         Route::get('/{id}', [QuickBookClassController::class, 'show'])->middleware('abilities:view-qbclass');
         Route::get('/', [QuickBookClassController::class, 'show'])->middleware('abilities:view-qbclass');
         Route::delete('/', [QuickBookClassController::class, 'destroy'])->middleware('abilities:delete-qbclass');

@@ -178,7 +178,7 @@ class ProductController extends Controller
          }
  
          $uom = UnitOfMeasure::find($product->uomId) ?: null;
-         $tax = Tax::find($product->taxId) ?: null; 
+         //$tax = Tax::find($product->taxId) ?: null; 
          $part = Part::find($product->partId) ?: null;
          $qbClass = QBClass::find($product->qbClassId) ?: null;
  

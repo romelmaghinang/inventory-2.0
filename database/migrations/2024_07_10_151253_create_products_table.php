@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -51,7 +52,17 @@ return new class extends Migration
             $table->index([
                 'weightUomId', 'uomId', 'qbClassId', 'partId', 'incomeAccountId', 'displayTypeId', 'defaultSoItemType', 'taxId', 'sizeUomId', 
                 'description', 'num', 'showSoComboFlag', 'sku', 'upc'], 'Performance');
-        });
+            
+            $table->json('customFields')->nullable();
+            DB::table('product')->update([
+                 'customFields' => json_encode([
+                    "201" => ["name" => "Pick Packing", "type" => "Checkbox", "value" => "true"],
+                    "317" => ["name" => "Order Signature", "type" => "Text", "value" => ""],
+                    "352" => ["name" => "Priority", "type" => "Drop-Down List", "value" => "High"]
+                   
+                ]),
+               ]);
+         });
     }
 
     /**

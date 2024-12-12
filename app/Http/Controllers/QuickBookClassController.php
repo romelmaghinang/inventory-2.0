@@ -52,6 +52,32 @@ class QuickBookClassController extends Controller
         );
     }
 
+    public function update(UpdateQuickBookClassRequest $request, $id): JsonResponse
+    {
+        $request->validate([
+            'name' => 'required|string|unique:qbclass,name,' . $id,
+            'active' => 'required|boolean'
+        ]);
+
+        $quickBook = qbClass::find($id);
+
+        if (!$quickBook) {
+            return response()->json([
+                'message' => 'Quick Book Class not found.'
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        $quickBook->update(
+            $request->only('name') + ['active' => $request->active]
+        );
+
+        return response()->json([
+            'message' => 'Quick Book Class Updated Successfully!',
+            'data' => $quickBook
+        ], Response::HTTP_OK);
+    }
+
+
     /**
      * Display the specified resource.
    
@@ -157,15 +183,24 @@ class QuickBookClassController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(qbClass $qbClass): JsonResponse
+    public function destroy(Request $request): JsonResponse
     {
+        $request->validate([
+            'qbclassId' => 'required|integer|exists:qbclass,id'
+        ]);
+    
+        $qbClass = qbClass::find($request->qbclassId);
+    
+        if (!$qbClass) {
+            return response()->json([
+                'message' => 'Quick Book Class not found.'
+            ], Response::HTTP_NOT_FOUND);
+        }
+    
         $qbClass->delete();
-
-        return response()->json(
-            [
-                'message' => 'Quick Book Class Deleted Successfully!'
-            ],
-            Response::HTTP_OK
-        );
+    
+        return response()->json([
+            'message' => 'Quick Book Class Deleted Successfully!'
+        ], Response::HTTP_OK);
     }
 }

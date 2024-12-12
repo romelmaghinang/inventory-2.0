@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Receipt;
 use App\Models\ReceiptItem;
+use App\Models\ReceiptStatus;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
 use App\Models\Carrier;
@@ -11,6 +12,7 @@ use App\Models\CarrierService;
 use App\Models\Location;
 use App\Models\Inventory;
 use Illuminate\Http\Request;
+use App\Models\ReceiptType;
 use App\Http\Requests\Receiving\ReceivingRequest;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -196,16 +198,19 @@ class ReceivingController extends Controller
  *     )
  * )
  */
-    public function getReceiptItemsByTrackingNum(Request $request): JsonResponse
+    public function getReceiptItemsByTrackingNum(Request $request): JsonResponse 
     {
         $numFromQuery = $request->query('num');
         $numFromBody = $request->input('num');
-        
+
         $createdBefore = $request->query('createdBefore');
         $createdAfter = $request->query('createdAfter');
         $perPage = $request->query('perPage', 100); 
 
         $idFromQuery = $request->query('id');
+
+        $statusName = $request->query('status');
+        $typeName = $request->query('type');
 
         $num = $numFromQuery ?? $numFromBody;
 
@@ -251,6 +256,20 @@ class ReceivingController extends Controller
                 $receiptItems->whereDate('dateCreated', '>=', $createdAfter);
             }
 
+            if ($statusName) {
+                $statusId = ReceiptStatus::where('name', $statusName)->value('id');
+                if ($statusId) {
+                    $receiptItems->where('statusId', $statusId);
+                }
+            }
+
+            if ($typeName) {
+                $typeId = ReceiptType::where('name', $typeName)->value('id');
+                if ($typeId) {
+                    $receiptItems->where('typeId', $typeId);
+                }
+            }
+
             $relatedData = [
                 'receipt' => $receipt,
                 'receiptItems' => $receiptItems->paginate($perPage),
@@ -277,6 +296,20 @@ class ReceivingController extends Controller
             $allReceiptItems->whereDate('dateCreated', '>=', $createdAfter);
         }
 
+        if ($statusName) {
+            $statusId = ReceiptStatus::where('name', $statusName)->value('id');
+            if ($statusId) {
+                $allReceiptItems->where('statusId', $statusId);
+            }
+        }
+
+        if ($typeName) {
+            $typeId = ReceiptType::where('name', $typeName)->value('id');
+            if ($typeId) {
+                $allReceiptItems->where('typeId', $typeId);
+            }
+        }
+
         $relatedData = [
             'allReceiptItems' => $allReceiptItems->paginate($perPage),
             'inventory' => Inventory::whereIn('partId', $allReceiptItems->pluck('partId'))->get(),
@@ -288,6 +321,7 @@ class ReceivingController extends Controller
             'relatedData' => $relatedData,
         ], Response::HTTP_OK);
     }
+
 
  
  

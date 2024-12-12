@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Models\Xo;
 use App\Models\State;
+use App\Models\Pick;
 use App\Models\Location;
 use App\Models\XoItemType;
 use App\Models\XoItem;
@@ -158,6 +159,10 @@ class TransferOrderController extends Controller
             'mainLocationTagId' => '0',
             'userId' => '0'
         ]);
+        $pick = Pick::create([
+            'num' => $data['TO']['TONum'],
+            'locationGroupId' => $fromLocationGroup->id,
+        ]);
 
         foreach ($data['Items'] as $item) {
             try {
@@ -214,6 +219,8 @@ class TransferOrderController extends Controller
             'carrier' => $carrier,
             'country' => $country,
             'toLocationGroup' => $toLocationGroup,
+            'pickData' => $pick,
+
         ];
 
         return response()->json([
