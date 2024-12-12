@@ -8,4 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class PickStatus extends Model
 {
     use HasFactory;
+    protected $table = 'pickstatus';
+
 }

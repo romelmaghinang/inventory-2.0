@@ -20,6 +20,10 @@ use App\Models\TableReference;
 use App\Models\SalesOrder;
 use App\Models\SalesOrderItems;
 use App\Models\TrackingInfoSn;
+use App\Models\XO;
+use App\Models\Customer;
+use App\Models\PurchaseOrder;
+use App\Models\PickStatus;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
@@ -364,10 +368,15 @@ class PickController extends Controller
     {
         $numFromQuery = $request->query('num');
         $numFromBody = $request->input('num');
-    
         $createdBefore = $request->input('createdBefore');
         $createdAfter = $request->input('createdAfter');
-        $type = $request->query('type');
+        $type = $request->input('type');
+        $status = $request->input('status');
+        $customerName = $request->input('customerName');
+        $soId = $request->input('soId');
+        $poId = $request->input('poId');
+        $woId = $request->input('woId');
+        $toId = $request->input('toId');
     
         $num = $numFromQuery ?? $numFromBody;
     
@@ -420,7 +429,52 @@ class PickController extends Controller
         }
     
         $query = Pick::query();
-    
+
+        if ($soId) {
+            $salesOrder = SalesOrder::find($soId);
+            if ($salesOrder) {
+                $query->where('num', $salesOrder->num);
+            } else {
+                return response()->json([
+                    'message' => 'Sales Order not found',
+                ], Response::HTTP_NOT_FOUND);
+            }
+        }
+
+        if ($poId) {
+            $purchaseOrder = PurchaseOrder::find($poId);
+            if ($purchaseOrder) {
+                $query->where('num', $purchaseOrder->num);
+            } else {
+                return response()->json([
+                    'message' => 'Purchase Order not found',
+                ], Response::HTTP_NOT_FOUND);
+            }
+        }
+
+        /*
+        if ($woId) {
+            $wo = WO::find($woId);
+            if ($wo) {
+                $query->where('num', $wo->num);
+            } else {
+                return response()->json([
+                    'message' => 'WO not found',
+                ], Response::HTTP_NOT_FOUND);
+            }
+        }
+        */
+
+        if ($toId) {
+            $xo = XO::find($toId);
+            if ($xo) {
+                $query->where('num', $xo->num);
+            } else {
+                return response()->json([
+                    'message' => 'XO not found',
+                ], Response::HTTP_NOT_FOUND);
+            }
+        }
         if ($createdBefore) {
             $request->validate([
                 'createdBefore' => 'date|before_or_equal:today',
@@ -451,11 +505,42 @@ class PickController extends Controller
             }
         }
     
+        if ($status) {
+            $request->validate([
+                'status' => 'string|exists:pickstatus,name',
+            ]);
+    
+            $pickStatus = PickStatus::where('name', $status)->first();
+    
+            if ($pickStatus) {
+                $query->where('statusId', $pickStatus->id);
+            } else {
+                return response()->json([
+                    'message' => 'Invalid status provided',
+                ], Response::HTTP_BAD_REQUEST);
+            }
+        }
+    
+        if ($customerName) {
+            $customer = Customer::where('name', $customerName)->first();
+    
+            if ($customer) {
+                $salesOrderIds = SalesOrder::where('customerId', $customer->id)->pluck('num');
+    
+                $query->whereIn('num', $salesOrderIds);
+            } else {
+                return response()->json([
+                    'message' => 'Customer not found',
+                ], Response::HTTP_NOT_FOUND);
+            }
+        }
+    
         $perPage = $request->input('per_page', 100);
         $picks = $query->paginate($perPage);
     
-        $picksWithType = collect($picks->items())->map(function ($pick) {
+        $picksWithTypeAndStatus = collect($picks->items())->map(function ($pick) {
             $pickType = PickType::find($pick->typeId);
+            $pickStatus = PickStatus::find($pick->statusId);
             return array_merge(
                 $pick->toArray(),
                 [
@@ -463,12 +548,16 @@ class PickController extends Controller
                         'id' => $pickType->id,
                         'name' => $pickType->name,
                     ] : null,
+                    'PickStatus' => $pickStatus ? [
+                        'id' => $pickStatus->id,
+                        'name' => $pickStatus->name,
+                    ] : null,
                 ]
             );
         });
     
         return response()->json([
-            'picks' => $picksWithType,
+            'picks' => $picksWithTypeAndStatus,
             'pagination' => [
                 'total' => $picks->total(),
                 'per_page' => $picks->perPage(),
@@ -479,6 +568,7 @@ class PickController extends Controller
             ],
         ], Response::HTTP_OK);
     }
+    
     
     
     
