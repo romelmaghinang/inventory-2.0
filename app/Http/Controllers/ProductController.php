@@ -76,58 +76,64 @@ class ProductController extends Controller
  *     )
  * )
  */
-    public function store(StoreProductRequest $storeProductRequest): JsonResponse
-    {
-        $part = Part::where('num', $storeProductRequest->partNumber)->firstOrFail();
-        $soItem = SalesOrderItemType::where('name', $storeProductRequest->productSoItemType)->firstOrFail();
-        $uom = UnitOfMeasure::where('name', $storeProductRequest->uom)->firstOrFail();
+public function store(StoreProductRequest $storeProductRequest): JsonResponse
+{
+    $part = Part::where('num', $storeProductRequest->partNumber)->firstOrFail();
+    $soItem = SalesOrderItemType::where('name', $storeProductRequest->productSoItemType)->firstOrFail();
+    $uom = UnitOfMeasure::where('name', $storeProductRequest->uom)->firstOrFail();
 
-        $product = Product::create(
-            $storeProductRequest->only(
-                [
-                    'price',
-                    'weight',
-                    'width',
-                    'height',
-                    'length',
-                    'alertNote',
-                    'cf'
-                ]
-            ) +
-                [
-                    'partId' => $part->id,
-                    'num' => $storeProductRequest->productNumber,
-                    'description' => $storeProductRequest->productDescription,
-                    'details' => $storeProductRequest->productDetails,
-                    'activeFlag' => $storeProductRequest->active,
-                    'taxableFlag' => $storeProductRequest->taxable,
-                    'showSoComboFlag' => $storeProductRequest->combo,
-                    'sellableInOtherUoms' => $storeProductRequest->allowUom,
-                    'url' => $storeProductRequest->productUrl,
-                    'upc' => $storeProductRequest->productUpc,
-                    'sku' => $storeProductRequest->productSku,
-                    'defaultSoItemType' => $soItem->id,
-                    'uomId' => $uom->id,
-                ]
-        );
+    $defaultCustomFields = [
+        "201" => ["name" => "Pick Packing", "type" => "Checkbox", "value" => "true"],
+        "317" => ["name" => "Order Signature", "type" => "Text", "value" => ""],
+        "352" => ["name" => "Priority", "type" => "Drop-Down List", "value" => "High"],
+    ];
 
-        $relatedPart = $part;
-        $relatedSoItem = $soItem;
-        $relatedUom = $uom;
+    $customFields = $storeProductRequest->customFields ?? [];
+    $mergedCustomFields = array_merge($defaultCustomFields, $customFields);
 
-        return response()->json(
+    $product = Product::create(
+        $storeProductRequest->only(
             [
-                'message' => 'Product Created Successfully!',
-                'product' => $product,
-                'relatedData' => [
-                    'part' => $relatedPart,
-                    'salesOrderItemType' => $relatedSoItem,
-                    'unitOfMeasure' => $relatedUom
-                ]
-            ],
-            Response::HTTP_CREATED
-        );
-    }
+                'price',
+                'weight',
+                'width',
+                'height',
+                'length',
+                'alertNote',
+            ]
+        ) +
+            [
+                'customFields' => json_encode($mergedCustomFields), 
+                'partId' => $part->id,
+                'num' => $storeProductRequest->productNumber,
+                'description' => $storeProductRequest->productDescription,
+                'details' => $storeProductRequest->productDetails,
+                'activeFlag' => $storeProductRequest->active,
+                'taxableFlag' => $storeProductRequest->taxable,
+                'showSoComboFlag' => $storeProductRequest->combo,
+                'sellableInOtherUoms' => $storeProductRequest->allowUom,
+                'url' => $storeProductRequest->productUrl,
+                'upc' => $storeProductRequest->productUpc,
+                'sku' => $storeProductRequest->productSku,
+                'defaultSoItemType' => $soItem->id,
+                'uomId' => $uom->id,
+            ]
+    );
+
+    return response()->json(
+        [
+            'message' => 'Product Created Successfully!',
+            'product' => $product,
+            'relatedData' => [
+                'part' => $part,
+                'salesOrderItemType' => $soItem,
+                'unitOfMeasure' => $uom
+            ]
+        ],
+        Response::HTTP_CREATED
+    );
+}
+
 
 
 /**

@@ -229,10 +229,16 @@ class SalesOrderController extends Controller
 
             $salesOrderItems[] = SalesOrderItems::create($transformedItem);
         }
+        $defaultCustomFields = [
+            "15" => ["name" => "Custom", "type" => "Text"],
+        ];
 
+        $customFields = $storePickRequest->customFields ?? [];
+        $mergedCustomFields = array_merge($defaultCustomFields, $customFields);
         $pick = Pick::create([
             'num' => $salesOrder->num,
             'locationGroupId' => $locationGroup->id,
+            'customFields' => json_encode($mergedCustomFields), 
         ]);
 
         $relatedData = [

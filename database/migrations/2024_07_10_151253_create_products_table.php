@@ -54,14 +54,7 @@ return new class extends Migration
                 'description', 'num', 'showSoComboFlag', 'sku', 'upc'], 'Performance');
             
             $table->json('customFields')->nullable();
-            DB::table('product')->update([
-                 'customFields' => json_encode([
-                    "201" => ["name" => "Pick Packing", "type" => "Checkbox", "value" => "true"],
-                    "317" => ["name" => "Order Signature", "type" => "Text", "value" => ""],
-                    "352" => ["name" => "Priority", "type" => "Drop-Down List", "value" => "High"]
-                   
-                ]),
-               ]);
+          
          });
     }
 

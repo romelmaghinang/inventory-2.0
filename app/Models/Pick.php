@@ -23,6 +23,7 @@ class Pick extends Model
         'statusId',
         'typeId',
         'priority',
+        'customFields',
     ];
 
     public $timestamps = false;

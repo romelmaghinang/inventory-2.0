@@ -10,6 +10,8 @@ use App\Models\Part;
 use App\Models\Tag;
 use App\Models\Serial;
 use App\Models\SerialNum;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
 
 class StorePickRequest extends FormRequest
 {
@@ -29,8 +31,20 @@ class StorePickRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'pickNum' => ['required', 'numeric', 'exists:so,num', 'unique:pick,num'],
-            'locationName' => ['required', 'string', 'max:255', 'exists:location,name'],
+        'pickNum' => [
+                'required',
+                'numeric',
+                function ($attribute, $value, $fail) {
+                    $existsInSo = DB::table('so')->where('num', $value)->exists();
+                    $existsInPo = DB::table('po')->where('num', $value)->exists();
+                    $existsInTo = DB::table('xo')->where('num', $value)->exists();
+
+                    if (!$existsInSo && !$existsInPo && !$existsInTo) {
+                        $fail("The {$attribute} must exist in at least one of the tables: so, po, or to.");
+                    }
+                },
+            ],
+           'locationName' => ['required', 'string', 'max:255', 'exists:location,name'],
             'partNum' => ['required', 'string', 'max:255', 'exists:part,num'],
             'partTrackingType' => ['required', 'string', 'exists:parttracking,name'],
             'trackingInfo' => [

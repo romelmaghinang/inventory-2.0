@@ -264,10 +264,17 @@ class PurchaseOrderController extends Controller
                 'dateLastModified' => Carbon::now(),
             ]);
         });
+        $defaultCustomFields = [
+            "15" => ["name" => "Custom", "type" => "Text"],
+        ];
 
+        $customFields = $storePickRequest->customFields ?? [];
+        $mergedCustomFields = array_merge($defaultCustomFields, $customFields);
         $pick = Pick::create([
             'num' => $models['locationGroup']->id,
             'locationGroupId' => $models['locationGroup']->id,
+            'customFields' => json_encode($mergedCustomFields), 
+
         ]);
         
         $receipt = Receipt::create([

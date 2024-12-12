@@ -52,7 +52,7 @@ class StoreProductRequest extends FormRequest
             'alertNote' => ['nullable', 'string', 'max:90'],
             'cartonCount' => ['required', 'numeric'],
             'cartonType' => ['required', 'string'],
-            'cf' => ['required', 'string'],
+            'cf' => ['array'],
         ];
     }
 

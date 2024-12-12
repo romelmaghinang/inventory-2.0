@@ -45,6 +45,7 @@ class Product extends Model
         'weight', // nullable
         'weightUomId', // nullable
         'width', // nullable
+        'customFields',
     ];
 
     public $timestamps = false;

@@ -27,13 +27,7 @@ return new class extends Migration
             $table->foreignId('typeId')->default(10)->constrained('picktype');
             $table->foreignId('priority')->default(30)->constrained('priority');
             $table->json('customFields')->nullable();
-            DB::table('pick')->update([
-                'customFields' => json_encode([
-                    "201" => ["name" => "Pick Packing", "type" => "Checkbox", "value" => "true"],
-                    "317" => ["name" => "Order Signature", "type" => "Text", "value" => ""],
-                    "352" => ["name" => "Priority", "type" => "Drop-Down List", "value" => "High"]
-                ]),
-            ]);
+
         });
     }
 

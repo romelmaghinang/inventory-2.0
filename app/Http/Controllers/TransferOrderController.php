@@ -182,6 +182,18 @@ class TransferOrderController extends Controller
                     'message' => "The UOM '{$item['UOM']}' was not found.",
                 ], 404);
             }
+            $defaultCustomFields = [
+                "15" => ["name" => "Custom", "type" => "Text"],
+            ];
+    
+            $customFields = $storePickRequest->customFields ?? [];
+            $mergedCustomFields = array_merge($defaultCustomFields, $customFields);
+            $pick = Pick::create([
+                'num' => $part->num,
+                'locationGroupId' => $fromLocationGroup->id,
+                'customFields' => json_encode($mergedCustomFields), 
+            ]);
+    
 
             $xoItem = XoItem::create([
                 'xoId' => $xo->id,
