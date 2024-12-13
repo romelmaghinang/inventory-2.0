@@ -77,7 +77,20 @@ class CurrencyController extends Controller
             'PLN' => 'zł',
             'HUF' => 'Ft',
             'CZK' => 'Kč',
+            'HKD' => 'HK$',
+            'PHP' => '₱',
+            'VND' => '₫',
+            'ARS' => '$',
+            'CLP' => '$',
+            'COP' => '$',
+            'EGP' => '£',
+            'AED' => 'د.إ',
+            'QAR' => 'ر.ق',
+            'BDT' => '৳',
+            'PKR' => '₨',     
+            'LKR' => 'Rs'
         ];
+        
 
         $symbol = $currencySymbols[$storeCurrencyRequest->code] ?? null;
 
@@ -247,6 +260,18 @@ class CurrencyController extends Controller
             'PLN' => 'zł',
             'HUF' => 'Ft',
             'CZK' => 'Kč',
+            'HKD' => 'HK$',
+            'PHP' => '₱',
+            'VND' => '₫',
+            'ARS' => '$',
+            'CLP' => '$',
+            'COP' => '$',
+            'EGP' => '£',
+            'AED' => 'د.إ',
+            'QAR' => 'ر.ق',
+            'BDT' => '৳',
+            'PKR' => '₨',     
+            'LKR' => 'Rs'
         ];
     
         if ($updateCurrencyRequest->has('code')) {

@@ -25,7 +25,6 @@ class StoreTaxRateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // TAX RATE
             'taxName' => ['required', 'string', 'max:31', 'unique:taxrate,name'], 
             'taxCode' => ['required', 'string', 'max:5', 'unique:taxrate,code'],  
             'taxType' => ['required', 'string', 'exists:taxratetype,name'],
@@ -60,7 +59,15 @@ class StoreTaxRateRequest extends FormRequest
                 } elseif (str_contains($message, 'has already been taken')) {
                     $categorizedErrors['duplicateFields'][] = $field;
                 } elseif (str_contains($message, 'exists')) {
-                    $categorizedErrors['relatedFieldErrors'][] = $field;
+                    if (str_contains($message, 'taxType')) {
+                        $categorizedErrors['relatedFieldErrors'][] = 'The selected tax type does not exist or is invalid.';
+                    } else {
+                        $categorizedErrors['relatedFieldErrors'][] = $field;
+                    }
+                } elseif (str_contains($message, 'The tax code field must not be greater than 5 characters')) {
+                    $categorizedErrors['invalidFormat'][] = 'taxCode: The tax code must not be greater than 5 characters.';
+                } elseif (str_contains($message, 'The selected tax type is invalid')) {
+                    $categorizedErrors['relatedFieldErrors'][] = 'The selected tax type is invalid.';
                 }
             }
         }
@@ -69,7 +76,7 @@ class StoreTaxRateRequest extends FormRequest
             [
                 'success' => false,
                 'message' => 'Validation errors occurred.',
-                'errors' => array_filter($categorizedErrors), 
+                'errors' => array_filter($categorizedErrors),
             ],
             Response::HTTP_UNPROCESSABLE_ENTITY
         ));
