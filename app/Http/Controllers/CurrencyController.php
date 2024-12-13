@@ -48,14 +48,56 @@ class CurrencyController extends Controller
  */
     public function store(StoreCurrencyRequest $storeCurrencyRequest): JsonResponse
     {
+        $currencySymbols = [
+            'USD' => '$',
+            'EUR' => '€',
+            'JPY' => '¥',
+            'GBP' => '£',
+            'AUD' => 'A$',
+            'CAD' => 'C$',
+            'CHF' => 'CHF',
+            'CNY' => '¥',
+            'INR' => '₹',
+            'BRL' => 'R$',
+            'RUB' => '₽',
+            'ZAR' => 'R',
+            'MXN' => '$',
+            'KRW' => '₩',
+            'SAR' => 'ر.س',
+            'TRY' => '₺',
+            'SGD' => 'S$',
+            'MYR' => 'RM',
+            'NZD' => 'NZ$',
+            'THB' => '฿',
+            'IDR' => 'Rp',
+            'ILS' => '₪',
+            'NOK' => 'kr',
+            'SEK' => 'kr',
+            'DKK' => 'kr',
+            'PLN' => 'zł',
+            'HUF' => 'Ft',
+            'CZK' => 'Kč',
+        ];
+
+        $symbol = $currencySymbols[$storeCurrencyRequest->code] ?? null;
+
+        if (!$symbol) {
+            return response()->json(
+                [
+                    'message' => 'Invalid currency code. No symbol found for the provided code.',
+                ],
+                Response::HTTP_UNPROCESSABLE_ENTITY
+            );
+        }
+
         $currency = Currency::create($storeCurrencyRequest->only(
             [
                 'name',
                 'code',
-                'symbol', 
             ]
         ) +
             [
+                'symbol' => $symbol,
                 'activeFlag' => $storeCurrencyRequest->active,
                 'rate' => $storeCurrencyRequest->globalCurrencyRate,
             ]);
@@ -68,6 +110,8 @@ class CurrencyController extends Controller
             Response::HTTP_CREATED
         );
     }
+
+
 
 
     /**
@@ -174,6 +218,52 @@ class CurrencyController extends Controller
      */
     public function update(UpdateCurrencyRequest $updateCurrencyRequest, Currency $currency): JsonResponse
     {
+        $currencySymbols = [
+            'USD' => '$',
+            'EUR' => '€',
+            'JPY' => '¥',
+            'GBP' => '£',
+            'AUD' => 'A$',
+            'CAD' => 'C$',
+            'CHF' => 'CHF',
+            'CNY' => '¥',
+            'INR' => '₹',
+            'BRL' => 'R$',
+            'RUB' => '₽',
+            'ZAR' => 'R',
+            'MXN' => '$',
+            'KRW' => '₩',
+            'SAR' => 'ر.س',
+            'TRY' => '₺',
+            'SGD' => 'S$',
+            'MYR' => 'RM',
+            'NZD' => 'NZ$',
+            'THB' => '฿',
+            'IDR' => 'Rp',
+            'ILS' => '₪',
+            'NOK' => 'kr',
+            'SEK' => 'kr',
+            'DKK' => 'kr',
+            'PLN' => 'zł',
+            'HUF' => 'Ft',
+            'CZK' => 'Kč',
+        ];
+    
+        if ($updateCurrencyRequest->has('code')) {
+            $symbol = $currencySymbols[$updateCurrencyRequest->code] ?? null;
+    
+            if (!$symbol) {
+                return response()->json(
+                    [
+                        'message' => 'Invalid currency code. No symbol found for the provided code.',
+                    ],
+                    Response::HTTP_UNPROCESSABLE_ENTITY
+                );
+            }
+    
+            $updateCurrencyRequest->merge(['symbol' => $symbol]);
+        }
+    
         $currency->update(
             $updateCurrencyRequest->only(['name', 'code', 'symbol']) + 
             ($updateCurrencyRequest->has('active') ? ['activeFlag' => $updateCurrencyRequest->active] : []) + 
@@ -182,12 +272,13 @@ class CurrencyController extends Controller
     
         return response()->json(
             [
-                'message' => 'Currency Update Successfully!',
+                'message' => 'Currency Updated Successfully!',
                 'data' => $currency,
             ],
             Response::HTTP_OK
         );
     }
+    
     
 
     /**
