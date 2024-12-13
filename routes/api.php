@@ -60,6 +60,8 @@ Route::middleware(['auth:sanctum', ])->group(function () {
         Route::get('/', [TaxRateController::class, 'show'])->middleware('abilities:view-taxrate');
         Route::delete('/', [TaxRateController::class, 'destroy'])->middleware('abilities:delete-taxrate');
     });
+    
+    Route::get('/payment-terms-type', [PaymentTermsController::class, 'showPaymentTermsType'])->middleware('abilities:view-payment-terms');
 
     Route::prefix('payment-terms')->group(function () {
         Route::post('/', [PaymentTermsController::class, 'store'])->middleware('abilities:create-payment-terms');

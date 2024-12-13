@@ -207,6 +207,52 @@ public function show(Request $request, $id = null): JsonResponse
     ], Response::HTTP_OK);
 }
 
+public function showPaymentTermsType(Request $request, $id = null): JsonResponse
+{
+    if ($id) {
+        $paymentTermsType = PaymentTermsType::find($id);
+
+        if (!$paymentTermsType) {
+            return response()->json(['message' => 'Payment Terms Type not found.'], Response::HTTP_NOT_FOUND);
+        }
+
+        return response()->json([
+            'message' => 'Payment Terms Type retrieved successfully!',
+            'data' => $paymentTermsType,
+        ], Response::HTTP_OK);
+    }
+
+    /*$name = $request->query('name') ?? $request->input('name');
+    if ($name) {
+        $request->validate(['name' => 'string|exists:paymenttermstype,name']);
+
+        $paymentTermsType = PaymentTermsType::where('name', $name)->firstOrFail();
+
+        return response()->json([
+            'message' => 'Payment Terms Type retrieved successfully!',
+            'data' => $paymentTermsType,
+        ], Response::HTTP_OK);
+    }
+        */
+
+    $perPage = $request->query('per_page', $request->input('per_page', 100));
+    $paymentTermsTypes = PaymentTermsType::paginate($perPage);
+
+    return response()->json([
+        'message' => 'All Payment Terms Types retrieved successfully!',
+        'data' => $paymentTermsTypes->items(),
+        'pagination' => [
+            'total' => $paymentTermsTypes->total(),
+            'per_page' => $paymentTermsTypes->perPage(),
+            'current_page' => $paymentTermsTypes->currentPage(),
+            'last_page' => $paymentTermsTypes->lastPage(),
+            'next_page_url' => $paymentTermsTypes->nextPageUrl(),
+            'prev_page_url' => $paymentTermsTypes->previousPageUrl(),
+        ],
+    ], Response::HTTP_OK);
+}
+
+
 
 
     /**
