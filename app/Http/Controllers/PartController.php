@@ -73,64 +73,77 @@ class PartController extends Controller
  * )
  */
     public function store(StorePartRequest $storePartRequest): JsonResponse
+    {
+        function generateUniqueUPC()
         {
-            $uom = UnitOfMeasure::where('name', $storePartRequest->uom)->firstOrFail();
-            $partType = PartType::where('name', $storePartRequest->partType)->firstOrFail();
-            $poItemType = PurchaseOrderItemType::where('name', $storePartRequest->poItemType)->firstOrFail();
+            do {
+                $upc = rand(10000000000, 99999999999); 
+            } while (Part::where('upc', $upc)->exists()); 
 
-            $part = Part::create(
-                $storePartRequest->only([
-                    'partDetails',
-                    'upc',
-                    'weight',
-                    'width',
-                    'consumptionRate',
-                    'revision',
-                    'length',
-                ]) + [
-                    'num' => $storePartRequest->partNumber,
-                    'description' => $storePartRequest->partDescription,
-                    'uomId' => $uom->id,
-                    'typeId' => $partType->id,
-                    'activeFlag' => $storePartRequest->active,
-                    'weightUomId' => $storePartRequest->weightUom,
-                    'sizeUomId' => $storePartRequest->sizeUom,
-                    'url' => $storePartRequest->pictureUrl,
-                    'defaultPoItemTypeId' => $poItemType->id,
-                ]
-            );
-
-            $partTracking = PartTracking::where('name', $storePartRequest->primaryTracking)->firstOrFail();
-
-            $partToTracking = PartToTracking::create(
-                $storePartRequest->only('nextValue') + [
-                    'partTrackingId' => $partTracking->id,
-                    'partId' => $part->id,
-                ]
-            );
-
-            $serialNumber = null;
-            if ($storePartRequest->primaryTracking === 'Serial Number') {
-                $serialNumber = SerialNumber::createUniqueSerialNumber($partToTracking->partTrackingId);
-            }
-
-            return response()->json(
-                [
-                    'message' => 'Part Created Successfully!',
-                    'partData' => $part,
-                    'partTrackingData' => $partTracking,
-                    'partToTrackingData' => $partToTracking,
-                    'serialNum' => $serialNumber,
-                    'relatedData' => [
-                        'uom' => $uom,
-                        'partType' => $partType,
-                        'poItemType' => $poItemType,
-                        'partTracking' => $partTracking,
-                    ],
-                ],
-                Response::HTTP_CREATED
-            );
+            return $upc;
         }
+
+        $uom = UnitOfMeasure::where('name', $storePartRequest->uom)->firstOrFail();
+        $partType = PartType::where('name', $storePartRequest->partType)->firstOrFail();
+        $poItemType = PurchaseOrderItemType::where('name', $storePartRequest->poItemType)->firstOrFail();
+
+        $upc = generateUniqueUPC();
+
+        $part = Part::create(
+            $storePartRequest->only([
+                'partDetails',
+                'upc', 
+                'weight',
+                'width',
+                'consumptionRate',
+                'revision',
+                'length',
+            ]) + [
+                'upc' => $upc, 
+                'num' => $storePartRequest->partNumber,
+                'description' => $storePartRequest->partDescription,
+                'uomId' => $uom->id,
+                'typeId' => $partType->id,
+                'activeFlag' => $storePartRequest->active,
+                'weightUomId' => $storePartRequest->weightUom,
+                'sizeUomId' => $storePartRequest->sizeUom,
+                'url' => $storePartRequest->pictureUrl,
+                'defaultPoItemTypeId' => $poItemType->id,
+            ]
+        );
+
+        $partTracking = PartTracking::where('name', $storePartRequest->primaryTracking)->firstOrFail();
+
+        $partToTracking = PartToTracking::create(
+            $storePartRequest->only('nextValue') + [
+                'partTrackingId' => $partTracking->id,
+                'partId' => $part->id,
+            ]
+        );
+
+        $serialNumber = null;
+        if ($storePartRequest->primaryTracking === 'Serial Number') {
+            $serialNumber = SerialNumber::createUniqueSerialNumber($partToTracking->partTrackingId);
+        }
+
+        return response()->json(
+            [
+                'message' => 'Part Created Successfully!',
+                'partData' => $part,
+                'partTrackingData' => $partTracking,
+                'partToTrackingData' => $partToTracking,
+                'serialNum' => $serialNumber,
+                'relatedData' => [
+                    'uom' => $uom,
+                    'partType' => $partType,
+                    'poItemType' => $poItemType,
+                    'partTracking' => $partTracking,
+                ],
+            ],
+            Response::HTTP_CREATED
+        );
+    }
+
 
     /**
      * @OA\Get(

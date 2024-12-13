@@ -29,7 +29,6 @@ class StorePartRequest extends FormRequest
             'partDescription' => ['required', 'string', 'max:252'], // description
             'partDetails' => ['required', 'string'],
             'uom' => ['required', 'string', 'exists:uom,name'], // uomId
-            'upc' => ['required', 'string', 'max:31'],
             'partType' => ['required', 'string', 'exists:parttype,name'], // typeId
             'active' => ['required', 'boolean'], // active Flag
             'abcCode' => ['required', 'string', 'max:1'],
