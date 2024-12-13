@@ -61,7 +61,7 @@ class UpdatePartRequest extends FormRequest
         'trackingFlag' => ['nullable', 'boolean'],
         'typeId' => ['nullable', 'integer'],
         'uomId' => ['nullable', 'integer'],
-        'upc' => ['nullable', 'string', 'max:31', 'unique:part,upc'],
+        'upc' => ['nullable', 'numeric', 'digits:11', 'unique:part,upc'],
         'url' => ['nullable', 'string', 'max:256', 'url'],
         'varianceAccountId' => ['nullable', 'integer'],
         'weight' => ['nullable', 'numeric'],
