@@ -126,6 +126,7 @@ Route::middleware(['auth:sanctum', ])->group(function () {
         Route::get('/', [PickController::class, 'show'])->middleware('abilities:view-pick');
         Route::delete('/', [PickController::class, 'destroy'])->middleware('abilities:delete-pick');
     });
+    Route::get('location-type', [LocationController::class, 'showLocationType'])->middleware('abilities:view-location');
 
     Route::prefix('location')->group(function () {
         Route::post('/', [LocationController::class, 'store'])->middleware('abilities:create-location');

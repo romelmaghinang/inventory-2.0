@@ -400,6 +400,15 @@ public function show(Request $request, $id = null): JsonResponse
         ],
     ], Response::HTTP_OK);
 }
+public function showLocationType(Request $request): JsonResponse
+{
+    $locationTypes = LocationType::paginate(10); 
+
+    return response()->json([
+        'message' => 'Location Types retrieved successfully!',
+        'data' => $locationTypes,
+    ], Response::HTTP_OK);
+}
 
 
 
