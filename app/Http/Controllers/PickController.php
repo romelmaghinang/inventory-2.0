@@ -368,15 +368,15 @@ class PickController extends Controller
     {
         $numFromQuery = $request->query('num');
         $numFromBody = $request->input('num');
-        $createdBefore = $request->input('createdBefore');
-        $createdAfter = $request->input('createdAfter');
-        $type = $request->input('type');
-        $status = $request->input('status');
-        $customerName = $request->input('customerName');
-        $soId = $request->input('soId');
-        $poId = $request->input('poId');
-        $woId = $request->input('woId');
-        $toId = $request->input('toId');
+        $createdBefore = $request->input('createdBefore', $request->query('createdBefore'));
+        $createdAfter = $request->input('createdAfter', $request->query('createdAfter'));
+        $type = $request->input('type', $request->query('type'));
+        $status = $request->input('status', $request->query('status'));
+        $customerName = $request->input('customerName', $request->query('customerName'));
+        $soId = $request->input('soId', $request->query('soId'));
+        $poId = $request->input('poId', $request->query('poId'));
+        $woId = $request->input('woId', $request->query('woId'));
+        $toId = $request->input('toId', $request->query('toId'));
     
         $num = $numFromQuery ?? $numFromBody;
     

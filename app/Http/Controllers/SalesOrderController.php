@@ -333,13 +333,14 @@ class SalesOrderController extends Controller
      */
     public function show(Request $request, $id, $query = null): JsonResponse
     {
-        $num = $request->query('num');  
-        $status = $request->query('status');
-        $createdBefore = $request->query('createdBefore');  
-        $createdAfter = $request->query('createdAfter');  
-        $customField = $request->query('customField');  
-        $page = $request->query('page', 1);  
-        $perPage = $request->query('perPage', 100); 
+        $num = $request->query('num', $request->input('num'));
+        $status = $request->query('status', $request->input('status'));
+        $createdBefore = $request->query('createdBefore', $request->input('createdBefore'));
+        $createdAfter = $request->query('createdAfter', $request->input('createdAfter'));
+        $customField = $request->query('customField', $request->input('customField'));
+        $page = $request->query('page', $request->input('page', 1));
+        $perPage = $request->query('perPage', $request->input('perPage', 100));
+        
     
         $fetchRelatedData = function ($salesOrder) {
             $relations = [

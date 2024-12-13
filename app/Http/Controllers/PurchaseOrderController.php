@@ -388,12 +388,13 @@ class PurchaseOrderController extends Controller
 
      public function show(Request $request, $id = null): JsonResponse
      {
-         $num = $request->json('num');
-         $status = $request->json('status');
-         $createdBefore = $request->input('createdBefore'); 
-         $createdAfter = $request->input('createdAfter'); 
-         $page = $request->input('page', 1);
-         $perPage = 100;
+         $num = $request->json('num', $request->query('num'));
+         $status = $request->json('status', $request->query('status')); 
+         $createdBefore = $request->query('createdBefore', $request->input('createdBefore'));
+         $createdAfter = $request->query('createdAfter', $request->input('createdAfter'));
+         $page = $request->query('page', $request->input('page', 1));
+         $perPage = $request->query('perPage', $request->input('perPage', 100));
+         
      
          if ($id) {
              $purchaseOrder = PurchaseOrder::find($id);

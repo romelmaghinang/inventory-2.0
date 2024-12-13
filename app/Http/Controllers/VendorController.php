@@ -274,8 +274,8 @@ class VendorController extends Controller
             return response()->json($vendorData, Response::HTTP_OK);
         }
 
-        $perPage = $request->input('per_page', 100);
-
+        $perPage = $request->query('per_page', $request->input('per_page', 100));
+        
         $vendors = Vendor::paginate($perPage);
 
         $vendorsData = $vendors->items();

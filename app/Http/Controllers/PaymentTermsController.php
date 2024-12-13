@@ -168,10 +168,10 @@ public function show(Request $request, $id = null): JsonResponse
         ], Response::HTTP_OK);
     }
 
-    if ($request->query('type')) {
-        $paymentTermTypeName = $request->query('type');
+    if ($request->query('type') || $request->input('type')) {
+        $paymentTermTypeName = $request->query('type', $request->input('type'));
         $paymentTermType = PaymentTermsType::where('name', $paymentTermTypeName)->first();
-
+    
         if ($paymentTermType) {
             $query = PaymentTerms::where('typeId', $paymentTermType->id);
         } else {
@@ -180,8 +180,9 @@ public function show(Request $request, $id = null): JsonResponse
     } else {
         $query = PaymentTerms::query();
     }
+    
 
-    $perPage = $request->input('per_page', 100); 
+    $perPage = $request->query('per_page', $request->input('per_page', 100));
     $paymentTerms = $query->paginate($perPage);
 
     foreach ($paymentTerms->items() as $paymentTerm) {

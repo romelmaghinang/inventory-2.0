@@ -370,9 +370,9 @@ class TransferOrderController extends Controller
 
     public function showXo(Request $request, $xoId = null): JsonResponse
     {
-        $perPage = $request->input('perPage', 100);
-        $page = $request->input('page', 1);
-        $type = $request->input('type'); 
+        $perPage = $request->input('perPage', $request->query('perPage', 100));
+        $page = $request->input('page', $request->query('page', 1));
+        $type = $request->input('type', $request->query('type'));
     
         $query = Xo::query();
     
@@ -418,9 +418,9 @@ class TransferOrderController extends Controller
 
     public function showXoItem(Request $request, $xoId = null, $partNum = null): JsonResponse
         {
-            $perPage = $request->input('perPage', 100);
-            $page = $request->input('page', 1);
-            $type = $request->input('type'); 
+            $perPage = $request->input('perPage', $request->query('perPage', 100));
+            $page = $request->input('page', $request->query('page', 1));
+            $type = $request->input('type', $request->query('type')); 
 
             $query = XoItem::query();
 

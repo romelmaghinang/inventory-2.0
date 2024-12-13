@@ -239,7 +239,7 @@ public function store(StoreProductRequest $storeProductRequest): JsonResponse
          return response()->json($productData, Response::HTTP_OK);
      }
  
-     $perPage = $request->input('per_page', 100);
+     $perPage = $request->input('per_page', $request->query('per_page', 100));
  
      $products = Product::paginate($perPage);
  

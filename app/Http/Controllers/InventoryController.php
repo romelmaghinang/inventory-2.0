@@ -320,8 +320,8 @@ class InventoryController extends Controller
                     });
                 }
 
-                $perPage = $request->input('per_page', 100);
-                $inventories = $query->paginate($perPage);
+                $perPage = $request->query('per_page', $request->input('per_page', 100));
+                $inventories = $query->paginate($perPage);                
 
                 if ($inventories->isEmpty()) {
                     return response()->json(['message' => 'No inventory found.'], Response::HTTP_NOT_FOUND);

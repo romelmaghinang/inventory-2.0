@@ -200,17 +200,19 @@ class ReceivingController extends Controller
  */
     public function getReceiptItemsByTrackingNum(Request $request): JsonResponse 
     {
-        $numFromQuery = $request->query('num');
-        $numFromBody = $request->input('num');
-
-        $createdBefore = $request->query('createdBefore');
-        $createdAfter = $request->query('createdAfter');
-        $perPage = $request->query('perPage', 100); 
-
-        $idFromQuery = $request->query('id');
-
-        $statusName = $request->query('status');
-        $typeName = $request->query('type');
+        $numFromQuery = $request->query('num', $request->input('num'));
+        $numFromBody = $request->input('num', $request->query('num'));
+        
+        $createdBefore = $request->query('createdBefore', $request->input('createdBefore'));
+        $createdAfter = $request->query('createdAfter', $request->input('createdAfter'));
+        
+        $perPage = $request->query('perPage', $request->input('perPage', 100));
+        
+        $idFromQuery = $request->query('id', $request->input('id'));
+        
+        $statusName = $request->query('status', $request->input('status'));
+        $typeName = $request->query('type', $request->input('type'));
+        
 
         $num = $numFromQuery ?? $numFromBody;
 

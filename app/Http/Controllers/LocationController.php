@@ -295,12 +295,13 @@ class LocationController extends Controller
  */
 public function show(Request $request, $id = null): JsonResponse  
 {
-    $type = $request->query('type');
-    $name = $request->query('name');
-    $pickable = $request->query('pickable');
-    $receivable = $request->query('receivable');
-    $activeFlag = $request->query('activeFlag');
-    $locationGroup = $request->query('locationGroup');
+    $type = $request->query('type', $request->input('type'));  
+    $name = $request->query('name', $request->input('name'));  
+    $pickable = $request->query('pickable', $request->input('pickable'));  
+    $receivable = $request->query('receivable', $request->input('receivable')); 
+    $activeFlag = $request->query('activeFlag', $request->input('activeFlag'));  
+    $locationGroup = $request->query('locationGroup', $request->input('locationGroup')); 
+    
 
     if ($id) {
         $location = Location::find($id);

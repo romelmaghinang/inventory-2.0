@@ -159,7 +159,7 @@ class QuickBookClassController extends Controller
             ], Response::HTTP_OK);
         }
 
-        $perPage = $request->input('per_page', 100);
+        $perPage = $request->query('perPage', $request->input('perPage', 100));
 
         $qbClasses = qbClass::paginate($perPage);
 

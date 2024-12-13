@@ -269,8 +269,8 @@ class CustomerController extends Controller
             $query->where('name', 'like', '%' . $name . '%');
         }
     
-        $perPage = $request->input('per_page', 100);
-    
+        $perPage = $request->query('per_page', $request->input('per_page', 100));
+            
         $customers = $query->paginate($perPage);
     
         $customersData = $customers->items();

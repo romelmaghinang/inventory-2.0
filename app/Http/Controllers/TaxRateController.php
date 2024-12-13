@@ -197,7 +197,7 @@ class TaxRateController extends Controller
                 ],
             ], Response::HTTP_OK);
         }
-        $typeName = $request->query('type');
+        $typeName = $request->query('type', $request->input('type'));
         $query = TaxRate::query();
     
         if ($typeName) {
@@ -209,7 +209,7 @@ class TaxRateController extends Controller
     
             $query->where('typeId', $type->id);
         }
-        $perPage = $request->input('per_page', 100);
+        $perPage = $request->input('per_page', $request->query('per_page', 100));
     
         $taxRates = TaxRate::paginate($perPage);
     

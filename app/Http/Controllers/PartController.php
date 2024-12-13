@@ -251,12 +251,13 @@ class PartController extends Controller
     
         $query = Part::query();
     
-        if ($request->query('num')) {
-            $query->where('num', $request->query('num'));
+        if ($request->query('num') || $request->input('num')) {
+            $num = $request->query('num', $request->input('num'));
+            $query->where('num', $num);
         }
-    
-        if ($request->query('type')) {
-            $partTypeName = $request->query('type');
+        
+        if ($request->query('type') || $request->input('type')) {
+            $partTypeName = $request->query('type', $request->input('type'));
             $partType = PartType::where('name', $partTypeName)->first();
             
             if ($partType) {
@@ -265,8 +266,9 @@ class PartController extends Controller
                 return response()->json(['message' => 'PartType not found'], Response::HTTP_NOT_FOUND);
             }
         }
+        
     
-        $perPage = $request->input('per_page', 100);
+        $perPage = $request->query('per_page', $request->input('per_page', 100));
         $parts = $query->paginate($perPage);
     
         $partsData = $parts->items();
