@@ -46,12 +46,13 @@ class CurrencyController extends Controller
  *     )
  * )
  */
-   public function store(StoreCurrencyRequest $storeCurrencyRequest): JsonResponse
+    public function store(StoreCurrencyRequest $storeCurrencyRequest): JsonResponse
     {
         $currency = Currency::create($storeCurrencyRequest->only(
             [
                 'name',
                 'code',
+                'symbol', 
             ]
         ) +
             [
@@ -67,6 +68,7 @@ class CurrencyController extends Controller
             Response::HTTP_CREATED
         );
     }
+
 
     /**
      * Display the specified resource.
@@ -173,7 +175,7 @@ class CurrencyController extends Controller
     public function update(UpdateCurrencyRequest $updateCurrencyRequest, Currency $currency): JsonResponse
     {
         $currency->update(
-            $updateCurrencyRequest->only(['name', 'code']) + 
+            $updateCurrencyRequest->only(['name', 'code', 'symbol']) + 
             ($updateCurrencyRequest->has('active') ? ['activeFlag' => $updateCurrencyRequest->active] : []) + 
             ($updateCurrencyRequest->has('globalCurrencyRate') ? ['rate' => $updateCurrencyRequest->globalCurrencyRate] : [])
         );

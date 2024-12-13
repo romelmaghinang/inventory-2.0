@@ -27,6 +27,7 @@ class UpdateCurrencyRequest extends FormRequest
         return [
             'name' => ['nullable', 'string', 'max:255', 'unique:currency,name'],
             'code' => ['nullable', 'string', 'max:255'],
+            'symbol' => 'nullable|string|max:5',
             'active' => ['nullable', 'boolean'],
             'quickBookCurrencyRate' => ['nullable', 'numeric'],
             'globalCurrencyRate' => ['nullable', 'numeric'],
