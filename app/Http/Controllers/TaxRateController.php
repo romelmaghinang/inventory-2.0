@@ -197,7 +197,9 @@ class TaxRateController extends Controller
                 ],
             ], Response::HTTP_OK);
         }
+    
         $typeName = $request->query('type', $request->input('type'));
+    
         $query = TaxRate::query();
     
         if ($typeName) {
@@ -209,50 +211,43 @@ class TaxRateController extends Controller
     
             $query->where('typeId', $type->id);
         }
-        $perPage = $request->input('per_page', $request->query('per_page', 100));
     
-        $taxRates = TaxRate::paginate($perPage);
+        $taxRates = $query->get();
     
-        $taxRatesData = collect($taxRates->items())->map(function ($taxRate) {
-            $vendor = $taxRate->vendorId ? Vendor::find($taxRate->vendorId) : null;
-            $type = $taxRate->typeId ? TaxRateType::find($taxRate->typeId) : null;
-            $orderType = $taxRate->orderTypeId ? OrderType::find($taxRate->orderTypeId) : null;
-        
-            return [
-                'id' => $taxRate->id,
-                'accountingHash' => $taxRate->accountingHash,
-                'accountingId' => $taxRate->accountingId,
-                'activeFlag' => $taxRate->activeFlag,
-                'code' => $taxRate->code,
-                'dateCreated' => $taxRate->dateCreated,
-                'dateLastModified' => $taxRate->dateLastModified,
-                'defaultFlag' => $taxRate->defaultFlag,
-                'description' => $taxRate->description,
-                'name' => $taxRate->name,
-                'rate' => $taxRate->rate,
-                'taxAccountId' => $taxRate->taxAccountId,
-                'typeCode' => $taxRate->typeCode,
-                'unitCost' => $taxRate->unitCost,
-                'vendorId' => $vendor ? ['id' => $vendor->id, 'name' => $vendor->name] : null,
-                'typeId' => $type ? ['id' => $type->id, 'name' => $type->name] : null,
-                'orderTypeId' => $orderType ? ['id' => $orderType->id, 'name' => $orderType->name] : null,
-            ];
-        });
-        
+        if ($taxRates->isEmpty()) {
+            return response()->json(['message' => 'No tax rates found for the specified type.'], Response::HTTP_NOT_FOUND);
+        }
     
         return response()->json([
-            'message' => 'All Tax Rates retrieved successfully!',
-            'data' => $taxRatesData,
-            'pagination' => [
-                'total' => $taxRates->total(),
-                'per_page' => $taxRates->perPage(),
-                'current_page' => $taxRates->currentPage(),
-                'last_page' => $taxRates->lastPage(),
-                'next_page_url' => $taxRates->nextPageUrl(),
-                'prev_page_url' => $taxRates->previousPageUrl(),
-            ],
+            'message' => 'Tax rates successfully retrieved.',
+            'data' => $taxRates->map(function ($taxRate) {
+                $vendor = $taxRate->vendorId ? Vendor::find($taxRate->vendorId) : null;
+                $type = $taxRate->typeId ? TaxRateType::find($taxRate->typeId) : null;
+                $orderType = $taxRate->orderTypeId ? OrderType::find($taxRate->orderTypeId) : null;
+    
+                return [
+                    'id' => $taxRate->id,
+                    'accountingHash' => $taxRate->accountingHash,
+                    'accountingId' => $taxRate->accountingId,
+                    'activeFlag' => $taxRate->activeFlag,
+                    'code' => $taxRate->code,
+                    'dateCreated' => $taxRate->dateCreated,
+                    'dateLastModified' => $taxRate->dateLastModified,
+                    'defaultFlag' => $taxRate->defaultFlag,
+                    'description' => $taxRate->description,
+                    'name' => $taxRate->name,
+                    'rate' => $taxRate->rate,
+                    'taxAccountId' => $taxRate->taxAccountId,
+                    'typeCode' => $taxRate->typeCode,
+                    'unitCost' => $taxRate->unitCost,
+                    'vendorId' => $vendor ? ['id' => $vendor->id, 'name' => $vendor->name] : null,
+                    'typeId' => $type ? ['id' => $type->id, 'name' => $type->name] : null,
+                    'orderTypeId' => $orderType ? ['id' => $orderType->id, 'name' => $orderType->name] : null,
+                ];
+            }),
         ], Response::HTTP_OK);
     }
+ 
  
 
 
