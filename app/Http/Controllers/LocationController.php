@@ -400,15 +400,31 @@ public function show(Request $request, $id = null): JsonResponse
         ],
     ], Response::HTTP_OK);
 }
-public function showLocationType(Request $request): JsonResponse
-{
-    $locationTypes = LocationType::paginate(10); 
+    public function showLocationType(Request $request): JsonResponse
+    {
+        $locationTypes = LocationType::paginate(100); 
 
-    return response()->json([
-        'message' => 'Location Types retrieved successfully!',
-        'data' => $locationTypes,
-    ], Response::HTTP_OK);
-}
+        return response()->json([
+            'message' => 'Location Types retrieved successfully!',
+            'data' => $locationTypes,
+        ], Response::HTTP_OK);
+    }
+    public function showLocationGroup(Request $request): JsonResponse
+    {
+        $locationGroups = LocationGroup::paginate(100); 
+
+        foreach ($locationGroups as $locationGroup) {
+            $qbClass = QBClass::find($locationGroup->qbClassId);
+            
+            $locationGroup->qbClassName = $qbClass ? $qbClass->name : null;
+        }
+
+        return response()->json([
+            'message' => 'Location Groups retrieved successfully!',
+            'data' => $locationGroups,
+        ], Response::HTTP_OK);
+    }
+
 
 
 
