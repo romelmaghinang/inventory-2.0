@@ -23,7 +23,7 @@ return new class extends Migration
             $table->unsignedBigInteger('lastChangedUserId')->nullable();
             $table->string('name', 255)->nullable()->unique();
             $table->integer('rate')->nullable();
-            $table->integer('symbol')->nullable();
+            $table->string('symbol', 10)->nullable();
             $table->index('lastChangedUserId', 'Performance');
         });
     }
